@@ -1,0 +1,129 @@
+{
+	"Create Template Class": {
+		"prefix": "CreateTemplate",
+		"body": [
+			"const Component = require('@interface/Component');",
+			"",
+			"class ${1:TemplateName} extends Component {",
+			"\tget SOURCE_PATH() {",
+			"\t\treturn require.resolve('./source/${1:mdfilename}.md');",
+			"\t}",
+			"",
+			"\tconstructor(settings) {",
+			"\t\tsuper(settings);",
+			"",
+			"\t\tconst { ${3:firstField} } = Object(settings);",
+			"\t\t",
+			"\t\tthis.${3:firstField} = ${3:firstField};",
+			"\t}",
+			"}",
+			"",
+			"module.exports = ${1:TemplateName};",
+			""
+		],
+		"description": "Creates a new Template class extending Component with filename property."
+	},
+	"Create View CLI": {
+		"prefix": "CreateViewCLI",
+		"body": [
+			"const ViewCLI = require('@CLI/ViewCLI');",
+			"const PoolForm = require('@CLI/PoolForm');",
+			"",
+			"async function ${1:ViewName}View({ viewParams, defaultData, dataDoc }) {",
+			"\treturn new ViewCLI({",
+			"\t\tname: '${2:viewName}',",
+			"\t\tpoolForm: new PoolForm({",
+			"\t\t\tquestions: []",
+			"\t\t}, this)",
+			"\t}, this);",
+			"}",
+			"",
+			"module.exports = ${1:ViewName}View;",
+			""
+		],
+		"description": "This is a snippet to create Views to CLI."
+	},
+	"Create new question for PoolForm": {
+		"prefix": "CreateQuestionPoolForm",
+		"body": [
+			"{",
+				"\tid: '${1:questionID}',",
+				"\ttext: `${2:Question text here} (Y/N)? `,",
+				"\tevents: {",
+					"\t\tonAnswer: async (ev, {}, answer) => {",
+						"\t\t\ttry {",
+							"\t\t\t\t${3:debugger;}",
+						"\t\t\t} catch (err) {",
+							"\t\t\t\tthrow new Error.Log(err);",
+						"\t\t\t}",
+					"\t\t}",
+				"\t}",
+			"}"
+		]
+	},
+	"Create a Class Instance": {
+		"prefix": "CreateClass",
+		"body": [
+			"class ${1:InstanceName} {",
+				"\tconstructor(setup) {",
+					"\t\ttry {",
+						"\t\t\tconst { ${2:paramName} } = Object(setup);",
+						"",
+						"\t\t\tthis.${2:paramName} = ${2:paramName};",
+					"\t\t} catch (err) {",
+						"\t\t\tthrow new Error.Log(err);",
+					"\t\t}",
+				"\t}",
+			"}",
+			"",
+			"module.exports = ${1:InstanceName};",
+			""
+		],
+		"description": "Create a new class instance with my usual pattern."
+	},
+	"Create a Class Instance Method": {
+		"prefix": "CreateClassMethod",
+		"body": [
+			"${1:async} ${2:methodName}(${3:}) {",
+				"\ttry {",
+				"",
+				"\t} catch (err) {",
+					"\t\tthrow new Error.Log(err);",
+				"\t}",
+			"}"
+		],
+		"description": "Create a new class instance with my usual pattern."
+	},
+	"Get a template resource": {
+		"prefix": "GetTemplate",
+		"body": [
+			"const ${1:templateName}Template = Resource.templates('${2:resournce.path}', {${3:params}});",
+			"const ${1:templateName}String = ${1:templateName}Template.renderToString();"
+		],
+		"description": "Declare a call to a resource template."
+	},
+	"Import CRUD": {
+		"prefix": "CRUD",
+		"body": [
+			"const CRUD = require('@CRUD');"
+		],
+		"description": "Import database CRUD."
+	},
+	"Create Collection": {
+		"prefix": "CreateCollection",
+		"body": [
+			"const Collection = require('@Collection');",
+			"const { ObjectId } = Collection.Types;",
+			"",
+			"module.exports = new Collection({",
+				"\tname: '${1:schema_name}',",
+				"\tsymbol: '${2:SYMBOL}',",
+				"\tdisplayName: '${3:Display Name}s',",
+				"\tpluralLabel: '${3:Plural Name}s',",
+				"\tsingularLabel: '${3:Singular Name}',",
+				"\tfieldsSet: [${4:}]",
+			"});"
+		],
+		"description": "To create a collection model schema."
+	}
+}

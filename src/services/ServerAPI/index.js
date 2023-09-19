@@ -1,4 +1,6 @@
 require('module-alias/register');
+// Declaring globals
+require('../../global');
 
 const express = require('express');
 // const { execSync } = require('child_process');
@@ -9,11 +11,13 @@ const cors = require('cors');
 // Routes
 const routes = require('@routes/index');
 
-class ServerAPI {
+module.exports = class ServerAPI {
     constructor (setup) {
         const { API_SECRET, sessionMaxAge, staticPath, PORT, listenCallback } = Object(setup);
+        const rootPath = __dirname.replace('\\node_modules\\4hands-api\\src\\services', '\\').replace(/\\/g, '/');
 
         this.app = express();
+        this.serverState = 'loading';
 
         // // Compiling frontend code
         // const compile = execSync('npm run build');
@@ -26,7 +30,7 @@ class ServerAPI {
         this.app.use(express.json());
 
         if (staticPath) {
-            this.app.use(express.static('../../../../' + staticPath));
+            this.app.use(express.static(rootPath + staticPath));
         }
 
         if (API_SECRET && sessionMaxAge) {
@@ -40,9 +44,12 @@ class ServerAPI {
 
         // Standard routes
         this.app.use('/api', routes.api);
+        this.app.use('/auth', routes.auth);
+        this.app.use('/collection', routes.collection);
 
         if (PORT) {
             this.app.listen(PORT, listenCallback);
+            this.serverState = 'online';
         }
     }
 
@@ -50,5 +57,3 @@ class ServerAPI {
         this.app.listen(port, cb);
     }
 }
-
-module.exports = ServerAPI;

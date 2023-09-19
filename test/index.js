@@ -1,5 +1,13 @@
 const { ServerAPI } = require('../index');
 
-const api = new ServerAPI();
-
-api.listen(80, () => console.log('heeeey'));
+// Initializing MongoDB
+require('@services/database/init').then(async () => {
+    const api = new ServerAPI({
+        PORT: 80,
+        listenCallback: () => {
+            console.log('4Hands API connected!');
+        }
+    });
+}).catch(err => {
+    throw err;
+});
