@@ -4,8 +4,7 @@
   "description": "4Hands API is an backend framework to build applications.",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "test": "nodemon ./test/index.js"
   },
   "repository": {
     "type": "git",
@@ -26,10 +25,13 @@
     "dotenv": "^16.3.1",
     "express-session": "^1.17.3",
     "express-socket.io-session": "^1.3.5",
+    "file-loader": "^6.2.0",
     "html-loader": "^4.2.0",
     "jsdoc": "^4.0.2",
     "jsonwebtoken": "^9.0.2",
+    "module-alias": "^2.2.3",
     "mongoose": "^7.5.2",
+    "nodemon": "^3.0.1",
     "npm": "^10.1.0",
     "path-browserify": "^1.0.1",
     "sass": "^1.67.0",
@@ -37,10 +39,37 @@
     "socket.io": "^4.7.2",
     "socket.io-client": "^4.7.2",
     "style-loader": "^3.3.3",
+    "url-loader": "^4.1.1",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.15.1",
     "xml-loader": "^1.2.1",
     "xml2js": "^0.6.2"
+  },
+  "_moduleAliases": {
+    "@config": "configs/project",
+    "@CONFIGS": "configs",
+    "@CRUD": "src/services/database/crud",
+    "@STRING": "src/interface/StringTemplateBuilder",
+    "@SUCCESS": "src/models/Success",
+    "@UTILS": "src/global/utils",
+    "@SESSION_CLI": "sessionCLI.json",
+    "@Collection": "src/models/settings/Collection",
+    "@src": "src",
+    "@scripts": "scripts",
+    "@controllers": "src/controllers",
+    "@global": "src/global",
+    "@helpers": "src/helpers",
+    "@interface": "src/interface",
+    "@models": "src/models",
+    "@resources": "src/resources/en_US",
+    "@routes": "src/routes",
+    "@middlewares": "src/middlewares",
+    "@schemas": "src/schemas",
+    "@services": "src/services",
+    "@validation": "src/validation",
+    "@CLI": "src/interface/CLI",
+    "@templates": "src/resources/en_US/templates",
+    "@www": "src/www"
   }
 }

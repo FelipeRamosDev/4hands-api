@@ -1,1 +1,3 @@
-console.log('4Hands API is running');
+const ServerAPI = require('./src/services/ServerAPI');
+
+exports.ServerAPI = ServerAPI;
