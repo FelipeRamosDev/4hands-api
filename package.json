@@ -1,0 +1,19 @@
+{
+  "name": "4hands-api",
+  "version": "0.1.0",
+  "description": "4Hands API is an backend framework to build applications.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FelipeRamosDev/4hands-api.git"
+  },
+  "author": "Felipe Ramos",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/FelipeRamosDev/4hands-api/issues"
+  },
+  "homepage": "https://github.com/FelipeRamosDev/4hands-api#readme"
+}
