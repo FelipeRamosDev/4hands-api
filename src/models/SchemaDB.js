@@ -7,6 +7,7 @@ const configs = require('@config');
 const GlobalClass = schemasClass.GlobalClass;
 const customQueries = require('@schemas/queries');
 const customEvents = require('@schemas/events');
+const FS = require('@src/services/FS');
 
 class SchemaDB {
     static RefConfig = RefConfig;
@@ -22,7 +23,12 @@ class SchemaDB {
     }) {
         try {
             this.name = setup.name;
+            this.projectPath = __dirname.replace('\\node_modules\\4hands-api\\src\\models', '\\').replace(/\\/g, '/');;
+            this.projectQueriesPath = `${this.projectPath}/src/collections/queries/${this.name}.query.js`;
+            this.projectEventsPath = `${this.projectPath}/src/collections/events/${this.name}.event.js`;
+            this.projectClassesPath = `${this.projectPath}/src/collections/Classes/${this.name}.class.js`;
             this.symbol = setup.symbol;
+            this.DB = null;
 
             if (Array.isArray(setup.fieldsSet)) {
                 if (!setup.schema) setup.schema = {};
@@ -34,9 +40,22 @@ class SchemaDB {
             }
 
             this.schema = new mongoose.Schema({...getGlobalSchema(setup.excludeGlobals), ...setup.schema});
-            this.queries = setup.queries || Object(customQueries[this.name]);
-            this.events = setup.events || Object(customEvents[this.name]);
-            this.DB = null;
+
+            if (setup.queries) {
+                this.queries = setup.queries;
+            } else if (FS.isExist(this.projectQueriesPath)) {
+                this.queries = require(this.projectQueriesPath);
+            } else {
+                this.queries = Object(customQueries[this.name]);
+            }
+
+            if (setup.events) {
+                this.events = setup.events;
+            } else if (FS.isExist(this.projectEventsPath)) {
+                this.events = require(this.projectEventsPath);
+            } else {
+                this.events = Object(customEvents[this.name]);
+            }
 
             // Initializing queries, events and classes
             this.initQueries();
@@ -44,7 +63,6 @@ class SchemaDB {
             this.initClasses();
 
             // Initializing the collection
-            this.init();
             const date = new Date();
 
             if (configs.database.consoleLogs.collectionLoaded) {
@@ -55,16 +73,15 @@ class SchemaDB {
         }
     }
 
-    init() {
+    init(server) {
         try {
-            if (!global.initializedCollections) global.initializedCollections = [];
             if (this.name !== configs.database.counterCollection) dbHelpers.createCounter(this);
 
             const isDup = mongoose.modelNames().find(key => key === this.name);
-            const isDupSymbol = initializedCollections.find(key => key === this.symbol);
+            const isDupSymbol = server.collections.find(key => key === this.symbol);
 
             if (!isDup && !isDupSymbol) {
-                initializedCollections.push(this.symbol);
+                server.collections.push(this.symbol);
                 this.DB = mongoose.model(this.name, this.schema);
             } else {
                 const error = new Error.Log('database.duplicated_schema', this.name, this.symbol);
@@ -72,6 +89,8 @@ class SchemaDB {
                 if (isDupSymbol) error.append('database.duplicated_schema_symbol', this.symbol);
                 throw error;
             }
+
+            return this;
         } catch(err) {
             throw new Error.Log(err).append('database.schema_init');
         } 
@@ -110,12 +129,18 @@ class SchemaDB {
 
     initClasses() {
         try {
+            const Custom = schemasClass[this.name];
+
             // Loading global class
             this.schema.loadClass(GlobalClass);
 
             // Loading the schema custom classe
-            const Custom = schemasClass[this.name];
-            if (Custom) this.schema.loadClass(Custom);
+            if (FS.isExist(this.projectClassesPath)) {
+                const ProjectClass = require(this.projectClassesPath);
+                this.schema.loadClass(ProjectClass);
+            } else if (Custom) {
+                this.schema.loadClass(Custom);
+            }
 
             this.schema.set('toObject', {virtuals: true});
         } catch(err) {

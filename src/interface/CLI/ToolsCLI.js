@@ -1,5 +1,4 @@
 const StringTemplateBuilder = require('@STRING');
-const config = require('@config');
 
 class ToolsCLI {
     constructor() {
@@ -7,11 +6,11 @@ class ToolsCLI {
     }
 
     print(txt, addHeader) {
-        console.log(`${addHeader ? `[${addHeader}]` : '[LOG]'}[${config.projectName.toUpperCase()}] -> ${txt}`);
+        console.log(`${addHeader ? `[${addHeader}]` : '[LOG]'}[${global.api.projectName.toUpperCase()}] -> ${txt}`);
     }
 
     printError(err) {
-        console.error(`[ERROR][${config.projectName.toUpperCase()}][${err.name}] -> ${err.message}\nERROR-STACK:\n${err.stack}`);
+        console.error(`[ERROR][${global.api.projectName.toUpperCase()}][${err.name}] -> ${err.message}\nERROR-STACK:\n${err.stack}`);
     }
 
     printTemplate(stringContent) {
