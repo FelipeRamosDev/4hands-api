@@ -2,7 +2,6 @@ const { execSync, exec } = require('child_process');
 const readline = require('readline');
 const ToolsCLI = require('@CLI/ToolsCLI');
 const StringTemplate = require('@interface/StringTemplateBuilder');
-const config = require('@config');
 const toolsCLI = new ToolsCLI();
 
 class Prompt {
@@ -71,7 +70,7 @@ class Prompt {
                 const question = new StringTemplate()
                     .separator()
                     .newLine()
-                    .text(`[QUESTION][${config.projectName.toUpperCase()}] -> ${questionText} `)
+                    .text(`[QUESTION][${global.api.projectName.toUpperCase()}] -> ${questionText} `)
                 .end();
 
                 rl.question(question, (answer) => {

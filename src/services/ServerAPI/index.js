@@ -3,11 +3,12 @@ require('module-alias/register');
 require('../../global');
 
 const express = require('express');
-// const { execSync } = require('child_process');
+const { execSync } = require('child_process');
 const session = require('express-session');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const https = require('https');
+const Database = require('@services/database/DatabaseServer')
 
 // Routes
 const routes = require('@routes/index');
@@ -16,6 +17,8 @@ const Endpoint = require('@src/models/settings/Endpoint');
 class ServerAPI {
     constructor (setup) {
         const {
+            projectName,
+            databaseConfig,
             API_SECRET,
             sessionCookiesMaxAge,
             staticPath,
@@ -25,21 +28,63 @@ class ServerAPI {
             sessionResave,
             sessionSaveUninitialized,
             keySSLPath,
-            certSSLPath
+            certSSLPath,
+            PORT
         } = Object(setup);
 
-        let { PORT } = Object(setup);
-        let useSSL = false;
-        
-        if (!PORT) {
-            PORT = 80;
+        this.projectName = projectName;
+        this.app_queue = [];
+        this.API_SECRET = API_SECRET;
+        this.sessionCookiesMaxAge = sessionCookiesMaxAge || 86400000;
+        this.staticPath = staticPath;
+        this.compileFE = compileFE;
+        this.jsonLimit = jsonLimit || '10mb';
+        this.sessionResave = (sessionResave !== undefined) ? sessionResave : true;
+        this.sessionSaveUninitialized = (sessionSaveUninitialized !== undefined) ? sessionSaveUninitialized : true;
+        this.keySSLPath = keySSLPath;
+        this.certSSLPath = certSSLPath;
+        this.PORT = PORT;
+
+        this.isSuccess = (customCallback) => {
+            try {
+                this.runAppQueue();
+                this.isListen = true;
+                this.serverState = 'online';
+                typeof listenCallback === 'function' && listenCallback();
+                typeof customCallback === 'function' && customCallback();
+            } catch (err) {
+                throw err;
+            }
         }
         
+        if (!this.PORT) {
+            this.PORT = 80;
+        }
+
+        this.useSSL = false;
+
+        if (this.keySSLPath && this.certSSLPath) {
+            this.useSSL = true;
+        }
+
+        if (databaseConfig) {
+            this.database = new Database({ ...databaseConfig }).init({
+                success: this.init.bind(this),
+                error: (err) => {
+                    throw err;
+                }
+            });
+        } else {
+            this.init();
+        }
+    }
+
+    init() {
         this.rootPath = __dirname.replace('\\node_modules\\4hands-api\\src\\services', '\\').replace(/\\/g, '/');
         this.app = express();
         this.serverState = 'loading';
 
-        if (compileFE) {
+        if (this.compileFE) {
             // Compiling frontend code
             const compile = execSync('npm run build');
             // Printiting webpack compile result
@@ -48,19 +93,19 @@ class ServerAPI {
 
         // Configuring server
         this.app.use(cors());
-        this.app.use(bodyParser.json({ limit: jsonLimit || '10mb' }));
+        this.app.use(bodyParser.json({ limit: this.jsonLimit }));
         this.app.use(express.json());
 
-        if (staticPath) {
-            this.app.use(express.static(this.rootPath + staticPath));
+        if (this.staticPath) {
+            this.app.use(express.static(this.rootPath + this.staticPath));
         }
 
-        if (API_SECRET) {
+        if (this.API_SECRET) {
             this.app.use(session({
-                secret: API_SECRET,
-                resave: (sessionResave !== undefined) ? sessionResave : true,
-                saveUninitialized: (sessionSaveUninitialized !== undefined) ? sessionSaveUninitialized : true,
-                cookie: { maxAge: sessionCookiesMaxAge || 86400000 }
+                secret: this.API_SECRET,
+                resave: this.sessionResave,
+                saveUninitialized: this.sessionSaveUninitialized,
+                cookie: { maxAge: this.sessionCookiesMaxAge }
             }));
         } else {
             throw 'You need to provide a API SECRET to start the server!';
@@ -71,13 +116,9 @@ class ServerAPI {
         this.app.use('/auth', routes.auth);
         this.app.use('/collection', routes.collection);
 
-        if (keySSLPath && certSSLPath) {
-            useSSL = true;
-        }
-
-        if (useSSL) {
-            const SSL_KEY = fs.readFileSync(this.rootPath + keySSLPath);
-            const SSL_CERT = fs.readFileSync(this.rootPath + certSSLPath);
+        if (this.useSSL) {
+            const SSL_KEY = fs.readFileSync(this.rootPath + this.keySSLPath);
+            const SSL_CERT = fs.readFileSync(this.rootPath + this.certSSLPath);
 
             if (SSL_KEY && SSL_CERT) {
                 const options = {
@@ -85,9 +126,9 @@ class ServerAPI {
                     cert: SSL_CERT
                 };
 
-                https.createServer(options, app).listen(PORT, () => {
-                    console.log(`Server listening on port ${PORT}`);
-                    this.PORT = PORT;
+                https.createServer(options, this.app).listen(this.PORT, () => {
+                    console.log(`Server listening on port ${this.PORT}`);
+                    this.isSuccess();
                 });
             } else {
                 throw new Error.Log({
@@ -96,18 +137,16 @@ class ServerAPI {
                 });
             }
         } else {
-            this.app.listen(PORT, () => {
-                this.PORT = PORT;
-                typeof listenCallback === 'function' && listenCallback();
+            this.app.listen(this.PORT, () => {
+                this.isSuccess();
             });
         }
     }
 
     listen(PORT, callback) {
-        if (!this.PORT && PORT) {
+        if (!this.isListen && PORT) {
             this.app.listen(PORT, () => {
-                this.PORT = PORT;
-                typeof callback === 'function' && callback();
+                this.isSuccess(callback);
             });
         }
     }
@@ -136,6 +175,11 @@ class ServerAPI {
         }
     }
 
+    runAppQueue() {
+        this.app_queue.map(item => item());
+        this.app_queue = [];
+    }
+
     createEndpoint(endpoint) {
         if (!endpoint instanceof Endpoint) {
             throw new Error.Log({
@@ -144,22 +188,44 @@ class ServerAPI {
             });
         }
 
+        const params = [endpoint.routePath, ...endpoint.middlewares, endpoint.controller];
+
         switch (endpoint.method) {
             case 'GET': {
-                this.app.get(endpoint.routePath, ...endpoint.middlewares, endpoint.controller);
-                break;
+                if (!this.app) {
+                    this.app_queue.push(() => this.app.get(...params))
+                } else {
+                    this.app.get(...params);
+                }
+
+                return;
             }
             case 'POST': {
-                this.app.post(endpoint.routePath, ...endpoint.middlewares, endpoint.controller);
-                break;
+                if (!this.app) {
+                    this.app_queue.push(() => this.app.post(...params))
+                } else {
+                    this.app.post(...params);
+                }
+
+                return;
             }
             case 'PUT': {
-                this.app.put(endpoint.routePath, ...endpoint.middlewares, endpoint.controller);
-                break;
+                if (!this.app) {
+                    this.app_queue.push(() => this.app.put(...params))
+                } else {
+                    this.app.put(...params);
+                }
+
+                return;
             }
             case 'DELETE': {
-                this.app.delete(endpoint.routePath, ...endpoint.middlewares, endpoint.controller);
-                break;
+                if (!this.app) {
+                    this.app_queue.push(() => this.app.delete(...params))
+                } else {
+                    this.app.delete(...params);
+                }
+
+                return;
             }
         }
     }

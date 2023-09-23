@@ -23,7 +23,7 @@ class Collection extends SchemaDB {
         super(setup);
 
         try {
-            const { name, symbol, displayName, pluralLabel, singularLabel, excludeGlobals, fieldsSet } = Object(setup);
+            const { name, symbol, displayName, pluralLabel, singularLabel, excludeGlobals, fieldsSet, Model } = Object(setup);
 
             /**
              * The symbol of the collection.
@@ -62,6 +62,12 @@ class Collection extends SchemaDB {
             this.excludeGlobals = excludeGlobals;
 
             /**
+             * The collection's model
+             * @property {object}
+             */
+            this.Model = Model;
+
+            /**
              * The fields of the collection.
              * @property {CollectionField[]}
              */
@@ -79,6 +85,14 @@ class Collection extends SchemaDB {
         } catch (err) {
             throw new Error.Log(err);
         }
+    }
+
+    /**
+     * To create a new field on the collection, it only can be called if the Collection instance is not initialized yet.
+     * @param {CollectionField} config 
+     */
+    addNewField(config) {
+        this.fieldsSet.push(new CollectionField(config).toObject());
     }
 }
 
