@@ -1,2 +1,2 @@
 # 4Hands API
-This is a API framework to create backends for your applications.
+This is a API framework to create a backend for your applications.
