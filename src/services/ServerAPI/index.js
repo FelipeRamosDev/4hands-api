@@ -11,8 +11,9 @@ const https = require('https');
 
 // Routes
 const routes = require('@routes/index');
+const Endpoint = require('@src/models/settings/Endpoint');
 
-module.exports = class ServerAPI {
+class ServerAPI {
     constructor (setup) {
         const {
             API_SECRET,
@@ -134,4 +135,34 @@ module.exports = class ServerAPI {
             });
         }
     }
+
+    createEndpoint(endpoint) {
+        if (!endpoint instanceof Endpoint) {
+            throw new Error.Log({
+                name: 'INVALID_ENDPOINT',
+                message: 'The "endpoint" param is not an Endpoint type!'
+            });
+        }
+
+        switch (endpoint.method) {
+            case 'GET': {
+                this.app.get(endpoint.routePath, ...endpoint.middlewares, endpoint.controller);
+                break;
+            }
+            case 'POST': {
+                this.app.post(endpoint.routePath, ...endpoint.middlewares, endpoint.controller);
+                break;
+            }
+            case 'PUT': {
+                this.app.put(endpoint.routePath, ...endpoint.middlewares, endpoint.controller);
+                break;
+            }
+            case 'DELETE': {
+                this.app.delete(endpoint.routePath, ...endpoint.middlewares, endpoint.controller);
+                break;
+            }
+        }
+    }
 }
+
+module.exports = ServerAPI;
