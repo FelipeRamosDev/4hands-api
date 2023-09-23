@@ -1,0 +1,34 @@
+{
+    "typeAcquisition": {
+        "include": ["**/*"],
+        "exclude": ["node_modules"]
+    },
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@project": ["../.."],
+            "@config": ["./configs/project"],
+            "@CRUD": ["./src/services/database/crud"],
+            "@STRING": ["./src/interface/StringTemplateBuilder"],
+            "@SUCCESS": ["./src/models/Success"],
+            "@UTILS": ["./src/global/utils"],
+            "@SESSION_CLI": ["./sessionCLI.json"],
+            "@Collection": ["./src/models/settings/Collection"],
+            "@src/*": ["./src/*"],
+            "@scripts/*": ["./scripts/*"],
+            "@CONFIGS/*": ["./configs/*"],
+            "@controllers/*": ["./src/controllers/*"],
+            "@global/*": ["./src/global/*"],
+            "@helpers/*": ["./src/helpers/*"],
+            "@interface/*": ["./src/interface/*"],
+            "@models/*": ["./src/models/*"],
+            "@resources/*": ["./src/resources/en_US/*"],
+            "@routes/*": ["./src/routes/*"],
+            "@middlewares/*": ["./src/middlewares/*"],
+            "@schemas/*": ["./src/schemas/*"],
+            "@services/*": ["./src/services/*"],
+            "@validation/*": ["./src/validation/*"],
+            "@CLI/*": ["./src/interface/CLI/*"]
+        }
+    }
+}
