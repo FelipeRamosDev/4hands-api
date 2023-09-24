@@ -8,7 +8,8 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const https = require('https');
-const Database = require('@services/database/DatabaseServer')
+const Database = require('@services/database/DatabaseServer');
+const FS = require('@services/FS');
 
 // Routes
 const routes = require('@routes/index');
@@ -43,7 +44,8 @@ class ServerAPI {
         this.sessionSaveUninitialized = (sessionSaveUninitialized !== undefined) ? sessionSaveUninitialized : true;
         this.keySSLPath = keySSLPath;
         this.certSSLPath = certSSLPath;
-        this.PORT = PORT;
+        this.listenCallback = listenCallback;
+        this.PORT = PORT || 80;
 
         this.isSuccess = (customCallback) => {
             try {
@@ -56,13 +58,8 @@ class ServerAPI {
                 throw err;
             }
         }
-        
-        if (!this.PORT) {
-            this.PORT = 80;
-        }
 
         this.useSSL = false;
-
         if (this.keySSLPath && this.certSSLPath) {
             this.useSSL = true;
         }
@@ -117,29 +114,9 @@ class ServerAPI {
         this.app.use('/collection', routes.collection);
 
         if (this.useSSL) {
-            const SSL_KEY = fs.readFileSync(this.rootPath + this.keySSLPath);
-            const SSL_CERT = fs.readFileSync(this.rootPath + this.certSSLPath);
-
-            if (SSL_KEY && SSL_CERT) {
-                const options = {
-                    key: SSL_KEY,
-                    cert: SSL_CERT
-                };
-
-                https.createServer(options, this.app).listen(this.PORT, () => {
-                    console.log(`Server listening on port ${this.PORT}`);
-                    this.isSuccess();
-                });
-            } else {
-                throw new Error.Log({
-                    name: 'SSLCertificateNotFound',
-                    message: `The SSL certificate wasn't found on the directory!`
-                });
-            }
+            this.listenSSL(this.PORT, this.keySSLPath, this.certSSLPath, () => this.isSuccess());
         } else {
-            this.app.listen(this.PORT, () => {
-                this.isSuccess();
-            });
+            this.app.listen(this.PORT, () => this.isSuccess());
         }
     }
 
@@ -152,9 +129,9 @@ class ServerAPI {
     }
 
     listenSSL(PORT, keySSLPath, certSSLPath, callback) {
-        if (!this.PORT && PORT) {
-            const SSL_KEY = fs.readFileSync(this.rootPath + keySSLPath);
-            const SSL_CERT = fs.readFileSync(this.rootPath + certSSLPath);
+        if (this.PORT || PORT) {
+            const SSL_KEY = FS.readFileSync(this.rootPath + keySSLPath);
+            const SSL_CERT = FS.readFileSync(this.rootPath + certSSLPath);
 
             if (!SSL_KEY || !SSL_CERT) {
                 throw new Error.Log({
@@ -188,7 +165,7 @@ class ServerAPI {
             });
         }
 
-        const params = [endpoint.routePath, ...endpoint.middlewares, endpoint.controller];
+        const params = [endpoint.routePath, ...(endpoint.middlewares || []), endpoint.controller];
 
         switch (endpoint.method) {
             case 'GET': {
