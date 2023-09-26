@@ -6,11 +6,11 @@ class ToolsCLI {
     }
 
     print(txt, addHeader) {
-        console.log(`${addHeader ? `[${addHeader}]` : '[LOG]'}[${global.api.projectName.toUpperCase()}] -> ${txt}`);
+        console.log(`${addHeader ? `[${addHeader}]` : '[LOG]'}[${API.projectName.toUpperCase()}] -> ${txt}`);
     }
 
     printError(err) {
-        console.error(`[ERROR][${global.api.projectName.toUpperCase()}][${err.name}] -> ${err.message}\nERROR-STACK:\n${err.stack}`);
+        console.error(`[ERROR][${API.projectName.toUpperCase()}][${err.name}] -> ${err.message}\nERROR-STACK:\n${err.stack}`);
     }
 
     printTemplate(stringContent) {

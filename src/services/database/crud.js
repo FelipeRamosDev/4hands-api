@@ -22,10 +22,10 @@ async function create(collectionName, data, options) {
 
 function query(setup) {
     try {
-        const schemas = require('../../schemas');
+        const schemas = API.database.collections;
         const {collectionName, filter, sort} = setup || {};
         const filterObj = helpers.treatFilter(filter || {});
-        const Schema = schemas[collectionName];
+        const Schema = schemas.find(item => item.name === collectionName);
 
         if (Schema) {
             const Collection = Schema.DB;
@@ -47,9 +47,9 @@ function getDoc(setup) {
     const {collectionName, filter} = setup || {};
 
     try {
-        const schemas = require('../../schemas');
+        const schemas = API.database.collections;
         const filterObj = helpers.treatFilter(filter);
-        const Schema = schemas[collectionName];
+        const Schema = schemas.find(item => item.name === collectionName);
         const Collection = Schema && Schema.DB;
 
         if (Collection) {
