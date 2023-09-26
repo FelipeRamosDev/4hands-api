@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
-const {getGlobalSchema} = require('../schemas/_globals');
-const schemasClass = require('../schemas/class');
+const {getGlobalSchema} = require('@schemas/_globals');
+const schemasClass = require('@schemas/class');
 const RefConfig = require('./settings/SchemaRefConfig');
-const {database: {dbHelpers, queries, events}} = require('../helpers');
+const {database: {dbHelpers, queries, events}} = require('@helpers');
 const configs = require('@config');
 const GlobalClass = schemasClass.GlobalClass;
 const customQueries = require('@schemas/queries');
