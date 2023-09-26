@@ -1,50 +1,53 @@
 const mongoose = require('mongoose');
-const models = require('../../../models');
-const services = require('../../../services');
+const models = require('@models');
+const services = require('@services');
+const Endpoint = require('@src/models/settings/Endpoint');
 const CRUD = services.database.crud;
 const UpdateDocument = models.routes.collection.UpdateDocument;
-const Request = require('../../../models/RequestAPI');
 const Response = UpdateDocument.response;
 
-const bodySchema = {
-    updateType: {
-        type: String,
-        default: 'one',
-        enum: ['one', 'many']
+module.exports = new Endpoint({
+    method: 'POST',
+    routePath: '/collection/update/document',
+    bodySchema: {
+        updateType: {
+            type: String,
+            default: 'one',
+            enum: ['one', 'many']
+        },
+        collectionName: {
+            type: String,
+            required: true
+        },
+        data: {
+            type: Object,
+            required: true
+        },
+        filter: {
+            required: true,
+            type: mongoose.SchemaTypes.Mixed
+        },
+        options: {
+            default: {},
+            type: {
+                returnDocs: { type: Boolean },
+                mongooseOpt: { type: Object }
+            }
+        }
     },
-    collectionName: {
-        type: String,
-        required: true
-    },
-    data: {
-        type: Object,
-        required: true
-    },
-    filter: {
-        required: true,
-        type: mongoose.SchemaTypes.Mixed
-    },
-    options: {
-        default: {},
-        type: {
-            returnDocs: { type: Boolean },
-            mongooseOpt: { type: Object }
+    controller: async (req, res) => {
+        const request = new Request(req, bodySchema);
+        const body = request.getBody();
+    
+        try {
+            body.data.sessionUser = req.session.currentUser;
+            const updated = await CRUD.update(body);        
+            const response = new Response(updated, body.collection);
+    
+            return res.status(200).json(response);
+        } catch(err) {
+            const error = new Error.Log(err).append('database.updating_document', body.filter);
+            return res.status(500).json(error.response());
         }
     }
-};
-
-module.exports = async function (req, res) {
-    const request = new Request(req, bodySchema);
-    const body = request.getBody();
-
-    try {
-        body.data.sessionUser = req.session.currentUser;
-        const updated = await CRUD.update(body);        
-        const response = new Response(updated, body.collection);
-
-        return res.status(200).json(response);
-    } catch(err) {
-        const error = new Error.Log(err).append('database.updating_document', body.filter);
-        return res.status(500).json(error.response());
-    }
-}
+});
