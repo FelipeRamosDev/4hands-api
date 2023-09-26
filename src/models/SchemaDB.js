@@ -78,10 +78,9 @@ class SchemaDB {
             if (this.name !== configs.database.counterCollection) dbHelpers.createCounter(this);
 
             const isDup = mongoose.modelNames().find(key => key === this.name);
-            const isDupSymbol = server.collections.find(key => key === this.symbol);
+            const isDupSymbol = server.collections.find(item => item.symbol === this.symbol);
 
             if (!isDup && !isDupSymbol) {
-                server.collections.push(this.symbol);
                 this.DB = mongoose.model(this.name, this.schema);
             } else {
                 const error = new Error.Log('database.duplicated_schema', this.name, this.symbol);

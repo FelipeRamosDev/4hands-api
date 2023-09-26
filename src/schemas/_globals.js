@@ -36,7 +36,8 @@ getGlobalSchema.standardGlobal = {
     },
     author: {
         type: ObjectId,
-        immutable: true
+        immutable: true,
+        ref: 'users'
     }
 }
 

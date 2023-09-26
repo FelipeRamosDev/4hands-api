@@ -30,7 +30,7 @@ module.exports = new Endpoint({
                     type: Array
                 },
                 populate: {
-                    type: mongoose.SchemaTypes.Mixed
+                    type: Object
                 }
             }
         }
