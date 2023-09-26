@@ -12,7 +12,6 @@ const Database = require('@services/database/DatabaseServer');
 const FS = require('@services/FS');
 
 // Routes
-const routes = require('@routes/index');
 const Endpoint = require('@src/models/settings/Endpoint');
 
 class ServerAPI {
@@ -64,6 +63,16 @@ class ServerAPI {
             this.useSSL = true;
         }
 
+        // Standard routes
+        this.createEndpoint(require('@controllers/api/health-check'));
+        this.createEndpoint(require('@controllers/auth/login'));
+        this.createEndpoint(require('@controllers/auth/register'));
+        this.createEndpoint(require('@controllers/collection/create'));
+        this.createEndpoint(require('@controllers/collection/delete'));
+        this.createEndpoint(require('@controllers/collection/get/doc'));
+        this.createEndpoint(require('@controllers/collection/get/query'));
+        this.createEndpoint(require('@controllers/collection/update/document'));
+
         if (databaseConfig) {
             this.database = new Database({ ...databaseConfig }).init({
                 success: this.init.bind(this),
@@ -107,11 +116,6 @@ class ServerAPI {
         } else {
             throw 'You need to provide a API SECRET to start the server!';
         }
-
-        // Standard routes
-        this.app.use('/api', routes.api);
-        this.app.use('/auth', routes.auth);
-        this.app.use('/collection', routes.collection);
 
         if (this.useSSL) {
             this.listenSSL(this.PORT, this.keySSLPath, this.certSSLPath, () => this.isSuccess());
