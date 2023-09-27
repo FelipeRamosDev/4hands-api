@@ -2,20 +2,21 @@ const {Schema, model} = require('mongoose');
 
 class ValidateSchema {
     constructor(rules) {
-        const schemas = require('../schemas');
+        const schemas = API.database.collections;
 
         // Initializing the schema
         if (Boolean.isValid(rules).stringFilled()) {
+            const collection = schemas.find(item => item.name === rules.valueOf());
             // If the rules provided is a string with the collection name, and this collection name is a valid name. It will use it as schema.
-            if (Boolean.isValid(schemas).path(rules + '.schema').objectFilled()) {
-                this.ModelDB = schemas[rules].DB
-                this._schema = schemas[rules].schema;
+            if (collection) {
+                this.ModelDB = collection.DB
+                this._schema = collection.schema;
             } else {
                 throw new Error.Log('common.request_model_schema_not_found', rules);
             }
         }
         
-        if (Boolean.isValid(rules).objectFilled()) {
+        if (Boolean.isValid(rules).objectFilled() && !(rules instanceof String)) {
             // If the rules provided is an object with the mongoose schema configurations, then it will create a internal schema for the request.
             try {
                 Object.keys(rules).map(key => {
