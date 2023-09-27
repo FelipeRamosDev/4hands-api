@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
 const models = require('@models');
-const services = require('@services');
 const Endpoint = require('@src/models/settings/Endpoint');
-const CRUD = services.database.crud;
+const CRUD = require('@CRUD');
 const UpdateDocument = models.routes.collection.UpdateDocument;
 const Response = UpdateDocument.response;
 
@@ -36,8 +35,7 @@ module.exports = new Endpoint({
         }
     },
     controller: async (req, res) => {
-        const request = new Request(req, bodySchema);
-        const body = request.getBody();
+        const body = req.body;
     
         try {
             body.data.sessionUser = req.session.currentUser;
