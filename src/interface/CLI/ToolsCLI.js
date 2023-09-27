@@ -10,7 +10,7 @@ class ToolsCLI {
     }
 
     printError(err) {
-        console.error(`[ERROR][${API.projectName.toUpperCase()}][${err.name}] -> ${err.message}\nERROR-STACK:\n${err.stack}`);
+        console.error(`[ERROR][${global.API ? API.projectName.toUpperCase() : 'API'}][${err.name}] -> ${err.message}\nERROR-STACK:\n${err.stack}`);
     }
 
     printTemplate(stringContent) {
