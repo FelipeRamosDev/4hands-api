@@ -10,7 +10,6 @@ const cors = require('cors');
 const https = require('https');
 const Database = require('@services/database/DatabaseServer');
 const FS = require('@services/FS');
-
 // Routes
 const Endpoint = require('@src/models/settings/Endpoint');
 
