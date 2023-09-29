@@ -38,17 +38,15 @@ function buildPromise(docsToUpdate, currFieldSchema, relatedUID, arrayAction, on
         const toUpdate = new Promise((resolve, reject) => {
             params = [
                 { _id: { $in: docsToUpdate } },
-                { [relatedField]: relatedUID, onlyAct },
-                (err, result) => {
-                    if (err) return reject(new Error.Log(err));
-                    return resolve(result);
-                }
+                { [relatedField]: relatedUID, onlyAct }
             ];
 
             if (this.$op === 'save') {
                 this.model(currFieldSchema.ref).updateMany(...params);
+                resolve();
             } else {
                 this.model.db.model(currFieldSchema.ref).updateMany(...params);
+                resolve();
             }
         });
 
