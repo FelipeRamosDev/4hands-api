@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
-const Counters = require('@schemas/counters');
-const Logs = require('@schemas/logs');
+const counters = require('@schemas/counters');
+const logs = require('@schemas/logs');
+const auth_buckets = require('@schemas/auth_buckets');
 
 class DatabaseServer {
     constructor (setup) {
@@ -11,8 +12,9 @@ class DatabaseServer {
         this.DBServer;
         this.collections = [];
 
-        this.collections.push(Counters.init(this));
-        this.collections.push(Logs.init(this));
+        this.collections.push(counters.init(this));
+        this.collections.push(logs.init(this));
+        this.collections.push(auth_buckets.init(this));
 
         if (Array.isArray(collections)) {
             collections.map(collection => this.collections.push(collection.init(this)));
@@ -34,6 +36,8 @@ class DatabaseServer {
             console.error('Ocorreu um erro ao conectar no banco de dados: ', JSON.stringify(err, null, 2));
             error(err);
         });
+
+        return this;
     }
 }
 

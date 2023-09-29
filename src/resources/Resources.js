@@ -1,9 +1,17 @@
 const source = require('.');
 const ErrorLog = require('../models/logs/ErrorLog');
+const FS = require('@services/FS');
 
 class Resources {
     constructor(language) {
-        this.base = source[language];
+        this.projectPath = __dirname.replace('\\node_modules\\4hands-api\\src\\resources', '\\').replace(/\\/g, '/');
+        this.language = language || 'en_US';
+        this.base = source[this.language];
+
+        const resourcePath = this.projectPath + 'src/resources/' + this.language;
+        if (FS.isExist(resourcePath)) {
+            this.loadResources(require(resourcePath));
+        }
     }
 
     text(path, ...params) {
@@ -46,6 +54,14 @@ class Resources {
         }
 
         return Boolean.isValid(result).function().eval() && result;
+    }
+
+    loadResources(resources) {
+        try {
+            this.base = {...this.base, ...resources};
+        } catch (err) {
+            throw err;
+        }
     }
 }
 

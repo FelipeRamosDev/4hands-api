@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
-const {getGlobalSchema} = require('../schemas/_globals');
-const schemasClass = require('../schemas/class');
+const {getGlobalSchema} = require('@schemas/_globals');
+const schemasClass = require('@schemas/class');
 const RefConfig = require('./settings/SchemaRefConfig');
-const {database: {dbHelpers, queries, events}} = require('../helpers');
+const {database: {dbHelpers, queries, events}} = require('@helpers');
 const configs = require('@config');
 const GlobalClass = schemasClass.GlobalClass;
 const customQueries = require('@schemas/queries');
@@ -24,9 +24,9 @@ class SchemaDB {
         try {
             this.name = setup.name;
             this.projectPath = __dirname.replace('\\node_modules\\4hands-api\\src\\models', '\\').replace(/\\/g, '/');;
-            this.projectQueriesPath = `${this.projectPath}/src/collections/queries/${this.name}.query.js`;
-            this.projectEventsPath = `${this.projectPath}/src/collections/events/${this.name}.event.js`;
-            this.projectClassesPath = `${this.projectPath}/src/collections/Classes/${this.name}.class.js`;
+            this.projectQueriesPath = `${this.projectPath}src/collections/queries/${this.name}.query.js`;
+            this.projectEventsPath = `${this.projectPath}src/collections/events/${this.name}.event.js`;
+            this.projectClassesPath = `${this.projectPath}src/collections/Class/${this.name}.class.js`;
             this.symbol = setup.symbol;
             this.DB = null;
 
@@ -78,10 +78,9 @@ class SchemaDB {
             if (this.name !== configs.database.counterCollection) dbHelpers.createCounter(this);
 
             const isDup = mongoose.modelNames().find(key => key === this.name);
-            const isDupSymbol = server.collections.find(key => key === this.symbol);
+            const isDupSymbol = server.collections.find(item => item.symbol === this.symbol);
 
             if (!isDup && !isDupSymbol) {
-                server.collections.push(this.symbol);
                 this.DB = mongoose.model(this.name, this.schema);
             } else {
                 const error = new Error.Log('database.duplicated_schema', this.name, this.symbol);
