@@ -8,6 +8,7 @@ const GlobalClass = schemasClass.GlobalClass;
 const customQueries = require('@schemas/queries');
 const customEvents = require('@schemas/events');
 const FS = require('@src/services/FS');
+const path = require('path');
 
 class SchemaDB {
     static RefConfig = RefConfig;
@@ -23,7 +24,7 @@ class SchemaDB {
     }) {
         try {
             this.name = setup.name;
-            this.projectPath = __dirname.replace('\\node_modules\\4hands-api\\src\\models', '\\').replace(/\\/g, '/');;
+            this.projectPath = path.normalize(__dirname.replace(path.normalize('/node_modules/4hands-api/src/models'), '/'));
             this.projectQueriesPath = `${this.projectPath}src/collections/queries/${this.name}.query.js`;
             this.projectEventsPath = `${this.projectPath}src/collections/events/${this.name}.event.js`;
             this.projectClassesPath = `${this.projectPath}src/collections/Class/${this.name}.class.js`;
