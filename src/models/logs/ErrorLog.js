@@ -3,7 +3,18 @@ const ValidationError = require('mongoose/lib/error/validation');
 const CastError = require('mongoose/lib/error/cast');
 const config = require('@config');
 
+/**
+ * Represents an error log entry in the application.
+ * @class ErrorLog
+ * @extends LogBase
+ */
 class ErrorLog extends LogBase {
+    /**
+     * Creates a new instance of the ErrorLog class.
+     * @param {Object} args - The error log parameters.
+     * @param {...string} stringArgsParams - Additional string parameters.
+     * @throws {Error} If the creation of error log fails.
+     */
     constructor({
         stack,
         errorList
@@ -52,6 +63,12 @@ class ErrorLog extends LogBase {
         }
     }
 
+    /**
+     * Asynchronously saves the error log to the database.
+     * @async
+     * @returns {Promise<ErrorLog>} - A promise resolving to the saved ErrorLog instance.
+     * @throws {Error} If there is an error during the saving process.
+     */
     async saveLog() {
         const schemas = require('../../schemas');
         
@@ -73,6 +90,12 @@ class ErrorLog extends LogBase {
         }
     }
 
+    /**
+     * Appends additional error information to the error log.
+     * @param {Object|string} append - The error object or string to append.
+     * @param {...string} params - Additional parameters for error information.
+     * @returns {ErrorLog} - The ErrorLog instance with appended information.
+     */
     append(append, ...params) {
         if (Boolean.isValid(append).filled().eval()) {
             if (Boolean.isValid(append).filled().string().eval()) {
@@ -95,6 +118,10 @@ class ErrorLog extends LogBase {
         return this;
     }
 
+    /**
+     * Generates a response object representing the error log.
+     * @returns {Object} - The response object containing error details.
+     */
     response() {
         return {
             success: false,
@@ -107,6 +134,10 @@ class ErrorLog extends LogBase {
         }
     }
 
+    /**
+     * Prints the error log to the console.
+     * @returns {ErrorLog} - The ErrorLog instance for method chaining.
+     */
     consolePrint() {
         toolsCLI.printError(this);
         return this;

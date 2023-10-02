@@ -3,7 +3,18 @@ const CRUD = require('../../services/database/crud');
 const { isObjectID } = require('../../helpers/database/relationalFields');
 const { increaseDocProp } = require('../../helpers/database/dbHelpers');
 
+/**
+ * Represents a global map in the application, extending the ValidateSchema class.
+ * @class GlobalMap
+ * @extends ValidateSchema
+ */
 class GlobalMap extends ValidateSchema {
+    /**
+     * Creates a new instance of the GlobalMap class.
+     * @param {Object} setup - The setup object.
+     * @param {Object} parent - The parent object.
+     * @throws {Error} If the creation of GlobalMap fails.
+     */
     constructor(setup, parent) {
         super(setup.validationRules || {});
         if (isObjectID(setup)) return;
@@ -26,14 +37,27 @@ class GlobalMap extends ValidateSchema {
         }
     }
 
+    /**
+     * Returns the parent object of the GlobalMap instance.
+     * @returns {Object} - The parent object.
+     */
     get parent() {
         return this.getParent();
     }
 
+    /**
+     * Returns the string representation of the index property.
+     * @returns {string} - The string representation of the index property.
+     */
     get stringIndex() {
         return String(this.index);
     }
 
+    /**
+     * Asynchronously retrieves the current user associated with the GlobalMap instance.
+     * @returns {Promise<Object>} - A promise resolving to the current user object.
+     * @throws {Error} If there is an error during the retrieval process.
+     */
     async getCurrentUser() {
         const User = require('@models/collections/User');
         const UID = User.currentUser();
@@ -45,6 +69,12 @@ class GlobalMap extends ValidateSchema {
         return user;
     }
 
+    /**
+     * Asynchronously saves the GlobalMap instance to the database.
+     * @param {string} collectionName - The name of the collection to save the instance.
+     * @returns {Promise<GlobalMap>} - A promise resolving to the saved GlobalMap instance.
+     * @throws {Error} If there is an error during the saving process.
+     */
     async saveDB(collectionName) {
         try {
             const created = await CRUD.create(collectionName || this.collectionName, {...this});
@@ -67,6 +97,12 @@ class GlobalMap extends ValidateSchema {
         }
     }
 
+    /**
+     * Asynchronously loads the GlobalMap instance from the database.
+     * @param {string} collectionName - The name of the collection to load the instance.
+     * @returns {Promise<GlobalMap>} - A promise resolving to the loaded GlobalMap instance.
+     * @throws {Error} If there is an error during the loading process.
+     */
     async loadDB(collectionName) {
         if (!collectionName) {
             collectionName = this.collectionName;
@@ -85,6 +121,12 @@ class GlobalMap extends ValidateSchema {
         }
     }
 
+    /**
+     * Asynchronously updates the GlobalMap instance in the database.
+     * @param {Object} updateParams - The update parameters including collectionName, filter, and data.
+     * @returns {Promise<GlobalMap>} - A promise resolving to the updated GlobalMap instance.
+     * @throws {Error} If there is an error during the update process.
+     */
     async updateDB({collectionName, filter, data}) {
         const collection = collectionName || this.collectionName;
 
@@ -102,6 +144,13 @@ class GlobalMap extends ValidateSchema {
         }
     }
 
+    /**
+     * Asynchronously deletes the GlobalMap instance from the database.
+     * @param {string} collectionName - The name of the collection to delete the instance.
+     * @param {Object} filter - The filter object for deletion.
+     * @returns {Promise<Object>} - A promise resolving to the deletion result.
+     * @throws {Error} If there is an error during the deletion process.
+     */
     async deleteDB(collectionName, filter) {
         try {
             const deleted = await CRUD.del({
@@ -119,6 +168,13 @@ class GlobalMap extends ValidateSchema {
         }
     }
 
+    /**
+     * Asynchronously increases a property value in the GlobalMap instance.
+     * @param {string} propKey - The property key to increase.
+     * @param {number} value - The value by which the property should be increased (default is 1).
+     * @returns {Promise<GlobalMap>} - A promise resolving to the updated GlobalMap instance.
+     * @throws {Error} If there is an error during the property increase process.
+     */
     async increaseProp(propKey, value) {
         if (!propKey) throw new Error.Log()
         const increaseAmount = value || 1;
@@ -138,24 +194,6 @@ class GlobalMap extends ValidateSchema {
             return increased;
         } catch (err) {
             throw new Error.Log('helpers.increase_doc_prop', this.collectionName, this._id, increaseValue);
-        }
-    }
-
-    async jiraTransitionStatus(event) {
-        if (!this.jiraIssue) return;
-
-        try {
-            for (let user of this.assignedUsers) {
-                const jiraUpdated = await user.jiraConnect.transitionIssue(this.jiraIssue.key, event);
-
-                if (jiraUpdated instanceof Error.Log) {
-                    throw jiraUpdated
-                }
-
-                return jiraUpdated;
-            };
-        } catch (err) {
-            throw new Error.Log(err);
         }
     }
 }

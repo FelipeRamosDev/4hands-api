@@ -1,4 +1,17 @@
+/**
+ * Represents a base class for logging in the application.
+ * @class LogBase
+ */
 class LogBase {
+    /**
+     * Creates a new instance of the LogBase class.
+     * @param {Object} params - The parameters for the log.
+     * @param {string} params.status - The status of the log.
+     * @param {string} params.type - The type of the log (default is 'log').
+     * @param {string} params.name - The name of the log.
+     * @param {string} params.message - The message of the log.
+     * @param {string} params.resource - The resource associated with the log.
+     */
     constructor({
         status,
         type,
@@ -13,6 +26,11 @@ class LogBase {
         this.resource = resource;
     }
 
+    /**
+     * Converts the log object to its JSON representation.
+     * @returns {string} - The JSON representation of the log object.
+     * @throws {Error} If there is an error during JSON stringification.
+     */
     toJSON() {
         try {
             return JSON.stringify({...this});
@@ -21,9 +39,21 @@ class LogBase {
         }
     }
 
-    notify() {}
+    /**
+     * Notifies relevant parties about the log.
+     * @abstract
+     */
+    notify() {
+        // To be implemented by subclasses.
+    }
 
-    emailNotify() {}
+    /**
+     * Sends email notifications about the log.
+     * @abstract
+     */
+    emailNotify() {
+        // To be implemented by subclasses.
+    }
 }
 
 module.exports = LogBase;
