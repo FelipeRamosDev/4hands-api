@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: interface/CLI/ViewNavigator.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: interface/CLI/ViewNavigator.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const ToolsCLI = require('./ToolsCLI');
+const NavigatorOption = require('./NavigatorOption');
+const ListTiles = require('@CLI/templates/ListTiles');
+const Prompt = require('@services/Prompt');
+const { QuestionModel } = require('./PoolForm');
+
+/**
+ * Default navigation questions for the ViewNavigator class.
+ * @type {Object}
+ */
+const navDefaultQuestions = {
+    startQuestion: 'navigation',
+    questions: [
+        {
+            id: 'navigation',
+            text: 'Choose an option above to navigate, type the index of the choosed option: ',
+            required: true
+        }
+    ]
+};
+
+/**
+ * Class representing a view navigator with navigation options.
+ * @extends ToolsCLI
+ */
+class ViewNavigator extends ToolsCLI {
+    static navDefaultQuestions = navDefaultQuestions;
+
+    /**
+     * Creates an instance of ViewNavigator.
+     * @constructor
+     * @param {Object} [setup] - The configuration for the view navigator instance.
+     * @param {string} [setup.type='nav'] - The type of navigation ('nav' or 'doc-list').
+     * @param {Array} [setup.options=[]] - Array of navigation options.
+     * @param {Function} [setup.navSuccessCallback] - Callback function on successful navigation.
+     * @param {Function} [setup.navErrorCallback] - Callback function on navigation error.
+     * @param {Object} [setup.question] - Question configuration for prompting user input.
+     * @param {ViewCLI} parentView - The parent view associated with this navigator.
+     */
+    constructor(setup = {
+        type: 'nav',
+        options: [],
+        navSuccessCallback,
+        navErrorCallback,
+        question
+    }, parentView) {
+        super();
+        const { type, options, question, navSuccessCallback, navErrorCallback } = setup || {};
+        const self = this;
+
+        /**
+         * The type of navigation ('nav' or 'doc-list').
+         * @type {string}
+         */
+        this.type = type || 'nav';
+
+        /**
+         * Array of navigation options.
+         * @type {Array}
+         */
+        this.options = [];
+
+        /**
+         * Question configuration for prompting user input.
+         * @type {Object}
+         */
+        this.question = question ? new QuestionModel(question) : {};
+
+        /**
+         * Callback function on successful navigation.
+         * @type {Function}
+         */
+        this.navSuccessCallback = navSuccessCallback &amp;&amp; navSuccessCallback.bind(this);
+
+        /**
+         * Callback function on navigation error.
+         * @type {Function}
+         */
+        this.navErrorCallback = navErrorCallback &amp;&amp; navErrorCallback.bind(this);
+
+        /**
+         * The parent view associated with this navigator.
+         * @type {ViewCLI}
+         */
+        this._parentView = () => parentView;
+
+        if (Array.isArray(options)) {
+            this.options = options.map((opt, index) => new NavigatorOption({ ...opt, index }, self));
+        }
+    }
+
+    /**
+     * Retrieves the parent view associated with this navigator.
+     * @returns {ViewCLI} The parent view instance.
+     */
+    get parentView() {
+        return this._parentView();
+    }
+
+    /**
+     * Navigates to a specific navigation option by its index.
+     * @param {string} index - The index of the navigation option to navigate to.
+     * @param {Object} [params] - Additional parameters to be passed to the view.
+     * @throws {Error.Log} When an error occurs during navigation.
+     */
+    async navTo(index, params) {
+        const opt = this.getOption(index);
+
+        if (!opt) {
+            this.print(`Navigation option for index "${index}" wasn't found!`, '[ERROR]');
+        }
+
+        if (typeof opt.trigger === 'function') {
+            return opt.trigger.call(opt, this);
+        }
+
+        if (this.parentView &amp;&amp; opt &amp;&amp; opt.targetView){
+            return await this.parentView.goToView(opt.targetView, {
+                ...opt.viewParams,
+                ...params,
+                defaultData: opt.defaultData,
+                docData: opt.doc
+            });
+        }
+    }
+
+    /**
+     * Retrieves a navigation option by its index.
+     * @param {string} index - The index of the navigation option to retrieve.
+     * @returns {NavigatorOption} The navigation option instance.
+     */
+    getOption(index) {
+        return this.options.find(opt => opt.index === index);
+    }
+
+    /**
+     * Adds a new navigation option to the navigator.
+     * @param {Object} data - Data for the new navigation option.
+     * @returns {ViewNavigator} The current ViewNavigator instance.
+     */
+    addOption(data) {
+        const newOption = new NavigatorOption(data, this);
+
+        newOption.type = this.type;
+        this.options.push(newOption);
+        return this;
+    }
+
+    /**
+     * Sets or updates an existing navigation option by its index.
+     * @param {string} index - The index of the navigation option to set or update.
+     * @param {Object} data - Data for the navigation option.
+     * @param {boolean} [override=false] - Indicates whether to override the existing option or merge the data.
+     */
+    setOption(index, data, override = false) {
+        const i = String(index);
+
+        if (override) {
+            this.options[i] = new NavigatorOption(data, this);
+        } else {
+            this.options[i] = { ...this.options[i], ...data };
+        }
+    }
+
+    /**
+     * Renders the navigation options and displays them to the user.
+     * @param {Object} [params] - Additional parameters for rendering.
+     * @returns {string} The rendered string output of the navigation options.
+     * @throws {Error.Log} When an error occurs during rendering.
+     */
+    render(params) {
+        let { exclude } = params || {};
+        let options = [];
+
+        if (this.type === 'doc-list') {
+            this.options.map((opt) => options.push(opt.doc));
+        } else {
+            options = this.options;
+            exclude = ['type', 'targetView', ...(exclude || [])];
+        }
+
+        try {
+            if (Array.isArray(options) &amp;&amp; options.length) {
+                const template = new ListTiles({ items: options });
+                const stringOutput = template.renderToString();
+                
+                this.printTemplate(stringOutput);
+                return stringOutput;
+            } else {
+                return '';
+            }
+        } catch (err) {
+            throw new Error.Log(err);
+        }
+    }
+
+    /**
+     * Prompts user input based on the provided question text and navigates to the chosen option.
+     * @param {Object} [params] - Additional parameters for rendering and navigation.
+     * @returns {Promise} A promise resolving to the result of navigation.
+     * @throws {Error.Log} When an error occurs during navigation.
+     */
+    async fire(params) {
+        try {
+            this.render(params);
+            const questionText = this.question &amp;&amp; this.question.text || '';
+
+            const fired = await this.prompt.question(questionText);
+            if (fired instanceof Error.Log) {
+                throw fired;
+            }
+
+            return await this.navTo(fired);
+        } catch (err) {
+            throw new Error.Log(err);
+        }
+    }
+}
+
+module.exports = ViewNavigator;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-AuthService.html">AuthService</a></li><li><a href="module-DataDependency.html">DataDependency</a></li><li><a href="module-EventsHandlers.html">EventsHandlers</a></li><li><a href="module-FormCtrlCLI.html">FormCtrlCLI</a></li><li><a href="module-NavigatorOption.html">NavigatorOption</a></li><li><a href="module-PoolForm.html">PoolForm</a></li><li><a href="module-QuestionModel.html">QuestionModel</a></li><li><a href="module-ToolsCLI.html">ToolsCLI</a></li><li><a href="module-ViewCLI.html">ViewCLI</a></li></ul><h3>Namespaces</h3><ul><li><a href="Models.html">Models</a></li><li><a href="Services.html">Services</a></li></ul><h3>Classes</h3><ul><li><a href="AuthBucket.html">AuthBucket</a></li><li><a href="AuthService.html">AuthService</a></li><li><a href="CLI.html">CLI</a></li><li><a href="Collection.html">Collection</a></li><li><a href="CollectionField.html">CollectionField</a></li><li><a href="Component.html">Component</a></li><li><a href="ComponentSubscription.html">ComponentSubscription</a></li><li><a href="DatabaseServer.html">DatabaseServer</a></li><li><a href="DocSubscription.html">DocSubscription</a></li><li><a href="Endpoint.html">Endpoint</a></li><li><a href="ErrorLog.html">ErrorLog</a></li><li><a href="EventStd.html">EventStd</a></li><li><a href="EventsHandlers.html">EventsHandlers</a></li><li><a href="FormCtrlCLI.html">FormCtrlCLI</a></li><li><a href="GlobalMap.html">GlobalMap</a></li><li><a href="LogBase.html">LogBase</a></li><li><a href="Logstamp.html">Logstamp</a></li><li><a href="NavigatorOption.html">NavigatorOption</a></li><li><a href="PoolForm.html">PoolForm</a></li><li><a href="Prompt.html">Prompt</a></li><li><a href="QuestionModel.html">QuestionModel</a></li><li><a href="RequestAPI.html">RequestAPI</a></li><li><a href="Resources.html">Resources</a></li><li><a href="SchemaRefConfig.html">SchemaRefConfig</a></li><li><a href="ScreenHelperCLI.html">ScreenHelperCLI</a></li><li><a href="ServerAPI.html">ServerAPI</a></li><li><a href="SocketConnection.html">SocketConnection</a></li><li><a href="SocketServer.html">SocketServer</a></li><li><a href="SocketSubscription.html">SocketSubscription</a></li><li><a href="StringTemplateBuilder.html">StringTemplateBuilder</a></li><li><a href="Success.html">Success</a></li><li><a href="ToolsCLI.html">ToolsCLI</a></li><li><a href="User.html">User</a></li><li><a href="ValidateSchema.html">ValidateSchema</a></li><li><a href="ValidationBase.html">ValidationBase</a></li><li><a href="ViewCLI.html">ViewCLI</a></li><li><a href="ViewNavigator.html">ViewNavigator</a></li><li><a href="XMLManager.html">XMLManager</a></li><li><a href="module-DataDependency-DataDependency.html">DataDependency</a></li></ul><h3>Global</h3><ul><li><a href="global.html##getPath">#getPath</a></li><li><a href="global.html#ApiHealthCheck">ApiHealthCheck</a></li><li><a href="global.html#AuthLogin">AuthLogin</a></li><li><a href="global.html#AuthRegister">AuthRegister</a></li><li><a href="global.html#CollectionCreate">CollectionCreate</a></li><li><a href="global.html#CollectionDelete">CollectionDelete</a></li><li><a href="global.html#CollectionGetDoc">CollectionGetDoc</a></li><li><a href="global.html#CollectionGetQuery">CollectionGetQuery</a></li><li><a href="global.html#CollectionUpdateDocument">CollectionUpdateDocument</a></li><li><a href="global.html#Log-Tologerrorsandanyotherlog.">Log - To log errors and any other log.</a></li><li><a href="global.html#Resource-Resourceinstancetocalltextandotherresources.">Resource - Resource instance to call text and other resources.</a></li><li><a href="global.html#ajax-DoesAJAXrequests">ajax - Does AJAX requests</a></li><li><a href="global.html#build">build</a></li><li><a href="global.html#convertMillisTo">convertMillisTo</a></li><li><a href="global.html#convertToMillis">convertToMillis</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#createCounter">createCounter</a></li><li><a href="global.html#createUserCLISession">createUserCLISession</a></li><li><a href="global.html#defaultRules">defaultRules</a></li><li><a href="global.html#del">del</a></li><li><a href="global.html#end">end</a></li><li><a href="global.html#findRelFields">findRelFields</a></li><li><a href="global.html#getCollectionModel">getCollectionModel</a></li><li><a href="global.html#getDoc">getDoc</a></li><li><a href="global.html#getObjectPath">getObjectPath</a></li><li><a href="global.html#getSessionCurrentUser">getSessionCurrentUser</a></li><li><a href="global.html#getUpdateProps">getUpdateProps</a></li><li><a href="global.html#increaseCounter">increaseCounter</a></li><li><a href="global.html#increaseDocProp">increaseDocProp</a></li><li><a href="global.html#increaseLog">increaseLog</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#isAuthenticated">isAuthenticated</a></li><li><a href="global.html#isCollectionExist">isCollectionExist</a></li><li><a href="global.html#isDocExist">isDocExist</a></li><li><a href="global.html#isObjectID">isObjectID</a></li><li><a href="global.html#navDefaultQuestions">navDefaultQuestions</a></li><li><a href="global.html#oid">oid</a></li><li><a href="global.html#onCreate">onCreate</a></li><li><a href="global.html#onDelete">onDelete</a></li><li><a href="global.html#onUpdate">onUpdate</a></li><li><a href="global.html#overrideListener">overrideListener</a></li><li><a href="global.html#paginate">paginate</a></li><li><a href="global.html#pickQueryType">pickQueryType</a></li><li><a href="global.html#populateAll">populateAll</a></li><li><a href="global.html#postDelete">postDelete</a></li><li><a href="global.html#postSave">postSave</a></li><li><a href="global.html#postUpdateOne">postUpdateOne</a></li><li><a href="global.html#preDelete">preDelete</a></li><li><a href="global.html#preSave">preSave</a></li><li><a href="global.html#preUpdateOne">preUpdateOne</a></li><li><a href="global.html#query">query</a></li><li><a href="global.html#readable">readable</a></li><li><a href="global.html#repeat">repeat</a></li><li><a href="global.html#setListener">setListener</a></li><li><a href="global.html#toolsCLI-CLItoolstouseineverywhere.">toolsCLI - CLI tools to use in everywhere.</a></li><li><a href="global.html#treatFilter">treatFilter</a></li><li><a href="global.html#update">update</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Mon Oct 02 2023 19:22:06 GMT-0300 (Brasilia Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

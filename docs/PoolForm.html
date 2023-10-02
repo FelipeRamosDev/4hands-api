@@ -1,0 +1,2083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Class: PoolForm</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Class: PoolForm</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2><span class="attribs"><span class="type-signature"></span></span>PoolForm<span class="signature">(setup, view)</span><span class="type-signature"></span></h2>
+        
+            <div class="class-description"><p>Represents a form controller for a pool of questions.</p></div>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+    
+    <h2>Constructor</h2>
+    
+
+    
+    <h4 class="name" id="PoolForm"><span class="type-signature"></span>new PoolForm<span class="signature">(setup, view)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>setup</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The setup configuration for the form.</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>startQuestion</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    ''
+                
+                </td>
+            
+
+            <td class="description last"><p>The ID of the first question.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>questions</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="QuestionModel.html">QuestionModel</a>></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    []
+                
+                </td>
+            
+
+            <td class="description last"><p>The list of questions to be used in the form.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>events</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="EventsHandlers.html">EventsHandlers</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    {}
+                
+                </td>
+            
+
+            <td class="description last"><p>The event handlers for the form.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>values</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    {}
+                
+                </td>
+            
+
+            <td class="description last"><p>The default values for the form fields.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>autoSaveAnswers</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+
+            <td class="description last"><p>The default values for the form fields.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>view</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The view object for the form.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="interface_CLI_PoolForm_index.js.html">interface/CLI/PoolForm/index.js</a>, <a href="interface_CLI_PoolForm_index.js.html#line13">line 13</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="back"><span class="type-signature">(async) </span>back<span class="signature">()</span><span class="type-signature"> &rarr; {*}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Triggers the back event and goes to the current.back question.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="interface_CLI_PoolForm_index.js.html">interface/CLI/PoolForm/index.js</a>, <a href="interface_CLI_PoolForm_index.js.html#line216">line 216</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+    <div class="param-desc">
+    
+        <p>When the back event or the error event thrown by goTo is rejected.</p>
+    
+    </div>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>The result of calling goTo with the current.back question ID.</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">*</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getFirstQuestion"><span class="type-signature"></span>getFirstQuestion<span class="signature">()</span><span class="type-signature"> &rarr; (nullable) {<a href="QuestionModel.html">QuestionModel</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Returns the first question object on the this.questions array list.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="interface_CLI_PoolForm_index.js.html">interface/CLI/PoolForm/index.js</a>, <a href="interface_CLI_PoolForm_index.js.html#line68">line 68</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="QuestionModel.html">QuestionModel</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getQuestion"><span class="type-signature"></span>getQuestion<span class="signature">(id)</span><span class="type-signature"> &rarr; (nullable) {<a href="QuestionModel.html">QuestionModel</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Returns the question object with the specified ID.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The ID of the question.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="interface_CLI_PoolForm_index.js.html">interface/CLI/PoolForm/index.js</a>, <a href="interface_CLI_PoolForm_index.js.html#line60">line 60</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="QuestionModel.html">QuestionModel</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getValue"><span class="type-signature"></span>getValue<span class="signature">(keyPath)</span><span class="type-signature"> &rarr; {*}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Retrieves the value at the given key path from the values object.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>keyPath</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The dot-separated path to the desired value.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="interface_CLI_PoolForm_index.js.html">interface/CLI/PoolForm/index.js</a>, <a href="interface_CLI_PoolForm_index.js.html#line142">line 142</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>The value at the given key path.</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">*</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="goTo"><span class="type-signature">(async) </span>goTo<span class="signature">(questionID)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Goes to the question with the given ID and triggers its trigger method.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>questionID</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The ID of the question to go to.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="interface_CLI_PoolForm_index.js.html">interface/CLI/PoolForm/index.js</a>, <a href="interface_CLI_PoolForm_index.js.html#line230">line 230</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+    <div class="param-desc">
+    
+        <p>When the trigger method of the question is rejected or the given question ID is not valid.</p>
+    
+    </div>
+
+
+    
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="goToView"><span class="type-signature">(async) </span>goToView<span class="signature">(viewPath, params<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Goes to the view with the given path and optional parameters.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>viewPath</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>The path to the view to go to.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>params</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Optional parameters to pass to the view.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="interface_CLI_PoolForm_index.js.html">interface/CLI/PoolForm/index.js</a>, <a href="interface_CLI_PoolForm_index.js.html#line247">line 247</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="next"><span class="type-signature">(async) </span>next<span class="signature">()</span><span class="type-signature"> &rarr; {*}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Triggers the next event and goes to the current.next question.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="interface_CLI_PoolForm_index.js.html">interface/CLI/PoolForm/index.js</a>, <a href="interface_CLI_PoolForm_index.js.html#line202">line 202</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+    <div class="param-desc">
+    
+        <p>When the next event or the error event thrown by goTo is rejected.</p>
+    
+    </div>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>The result of calling goTo with the current.next question ID.</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">*</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="setQuestion"><span class="type-signature"></span>setQuestion<span class="signature">(setup<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Adds a new question to the list of questions.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>setup</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="QuestionModel.html">QuestionModel</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>The setup configuration for the question.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="interface_CLI_PoolForm_index.js.html">interface/CLI/PoolForm/index.js</a>, <a href="interface_CLI_PoolForm_index.js.html#line76">line 76</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="setValue"><span class="type-signature"></span>setValue<span class="signature">(keyPath, value, override<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Sets the value at the given key path in the values object.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>keyPath</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>The dot-separated path to the desired value.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>The new value to set at the given key path.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>override</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+
+            <td class="description last"><p>Whether to override the existing value(s) at the given key path with the new value.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="interface_CLI_PoolForm_index.js.html">interface/CLI/PoolForm/index.js</a>, <a href="interface_CLI_PoolForm_index.js.html#line161">line 161</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="start"><span class="type-signature">(async) </span>start<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Triggers the start event and goes to the startQuestion question.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="interface_CLI_PoolForm_index.js.html">interface/CLI/PoolForm/index.js</a>, <a href="interface_CLI_PoolForm_index.js.html#line177">line 177</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+    <div class="param-desc">
+    
+        <p>When the start event or the error event thrown by goTo is rejected.</p>
+    
+    </div>
+
+
+    
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="startPool"><span class="type-signature">(async) </span>startPool<span class="signature">()</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Starts the form and triggers the &quot;start&quot; event.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="interface_CLI_PoolForm_index.js.html">interface/CLI/PoolForm/index.js</a>, <a href="interface_CLI_PoolForm_index.js.html#line87">line 87</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        <ul>
+<li>If an error occurs during form execution.</li>
+</ul>
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <ul>
+<li>The form data which is the result of the form filled.</li>
+</ul>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-AuthService.html">AuthService</a></li><li><a href="module-DataDependency.html">DataDependency</a></li><li><a href="module-EventsHandlers.html">EventsHandlers</a></li><li><a href="module-FormCtrlCLI.html">FormCtrlCLI</a></li><li><a href="module-NavigatorOption.html">NavigatorOption</a></li><li><a href="module-PoolForm.html">PoolForm</a></li><li><a href="module-QuestionModel.html">QuestionModel</a></li><li><a href="module-ToolsCLI.html">ToolsCLI</a></li><li><a href="module-ViewCLI.html">ViewCLI</a></li></ul><h3>Namespaces</h3><ul><li><a href="Models.html">Models</a></li><li><a href="Services.html">Services</a></li></ul><h3>Classes</h3><ul><li><a href="AuthBucket.html">AuthBucket</a></li><li><a href="AuthService.html">AuthService</a></li><li><a href="CLI.html">CLI</a></li><li><a href="Collection.html">Collection</a></li><li><a href="CollectionField.html">CollectionField</a></li><li><a href="Component.html">Component</a></li><li><a href="ComponentSubscription.html">ComponentSubscription</a></li><li><a href="DatabaseServer.html">DatabaseServer</a></li><li><a href="DocSubscription.html">DocSubscription</a></li><li><a href="Endpoint.html">Endpoint</a></li><li><a href="ErrorLog.html">ErrorLog</a></li><li><a href="EventStd.html">EventStd</a></li><li><a href="EventsHandlers.html">EventsHandlers</a></li><li><a href="FormCtrlCLI.html">FormCtrlCLI</a></li><li><a href="GlobalMap.html">GlobalMap</a></li><li><a href="LogBase.html">LogBase</a></li><li><a href="Logstamp.html">Logstamp</a></li><li><a href="NavigatorOption.html">NavigatorOption</a></li><li><a href="PoolForm.html">PoolForm</a></li><li><a href="Prompt.html">Prompt</a></li><li><a href="QuestionModel.html">QuestionModel</a></li><li><a href="RequestAPI.html">RequestAPI</a></li><li><a href="Resources.html">Resources</a></li><li><a href="SchemaRefConfig.html">SchemaRefConfig</a></li><li><a href="ScreenHelperCLI.html">ScreenHelperCLI</a></li><li><a href="ServerAPI.html">ServerAPI</a></li><li><a href="SocketConnection.html">SocketConnection</a></li><li><a href="SocketServer.html">SocketServer</a></li><li><a href="SocketSubscription.html">SocketSubscription</a></li><li><a href="StringTemplateBuilder.html">StringTemplateBuilder</a></li><li><a href="Success.html">Success</a></li><li><a href="ToolsCLI.html">ToolsCLI</a></li><li><a href="User.html">User</a></li><li><a href="ValidateSchema.html">ValidateSchema</a></li><li><a href="ValidationBase.html">ValidationBase</a></li><li><a href="ViewCLI.html">ViewCLI</a></li><li><a href="ViewNavigator.html">ViewNavigator</a></li><li><a href="XMLManager.html">XMLManager</a></li><li><a href="module-DataDependency-DataDependency.html">DataDependency</a></li></ul><h3>Global</h3><ul><li><a href="global.html##getPath">#getPath</a></li><li><a href="global.html#ApiHealthCheck">ApiHealthCheck</a></li><li><a href="global.html#AuthLogin">AuthLogin</a></li><li><a href="global.html#AuthRegister">AuthRegister</a></li><li><a href="global.html#CollectionCreate">CollectionCreate</a></li><li><a href="global.html#CollectionDelete">CollectionDelete</a></li><li><a href="global.html#CollectionGetDoc">CollectionGetDoc</a></li><li><a href="global.html#CollectionGetQuery">CollectionGetQuery</a></li><li><a href="global.html#CollectionUpdateDocument">CollectionUpdateDocument</a></li><li><a href="global.html#Log-Tologerrorsandanyotherlog.">Log - To log errors and any other log.</a></li><li><a href="global.html#Resource-Resourceinstancetocalltextandotherresources.">Resource - Resource instance to call text and other resources.</a></li><li><a href="global.html#ajax-DoesAJAXrequests">ajax - Does AJAX requests</a></li><li><a href="global.html#build">build</a></li><li><a href="global.html#convertMillisTo">convertMillisTo</a></li><li><a href="global.html#convertToMillis">convertToMillis</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#createCounter">createCounter</a></li><li><a href="global.html#createUserCLISession">createUserCLISession</a></li><li><a href="global.html#defaultRules">defaultRules</a></li><li><a href="global.html#del">del</a></li><li><a href="global.html#end">end</a></li><li><a href="global.html#findRelFields">findRelFields</a></li><li><a href="global.html#getCollectionModel">getCollectionModel</a></li><li><a href="global.html#getDoc">getDoc</a></li><li><a href="global.html#getObjectPath">getObjectPath</a></li><li><a href="global.html#getSessionCurrentUser">getSessionCurrentUser</a></li><li><a href="global.html#getUpdateProps">getUpdateProps</a></li><li><a href="global.html#increaseCounter">increaseCounter</a></li><li><a href="global.html#increaseDocProp">increaseDocProp</a></li><li><a href="global.html#increaseLog">increaseLog</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#isAuthenticated">isAuthenticated</a></li><li><a href="global.html#isCollectionExist">isCollectionExist</a></li><li><a href="global.html#isDocExist">isDocExist</a></li><li><a href="global.html#isObjectID">isObjectID</a></li><li><a href="global.html#navDefaultQuestions">navDefaultQuestions</a></li><li><a href="global.html#oid">oid</a></li><li><a href="global.html#onCreate">onCreate</a></li><li><a href="global.html#onDelete">onDelete</a></li><li><a href="global.html#onUpdate">onUpdate</a></li><li><a href="global.html#overrideListener">overrideListener</a></li><li><a href="global.html#paginate">paginate</a></li><li><a href="global.html#pickQueryType">pickQueryType</a></li><li><a href="global.html#populateAll">populateAll</a></li><li><a href="global.html#postDelete">postDelete</a></li><li><a href="global.html#postSave">postSave</a></li><li><a href="global.html#postUpdateOne">postUpdateOne</a></li><li><a href="global.html#preDelete">preDelete</a></li><li><a href="global.html#preSave">preSave</a></li><li><a href="global.html#preUpdateOne">preUpdateOne</a></li><li><a href="global.html#query">query</a></li><li><a href="global.html#readable">readable</a></li><li><a href="global.html#repeat">repeat</a></li><li><a href="global.html#setListener">setListener</a></li><li><a href="global.html#toolsCLI-CLItoolstouseineverywhere.">toolsCLI - CLI tools to use in everywhere.</a></li><li><a href="global.html#treatFilter">treatFilter</a></li><li><a href="global.html#update">update</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Mon Oct 02 2023 19:22:06 GMT-0300 (Brasilia Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: helpers/database/relationalFields.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: helpers/database/relationalFields.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Builds and returns a Promise to update related documents based on the provided parameters.
+ * @function
+ * @private
+ * @param {Array|string} docsToUpdate - Array or single ID of documents to be updated.
+ * @param {Object} currFieldSchema - The schema object of the current field.
+ * @param {string} relatedUID - The unique ID of the related document.
+ * @param {string} arrayAction - The action to be performed on the array field ('$addToSet' or '$pull').
+ * @param {string} onlyAct - Flag indicating if the operation should be executed only if the flag is true.
+ * @returns {Promise|undefined} - A Promise representing the update operation, or undefined if no action is performed.
+ */
+function buildPromise(docsToUpdate, currFieldSchema, relatedUID, arrayAction, onlyAct) {
+    if (!currFieldSchema.refConfig) return;
+
+    const currType = currFieldSchema.type;
+    const {relatedField, type} = currFieldSchema.refConfig;
+    const isCurrentAnArray = (Array.isArray(currType) &amp;&amp; currType.length &amp;&amp; currType[0].schemaName === 'ObjectId');
+    const isCurrentAnObjectId = (currType.schemaName === 'ObjectId');
+    const isRelatedAnArray = (type === 'array-oid');
+    const isRelatedAnObjectId = (type === 'ObjectId');
+    let params;
+
+    if (isCurrentAnArray &amp;&amp; !docsToUpdate.length) {
+        return;
+    }
+
+    if (isCurrentAnArray &amp;&amp; isRelatedAnArray) {
+        const toUpdate = new Promise((resolve, reject) => {
+            params = [
+                { _id: { $in: docsToUpdate } },
+                { [arrayAction]: { [relatedField]: relatedUID }, onlyAct },
+                (err, result) => {
+                    if (err) throw reject(new Error.Log(err));
+                    return resolve(result);
+                }
+            ];
+
+            if (this.$op === 'save') {
+                this.model(currFieldSchema.ref).updateMany(...params);
+            } else {
+                this.model.db.model(currFieldSchema.ref).updateMany(...params);
+            }
+        });
+
+        return toUpdate;
+    }
+
+    if (isCurrentAnArray &amp;&amp; isRelatedAnObjectId) {
+        const toUpdate = new Promise((resolve, reject) => {
+            params = [
+                { _id: { $in: docsToUpdate } },
+                { [relatedField]: relatedUID, onlyAct }
+            ];
+
+            if (this.$op === 'save') {
+                this.model(currFieldSchema.ref).updateMany(...params);
+                resolve();
+            } else {
+                this.model.db.model(currFieldSchema.ref).updateMany(...params);
+                resolve();
+            }
+        });
+
+        return toUpdate;
+    }
+
+    if (isCurrentAnObjectId &amp;&amp; isRelatedAnArray) {
+        params = [
+            { _id: docsToUpdate },
+            {[arrayAction]: { [relatedField]: relatedUID }, onlyAct}
+        ];
+    }
+
+    if (isCurrentAnObjectId &amp;&amp; isRelatedAnObjectId) {
+        params = [
+            { _id: docsToUpdate },
+            { [relatedField]: relatedUID, onlyAct }
+        ];
+    }
+
+    if (this.$op === 'save') {
+        return this.model(currFieldSchema.ref).updateOne(...params);
+    } else {
+        return this.model.db.model(currFieldSchema.ref).updateOne(...params);
+    }
+}
+
+/**
+ * Handles relational updates when a new document is created.
+ * @function
+ * @async
+ * @returns {Array} - An array of updated documents after the relational updates.
+ * @throws {Error} - Throws an error if there is an issue handling the updates.
+ */
+async function onCreate() {
+    const promises = [];
+
+    try {
+        // Iterate each field of the current document being created
+        Object.entries(this.schema.obj).map(([key, value]) => {
+            if (!value.refConfig || !this[key]) return;
+
+            const toUpdate = buildPromise.call(this,
+                this[key],
+                value,
+                this.id,
+                '$addToSet',
+                'create'
+            );
+            promises.push(toUpdate);
+        });
+    
+        const updated = await Promise.all(promises);
+        return updated;
+    } catch(err) {
+        throw new Error.Log(err);
+    }
+}
+
+/**
+ * Handles relational updates when an existing document is updated.
+ * @function
+ * @async
+ * @returns {Array} - An array of updated documents after the relational updates.
+ * @throws {Error} - Throws an error if there is an issue handling the updates.
+ */
+async function onUpdate() {
+    try {
+        const schemaObj = this.schema.obj;
+        const promises = [];
+
+        Object.entries(this._update).map(([key, value]) => {
+            if (key === '$addToSet' || key === '$pull') {
+                Object.entries(value).map(([$key, $value]) => {
+                    const currFieldSchema = schemaObj[$key];
+                    const toUpdate = buildPromise.call(this,
+                        $value,
+                        currFieldSchema,
+                        this._conditions._id,
+                        key
+                    );
+
+                    toUpdate &amp;&amp; promises.push(toUpdate);
+                });
+            } else {
+                const currFieldSchema = schemaObj[key] || {};
+                const toUpdate = buildPromise.call(this,
+                    value,
+                    currFieldSchema,
+                    this._conditions._id,
+                    key
+                );
+
+                toUpdate &amp;&amp; promises.push(toUpdate);
+            }
+        })
+    
+        const updated = await Promise.all(promises);
+        return updated;
+    } catch(err) {
+        throw new Error.Log(err);
+    }
+}
+
+/**
+ * Handles relational updates when a document is deleted.
+ * @function
+ * @async
+ * @returns {Array} - An array of updated documents after the relational updates.
+ * @throws {Error} - Throws an error if there is an issue handling the updates.
+ */
+async function onDelete() {
+    try {
+        const filter = this.getFilter();
+        const currentDoc = await this.model.findOne(filter);
+        const promises = [];
+    
+        if (!currentDoc) {
+            return;
+        }
+
+        // Iterate each field of the current document being deleted
+        Object.entries(this.schema.obj).map(([key, value]) => {
+            if (!value.refConfig) return;
+
+            const toUpdate = buildPromise.call(this,
+                currentDoc[key],
+                value,
+                this._conditions._id,
+                '$pull',
+                'delete'
+            );
+            promises.push(toUpdate);
+        });
+
+        const updated = await Promise.all(promises);
+        return updated;
+    } catch(err) {
+        throw new Error.Log(err);
+    }
+}
+
+/**
+ * Checks if the provided value is an ObjectId or an array of ObjectIds.
+ * @function
+ * @param {Array|Object} value - The value to be checked.
+ * @returns {boolean} - True if the value is an ObjectId or an array of ObjectIds, false otherwise.
+ */
+function isObjectID(value) {
+    if (Array.isArray(value)) {
+        return Boolean(value[0]._bsontype === 'ObjectId');
+    } else {
+        return Boolean(value._bsontype === 'ObjectId');
+    }
+}
+
+module.exports = {
+    onCreate,
+    onUpdate,
+    onDelete,
+    isObjectID
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-AuthService.html">AuthService</a></li><li><a href="module-DataDependency.html">DataDependency</a></li><li><a href="module-EventsHandlers.html">EventsHandlers</a></li><li><a href="module-FormCtrlCLI.html">FormCtrlCLI</a></li><li><a href="module-NavigatorOption.html">NavigatorOption</a></li><li><a href="module-PoolForm.html">PoolForm</a></li><li><a href="module-QuestionModel.html">QuestionModel</a></li><li><a href="module-ToolsCLI.html">ToolsCLI</a></li><li><a href="module-ViewCLI.html">ViewCLI</a></li></ul><h3>Namespaces</h3><ul><li><a href="Models.html">Models</a></li><li><a href="Services.html">Services</a></li></ul><h3>Classes</h3><ul><li><a href="AuthBucket.html">AuthBucket</a></li><li><a href="AuthService.html">AuthService</a></li><li><a href="CLI.html">CLI</a></li><li><a href="Collection.html">Collection</a></li><li><a href="CollectionField.html">CollectionField</a></li><li><a href="Component.html">Component</a></li><li><a href="ComponentSubscription.html">ComponentSubscription</a></li><li><a href="DatabaseServer.html">DatabaseServer</a></li><li><a href="DocSubscription.html">DocSubscription</a></li><li><a href="Endpoint.html">Endpoint</a></li><li><a href="ErrorLog.html">ErrorLog</a></li><li><a href="EventStd.html">EventStd</a></li><li><a href="EventsHandlers.html">EventsHandlers</a></li><li><a href="FormCtrlCLI.html">FormCtrlCLI</a></li><li><a href="GlobalMap.html">GlobalMap</a></li><li><a href="LogBase.html">LogBase</a></li><li><a href="Logstamp.html">Logstamp</a></li><li><a href="NavigatorOption.html">NavigatorOption</a></li><li><a href="PoolForm.html">PoolForm</a></li><li><a href="Prompt.html">Prompt</a></li><li><a href="QuestionModel.html">QuestionModel</a></li><li><a href="RequestAPI.html">RequestAPI</a></li><li><a href="Resources.html">Resources</a></li><li><a href="SchemaRefConfig.html">SchemaRefConfig</a></li><li><a href="ScreenHelperCLI.html">ScreenHelperCLI</a></li><li><a href="ServerAPI.html">ServerAPI</a></li><li><a href="SocketConnection.html">SocketConnection</a></li><li><a href="SocketServer.html">SocketServer</a></li><li><a href="SocketSubscription.html">SocketSubscription</a></li><li><a href="StringTemplateBuilder.html">StringTemplateBuilder</a></li><li><a href="Success.html">Success</a></li><li><a href="ToolsCLI.html">ToolsCLI</a></li><li><a href="User.html">User</a></li><li><a href="ValidateSchema.html">ValidateSchema</a></li><li><a href="ValidationBase.html">ValidationBase</a></li><li><a href="ViewCLI.html">ViewCLI</a></li><li><a href="ViewNavigator.html">ViewNavigator</a></li><li><a href="XMLManager.html">XMLManager</a></li><li><a href="module-DataDependency-DataDependency.html">DataDependency</a></li></ul><h3>Global</h3><ul><li><a href="global.html##getPath">#getPath</a></li><li><a href="global.html#ApiHealthCheck">ApiHealthCheck</a></li><li><a href="global.html#AuthLogin">AuthLogin</a></li><li><a href="global.html#AuthRegister">AuthRegister</a></li><li><a href="global.html#CollectionCreate">CollectionCreate</a></li><li><a href="global.html#CollectionDelete">CollectionDelete</a></li><li><a href="global.html#CollectionGetDoc">CollectionGetDoc</a></li><li><a href="global.html#CollectionGetQuery">CollectionGetQuery</a></li><li><a href="global.html#CollectionUpdateDocument">CollectionUpdateDocument</a></li><li><a href="global.html#Log-Tologerrorsandanyotherlog.">Log - To log errors and any other log.</a></li><li><a href="global.html#Resource-Resourceinstancetocalltextandotherresources.">Resource - Resource instance to call text and other resources.</a></li><li><a href="global.html#ajax-DoesAJAXrequests">ajax - Does AJAX requests</a></li><li><a href="global.html#build">build</a></li><li><a href="global.html#convertMillisTo">convertMillisTo</a></li><li><a href="global.html#convertToMillis">convertToMillis</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#createCounter">createCounter</a></li><li><a href="global.html#createUserCLISession">createUserCLISession</a></li><li><a href="global.html#defaultRules">defaultRules</a></li><li><a href="global.html#del">del</a></li><li><a href="global.html#end">end</a></li><li><a href="global.html#findRelFields">findRelFields</a></li><li><a href="global.html#getCollectionModel">getCollectionModel</a></li><li><a href="global.html#getDoc">getDoc</a></li><li><a href="global.html#getObjectPath">getObjectPath</a></li><li><a href="global.html#getSessionCurrentUser">getSessionCurrentUser</a></li><li><a href="global.html#getUpdateProps">getUpdateProps</a></li><li><a href="global.html#increaseCounter">increaseCounter</a></li><li><a href="global.html#increaseDocProp">increaseDocProp</a></li><li><a href="global.html#increaseLog">increaseLog</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#isAuthenticated">isAuthenticated</a></li><li><a href="global.html#isCollectionExist">isCollectionExist</a></li><li><a href="global.html#isDocExist">isDocExist</a></li><li><a href="global.html#isObjectID">isObjectID</a></li><li><a href="global.html#navDefaultQuestions">navDefaultQuestions</a></li><li><a href="global.html#oid">oid</a></li><li><a href="global.html#onCreate">onCreate</a></li><li><a href="global.html#onDelete">onDelete</a></li><li><a href="global.html#onUpdate">onUpdate</a></li><li><a href="global.html#overrideListener">overrideListener</a></li><li><a href="global.html#paginate">paginate</a></li><li><a href="global.html#pickQueryType">pickQueryType</a></li><li><a href="global.html#populateAll">populateAll</a></li><li><a href="global.html#postDelete">postDelete</a></li><li><a href="global.html#postSave">postSave</a></li><li><a href="global.html#postUpdateOne">postUpdateOne</a></li><li><a href="global.html#preDelete">preDelete</a></li><li><a href="global.html#preSave">preSave</a></li><li><a href="global.html#preUpdateOne">preUpdateOne</a></li><li><a href="global.html#query">query</a></li><li><a href="global.html#readable">readable</a></li><li><a href="global.html#repeat">repeat</a></li><li><a href="global.html#setListener">setListener</a></li><li><a href="global.html#toolsCLI-CLItoolstouseineverywhere.">toolsCLI - CLI tools to use in everywhere.</a></li><li><a href="global.html#treatFilter">treatFilter</a></li><li><a href="global.html#update">update</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Mon Oct 02 2023 19:22:06 GMT-0300 (Brasilia Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
