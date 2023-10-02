@@ -10,8 +10,7 @@ const cors = require('cors');
 const https = require('https');
 const Database = require('@services/database/DatabaseServer');
 const FS = require('@services/FS');
-// Routes
-
+const path = require('path');
 const Endpoint = require('@src/models/settings/Endpoint');
 
 class ServerAPI {
@@ -86,7 +85,7 @@ class ServerAPI {
     }
 
     init() {
-        this.rootPath = __dirname.replace('\\node_modules\\4hands-api\\src\\services', '\\').replace(/\\/g, '/');
+        this.rootPath = path.normalize(__dirname.replace(path.normalize('/node_modules/4hands-api/src/services'), '/'));
         this.app = express();
         this.serverState = 'loading';
 
