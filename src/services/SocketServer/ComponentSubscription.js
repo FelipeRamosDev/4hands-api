@@ -1,15 +1,33 @@
-const SocketSubscription = require('./SocketSubscription');
-
+/**
+ * Represents a subscription for a specific component in the application.
+ * Extends SocketSubscription class.
+ */
 class ComponentSubscription extends SocketSubscription {
+    /**
+     * Creates an instance of ComponentSubscription.
+     * @param {Object} setup - Configuration options for the subscription.
+     * @param {Object} connection - The connection object for managing the subscription.
+     * @param {Object} setup.component - The component object associated with the subscription.
+     */
     constructor(setup, connection) {
         super(setup, connection);
 
         try {
             const { component } = Object(setup);
 
+            /**
+             * Type identifier for the subscription (component).
+             * @type {string}
+             */
             this.type = 'component';
+
+            /**
+             * The component object associated with the subscription.
+             * @type {Object}
+             */
             this.component = component;
 
+            // Initializes the client change listener and appends the component.
             this.setClientChangeListener();
             this.appendComponent();
         } catch (err) {
@@ -17,6 +35,9 @@ class ComponentSubscription extends SocketSubscription {
         }
     }
 
+    /**
+     * Sends the component data to the client.
+     */
     toClient() {
         try {
             if (!this.component) {
@@ -29,6 +50,10 @@ class ComponentSubscription extends SocketSubscription {
         }
     }
 
+    /**
+     * Sends error data to the client in case of component subscription error.
+     * @param {Object} error - The error object to be sent to the client.
+     */
     toClientError(error) {
         try {
             if (!this.component) {
@@ -42,6 +67,10 @@ class ComponentSubscription extends SocketSubscription {
         }
     }
 
+    /**
+     * Updates the component data by merging the provided data.
+     * @param {Object} mergeData - The data object to be merged with the component.
+     */
     updateComponent(mergeData) {
         try {
             this.connection.updateComponent(this.subscriptionUID, mergeData);
@@ -50,6 +79,9 @@ class ComponentSubscription extends SocketSubscription {
         }
     }
 
+    /**
+     * Sets up the client change listener for component updates.
+     */
     setClientChangeListener() {
         try {
             this.socket.on('subscribe:component:clientupdate:' + this.subscriptionUID, (mergeData) => {
@@ -60,6 +92,9 @@ class ComponentSubscription extends SocketSubscription {
         }
     }
 
+    /**
+     * Appends the current component subscription to the connection.
+     */
     appendComponent() {
         try {
             this.connection.appendComponent(this);
@@ -70,4 +105,3 @@ class ComponentSubscription extends SocketSubscription {
 }
 
 module.exports = ComponentSubscription;
-

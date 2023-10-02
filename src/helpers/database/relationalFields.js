@@ -1,3 +1,14 @@
+/**
+ * Builds and returns a Promise to update related documents based on the provided parameters.
+ * @function
+ * @private
+ * @param {Array|string} docsToUpdate - Array or single ID of documents to be updated.
+ * @param {Object} currFieldSchema - The schema object of the current field.
+ * @param {string} relatedUID - The unique ID of the related document.
+ * @param {string} arrayAction - The action to be performed on the array field ('$addToSet' or '$pull').
+ * @param {string} onlyAct - Flag indicating if the operation should be executed only if the flag is true.
+ * @returns {Promise|undefined} - A Promise representing the update operation, or undefined if no action is performed.
+ */
 function buildPromise(docsToUpdate, currFieldSchema, relatedUID, arrayAction, onlyAct) {
     if (!currFieldSchema.refConfig) return;
 
@@ -74,6 +85,13 @@ function buildPromise(docsToUpdate, currFieldSchema, relatedUID, arrayAction, on
     }
 }
 
+/**
+ * Handles relational updates when a new document is created.
+ * @function
+ * @async
+ * @returns {Array} - An array of updated documents after the relational updates.
+ * @throws {Error} - Throws an error if there is an issue handling the updates.
+ */
 async function onCreate() {
     const promises = [];
 
@@ -99,6 +117,13 @@ async function onCreate() {
     }
 }
 
+/**
+ * Handles relational updates when an existing document is updated.
+ * @function
+ * @async
+ * @returns {Array} - An array of updated documents after the relational updates.
+ * @throws {Error} - Throws an error if there is an issue handling the updates.
+ */
 async function onUpdate() {
     try {
         const schemaObj = this.schema.obj;
@@ -137,6 +162,13 @@ async function onUpdate() {
     }
 }
 
+/**
+ * Handles relational updates when a document is deleted.
+ * @function
+ * @async
+ * @returns {Array} - An array of updated documents after the relational updates.
+ * @throws {Error} - Throws an error if there is an issue handling the updates.
+ */
 async function onDelete() {
     try {
         const filter = this.getFilter();
@@ -168,6 +200,12 @@ async function onDelete() {
     }
 }
 
+/**
+ * Checks if the provided value is an ObjectId or an array of ObjectIds.
+ * @function
+ * @param {Array|Object} value - The value to be checked.
+ * @returns {boolean} - True if the value is an ObjectId or an array of ObjectIds, false otherwise.
+ */
 function isObjectID(value) {
     if (Array.isArray(value)) {
         return Boolean(value[0]._bsontype === 'ObjectId');

@@ -3,6 +3,10 @@ const FS = require('../services/FS');
 const ToolsCLI = require('./CLI/ToolsCLI');
 const DataDependency = require('@models/DataDependency');
 
+/**
+ * Default validation rules for the Component class.
+ * @type {Object}
+ */
 const defaultRules = {
     componentName: { type: String, default: () => 'comp-' + Date.now()},
     description: { type: String },
@@ -10,7 +14,17 @@ const defaultRules = {
     types: { type: Object, default: {} }
 }
 
+/**
+ * Class representing a component with validation and rendering capabilities.
+ * @extends ValidateSchema
+ */
 class Component extends ValidateSchema {
+    /**
+     * Creates an instance of Component.
+     * @constructor
+     * @param {Object} setup - The configuration for the component instance.
+     * @param {Object} validationRules - Validation rules for the component.
+     */
     constructor(setup, validationRules){
         super(typeof validationRules === 'string' ? validationRules : {...defaultRules, ...validationRules});
         const self = this;
@@ -63,14 +77,27 @@ class Component extends ValidateSchema {
         }
     }
 
+    /**
+     * Gets the template string content from the source file.
+     * @type {string}
+     */
     get TEMPLATE_STRING() {
         return FS.readFileSync(this.SOURCE_PATH);
     }
 
+    /**
+     * Retrieves setters for component properties.
+     * @type {Object}
+     */
     get setters() {
         return {}
     }
 
+    /**
+     * Adds a subscription to the component.
+     * @param {any} subscription - The subscription to be added.
+     * @throws {Error.Log} When an error occurs while adding the subscription.
+     */
     addSubscription(subscription) {
         try {
             this.subscriptions.push(subscription);
@@ -79,6 +106,11 @@ class Component extends ValidateSchema {
         }
     }
 
+    /**
+     * Loads dependencies of the component.
+     * @returns {Promise} A promise resolving to the loaded component with dependencies.
+     * @throws {Error.Log} When an error occurs while loading dependencies.
+     */
     async loadDependencies() {
         try {
             await Promise.all(this.dataDependencies.map(dep => dep.load()));
@@ -93,6 +125,11 @@ class Component extends ValidateSchema {
         }
     }
 
+    /**
+     * Merges and updates component properties with provided data.
+     * @param {Object} data - Data to update the component with.
+     * @throws {Error.Log} When an error occurs during data update.
+     */
     updateMerge(data) {
         try {
             Object.keys(data).map(key => {
@@ -110,6 +147,12 @@ class Component extends ValidateSchema {
         }
     }
 
+    /**
+     * Loads the source file content and updates the output model of the component.
+     * @param {string} [path] - The path to the source file.
+     * @returns {string} The loaded output model.
+     * @throws {Error.Log} When an error occurs while loading the source file.
+     */
     loadSourceFile(path) {
         try {
             if (!path && !this.SOURCE_PATH) {
@@ -128,6 +171,12 @@ class Component extends ValidateSchema {
         }
     }
 
+    /**
+     * Converts the given value to a string.
+     * @param {any} [value=''] - The value to convert to a string.
+     * @returns {string} The converted string value.
+     * @throws {Error.Log} When an invalid value format is provided.
+     */
     string(value = '') {
         if (typeof value === 'string' || typeof value === 'number') {
             return String(value || '');
@@ -136,6 +185,12 @@ class Component extends ValidateSchema {
         }
     }
 
+    /**
+     * Converts an array of items to a string based on the child type name.
+     * @param {Array} [itemValue=[]] - Array of items to convert to a string.
+     * @param {string} childTypeName - The child type name for rendering items.
+     * @returns {string} The rendered string representation of the array.
+     */
     array(itemValue = [], childTypeName) {
         const Child = this.types[childTypeName];
         let result = '';
@@ -163,6 +218,12 @@ class Component extends ValidateSchema {
         return result;
     }
 
+    /**
+     * Converts the given value to a JSON string.
+     * @param {any} value - The value to convert to a JSON string.
+     * @returns {string} The JSON string representation of the value.
+     * @throws {Error.Log} When an error occurs during JSON conversion.
+     */
     json(value) {
         try {
             return JSON.stringify(Object(value));
@@ -171,6 +232,11 @@ class Component extends ValidateSchema {
         }
     }
 
+    /**
+     * Converts the given date value to a formatted string.
+     * @param {any} value - The date value to format.
+     * @returns {string} The formatted date string.
+     */
     date(value) {
         try {
             const localString = new Date(value).toLocaleString();
@@ -180,6 +246,11 @@ class Component extends ValidateSchema {
         }
     }
 
+    /**
+     * Converts an array of children components to a concatenated string representation.
+     * @param {Array} children - Array of child components to convert.
+     * @returns {string} The concatenated string representation of children components.
+     */
     children(children) {
         let stringResult = '';
 
@@ -192,6 +263,12 @@ class Component extends ValidateSchema {
         return stringResult;
     }
 
+    /**
+     * Converts the component's output model to a markdown string based on provided parameters.
+     * @param {Object} [params] - Parameters for converting the output model to markdown.
+     * @returns {string} The converted markdown string.
+     * @throws {Error.Log} When an error occurs during markdown conversion.
+     */
     toMarkdown(params) {
         // Find substrings between %{{ and }}% and replace by the param value
         const regex = /%{{(.*?)}}%/g;
@@ -240,6 +317,12 @@ class Component extends ValidateSchema {
         return result;
     }
 
+    /**
+     * Renders the component to a string based on provided parameters.
+     * @param {Object} [params] - Parameters for rendering the component.
+     * @returns {string} The rendered string output of the component.
+     * @throws {Error.Log} When an error occurs during rendering.
+     */
     renderToString(params) {
         try {
             const stringResult = this.toMarkdown(params);
@@ -253,6 +336,11 @@ class Component extends ValidateSchema {
         }
     }
 
+    /**
+     * Prints the rendered component output on the screen based on provided parameters.
+     * @param {Object} [params] - Parameters for printing the component output.
+     * @throws {Error.Log} When an error occurs during printing.
+     */
     printOnScreen(params) {
         try {
             const stringResult = this.renderToString(params);

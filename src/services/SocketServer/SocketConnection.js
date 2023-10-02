@@ -1,12 +1,30 @@
-const ComponentSubscription = require('./ComponentSubscription');
-const DocSubscription = require('./DocSubscription');
-
+/**
+ * Manages socket connections and subscriptions.
+ */
 class SocketConnection {
+    /**
+     * Creates an instance of SocketConnection.
+     * @param {Object} socket - The socket object representing the connection.
+     * @param {Object} serverInstance - The server instance associated with the connection.
+     */
     constructor(socket, serverInstance) {
         try {
+            /**
+             * Returns the server instance associated with the connection.
+             * @returns {Object} - The server instance.
+             */
             this._serverInstance = () => serverInstance;
 
+            /**
+             * The socket object representing the connection.
+             * @type {Object}
+             */
             this.socket = socket;
+
+            /**
+             * Array to store active subscriptions.
+             * @type {Array}
+             */
             this.subscriptions = [];
 
             this.init();
@@ -15,27 +33,50 @@ class SocketConnection {
         }
     }
 
+    /**
+     * Gets the server instance associated with the connection.
+     * @returns {Object} - The server instance.
+     */
     get serverInstance() {
         return this._serverInstance();
     }
 
+    /**
+     * Initializes socket event listeners and connection status.
+     */
     init() {
         this.socket.on('connection:status', this.onConnectionStatus.bind(this));
         this.socket.on('subscribe:doc', this.subscribeDOC.bind(this));
         this.socket.on('subscribe:component', this.subscribeComponent.bind(this));
 
+        /**
+         * Object property to store subscribed components.
+         * @type {Object}
+         */
         this.socket.data.subscribedComponents = {};
+
         this.emitConnectionStatus();
     }
 
+    /**
+     * Handles 'connection:status' event by emitting connection status.
+     */
     onConnectionStatus() {
         this.emitConnectionStatus();
     }
 
+    /**
+     * Emits connection status to the client.
+     */
     emitConnectionStatus() {
         this.socket.emit('connection:status', this.socket.id);
     }
 
+    /**
+     * Subscribes to a document based on the provided setup.
+     * @param {Object} setup - Configuration options for the document subscription.
+     * @returns {Object} - The document subscription instance.
+     */
     async subscribeDOC(setup) {
         const { collectionName, filter } = Object(setup);
 
@@ -60,6 +101,11 @@ class SocketConnection {
         }
     }
 
+    /**
+     * Subscribes to a component based on the provided setup.
+     * @param {Object} setup - Configuration options for the component subscription.
+     * @returns {Object} - The component subscription instance.
+     */
     async subscribeComponent(setup) {
         const { path, dataDependencies, data, subsUID } = Object(setup);
 
@@ -81,6 +127,11 @@ class SocketConnection {
         }
     }
 
+    /**
+     * Appends a component subscription to the subscribed components list.
+     * @param {Object} subscription - The component subscription instance.
+     * @returns {Object} - The component object.
+     */
     appendComponent(subscription) {
         try {
             if (!subscription.socket) {
@@ -98,6 +149,11 @@ class SocketConnection {
         }
     }
 
+    /**
+     * Gets the component object associated with the provided subscription UID.
+     * @param {string} subscriptionUID - The unique identifier for the component subscription.
+     * @returns {Object} - The component object.
+     */
     getComponent(subscriptionUID) {
         try {
             if (!this.socket || !this.socket.data.subscribedComponents) {
@@ -110,6 +166,11 @@ class SocketConnection {
         }
     }
 
+    /**
+     * Gets the subscription object associated with the provided subscription UID.
+     * @param {string} subscriptionUID - The unique identifier for the subscription.
+     * @returns {Object} - The subscription object.
+     */
     getSubscription(subscriptionUID) {
         try {
             if (!this.socket || !this.subscriptions) {
@@ -122,6 +183,12 @@ class SocketConnection {
         }
     }
 
+    /**
+     * Updates the component associated with the provided subscription UID using merge data.
+     * @param {string} subscriptionUID - The unique identifier for the component subscription.
+     * @param {Object} mergeData - The data used for merging and updating the component.
+     * @returns {Object} - The updated component object.
+     */
     updateComponent(subscriptionUID, mergeData) {
         try {
             const component = this.socket.data.subscribedComponents[subscriptionUID];
