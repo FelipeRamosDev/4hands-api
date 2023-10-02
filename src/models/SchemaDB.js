@@ -12,7 +12,8 @@ const path = require('path');
 
 /**
  * Represents a schema for MongoDB database, including methods for initializing queries, events, and classes.
- * @class
+ * @module SchemaDB
+ * @namespace Models
  * @param {Object} setup - The setup object containing schema details and configurations.
  * @throws {Error} If initialization fails.
  */

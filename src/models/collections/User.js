@@ -8,8 +8,9 @@ const sessionCLI = FS.isExist(config.sessionPath) && require('@SESSION_CLI') || 
 
 /**
  * Represents a user in the application.
- * @class User
+ * @module User
  * @extends _Global
+ * @namespace Models
  */
 class User extends _Global {
     /**

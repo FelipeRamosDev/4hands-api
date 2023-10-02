@@ -15,6 +15,8 @@ const Endpoint = require('@src/models/settings/Endpoint');
 
 /**
  * Represents the main server class for the API.
+ * @module ServerAPI
+ * @namespace Services
  */
 class ServerAPI {
     /**

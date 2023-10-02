@@ -5,8 +5,9 @@ const { increaseDocProp } = require('../../helpers/database/dbHelpers');
 
 /**
  * Represents a global map in the application, extending the ValidateSchema class.
- * @class GlobalMap
+ * @module GlobalMap
  * @extends ValidateSchema
+ * @namespace Models
  */
 class GlobalMap extends ValidateSchema {
     /**

@@ -4,6 +4,7 @@ const SchemaRefConfig = require('./SchemaRefConfig');
  * Represents a field in a collection.
  * 
  * @module CollectionField
+ * @namespace Models
  */
 class CollectionField {
     /**

@@ -2,8 +2,9 @@ const ValidateSchema = require('../validation/validateSchema');
 
 /**
  * Represents an API request handler which validates incoming request body against provided schema.
- * @class
+ * @module RequestAPI
  * @extends ValidateSchema
+ * @namespace Models
  * @param {Object} request - The request object.
  * @param {Object} bodySchema - The schema object to validate the request body against.
  * @throws {ValidationError} If the request body fails schema validation.

@@ -4,8 +4,9 @@ const CRUD = require('@CRUD');
 
 /**
  * Represents an authentication bucket associated with a user.
- * @class AuthBucket
+ * @module AuthBucket
  * @extends _Global
+ * @namespace Models
  */
 class AuthBucket extends _Global {
     /**

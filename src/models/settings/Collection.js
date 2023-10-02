@@ -3,8 +3,9 @@ const SchemaDB = require('@models/SchemaDB');
 
 /**
  * Represents a collection in the database.
- * @class Collection
+ * @module Collection
  * @extends SchemaDB
+ * @namespace Models
  */
 class Collection extends SchemaDB {
     /**

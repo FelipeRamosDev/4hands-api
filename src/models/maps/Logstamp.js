@@ -1,6 +1,7 @@
 /**
  * Represents a log entry with a timestamp, activity type, and description.
- * @class Logstamp
+ * @module Logstamp
+ * @namespace Models
  */
 class Logstamp {
     /**

@@ -6,6 +6,8 @@ const toolsCLI = new ToolsCLI();
 
 /**
  * Represents a command line prompt utility.
+ * @module Prompt
+ * @namespace Services
  */
 class Prompt {
     /**
