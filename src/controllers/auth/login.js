@@ -8,6 +8,11 @@ const cookiesConfig = {
     secure: Configs.secureCookies
 };
 
+/**
+ * Represents a controller endpoint for authenticate an user.
+ * @name AuthLogin
+ * @type {Endpoint}
+ */
 module.exports = new Endpoint({
     method: 'POST',
     routePath: '/auth/login',

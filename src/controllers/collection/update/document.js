@@ -5,6 +5,11 @@ const CRUD = require('@CRUD');
 const UpdateDocument = models.routes.collection.UpdateDocument;
 const Response = UpdateDocument.response;
 
+/**
+ * Represents a controller endpoint for updating a document in a collection.
+ * @name CollectionUpdateDocument
+ * @type {Endpoint}
+ */
 module.exports = new Endpoint({
     method: 'POST',
     routePath: '/collection/update/document',
