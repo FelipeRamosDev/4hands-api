@@ -3,6 +3,8 @@ const path = require('path');
 
 /**
  * Utility class for file system operations.
+ * @module FileSystemService
+ * @namespace Services
  */
 class FileSystemService {
     /**

@@ -1,6 +1,7 @@
 /**
  * Represents a success response object used to convey successful API responses.
- * @class
+ * @module Success
+ * @namespace Models
  */
 class Success {
     /**

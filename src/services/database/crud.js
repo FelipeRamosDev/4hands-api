@@ -1,5 +1,4 @@
 const helpersModule = require('../../helpers');
-
 const helpers = helpersModule.database.dbHelpers;
 
 /**
@@ -186,6 +185,11 @@ async function del(setup) {
     }
 }
 
+/**
+ * Module providing CRUD (Create, Read, Update, Delete) operations for interacting with a database.
+ * @module CRUD
+ * @namespace Services
+ */
 module.exports = {
     create,
     query,

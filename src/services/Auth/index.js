@@ -216,4 +216,9 @@ class AuthService {
     }
 }
 
+/**
+ * @namespace Services
+ * @module AuthService
+ * @description Class representing an authentication service for handling user authentication and authorization.
+ */
 module.exports = AuthService;

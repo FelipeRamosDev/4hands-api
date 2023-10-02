@@ -4,6 +4,7 @@ const bodyValidation = require('@middlewares/bodyValidation');
 /**
  * Represents an API endpoint configuration.
  * @class Endpoint
+ * @namespace Models
  */
 class Endpoint {
     /**

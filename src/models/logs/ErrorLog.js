@@ -5,8 +5,9 @@ const config = require('@config');
 
 /**
  * Represents an error log entry in the application.
- * @class ErrorLog
+ * @module ErrorLog
  * @extends LogBase
+ * @namespace Models
  */
 class ErrorLog extends LogBase {
     /**

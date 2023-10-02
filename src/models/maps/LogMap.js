@@ -1,6 +1,7 @@
 /**
  * Represents a base class for logging in the application.
- * @class LogBase
+ * @module LogBase
+ * @namespace Models
  */
 class LogBase {
     /**

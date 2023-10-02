@@ -1,18 +1,54 @@
-const { Server } = require('socket.io');
+/**
+ * Module providing functionality for handling socket connections and managing subscriptions.
+ * @module SocketServer
+ * @namespace Services
+ */
+
 const Config = require('@config');
+const Server = require('socket.io').Server;
 const SocketConnection = require('./SocketConnection');
 
+/**
+ * Represents a socket server that manages socket connections and subscriptions.
+ * @class
+ * @param {Object} setup - The setup object.
+ * @param {string[]} setup.hosts - An array of allowed hosts for CORS configuration.
+ * @param {number} setup.port - The port on which the socket server will listen. Defaults to the value specified in the configuration.
+ */
 class SocketServer {
+    /**
+     * Creates a new instance of the SocketServer class.
+     * @constructor
+     * @param {Object} setup - The setup object containing hosts and port information.
+     */
     constructor(setup) {
         try {
             const { hosts, port } = Object(setup);
 
+            /**
+             * The socket.io server instance.
+             * @type {object}
+             */
             this.io = new Server({ cors: {
                 origin: ['http://localhost', 'https://localhost', ...(hosts || [])]
             }});
 
+            /**
+             * The port on which the socket server is running.
+             * @type {number}
+             */
             this.port = port || Config.socketServerPort;
+
+            /**
+             * An array of active socket connections.
+             * @type {SocketConnection[]}
+             */
             this.connections = [];
+
+            /**
+             * An array of active subscriptions.
+             * @type {Array}
+             */
             this.subscriptions = [];
 
             this.init();
@@ -21,6 +57,10 @@ class SocketServer {
         }
     }
 
+    /**
+     * Initializes the socket server by setting up event listeners for incoming connections and disconnections.
+     * @private
+     */
     init() {
         try {
             this.io.on('connect', (socket) => {
@@ -38,9 +78,14 @@ class SocketServer {
         }
     }
 
+    /**
+     * Retrieves a socket connection based on the provided connection ID.
+     * @param {string} connectionID - The unique identifier of the socket connection.
+     * @returns {SocketConnection|undefined} - The socket connection with the given ID or undefined if not found.
+     */
     getConnection(connectionID) {
         try {
-            return this.connections.find(item => item.socket.id = connectionID);
+            return this.connections.find(item => item.socket.id === connectionID);
         } catch (err) {
             throw new Error.Log(err);
         }
@@ -48,4 +93,3 @@ class SocketServer {
 }
 
 module.exports = SocketServer;
-

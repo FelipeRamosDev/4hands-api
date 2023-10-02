@@ -5,6 +5,8 @@ const auth_buckets = require('@schemas/auth_buckets');
 
 /**
  * Represents a database server with specified configurations and collections.
+ * @module DatabaseServer
+ * @namespace Services
  */
 class DatabaseServer {
     /**

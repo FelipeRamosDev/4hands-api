@@ -2,6 +2,8 @@ const CRUD = require('@CRUD');
 
 /**
  * Represents a data dependency used to manage real-time data updates and rendering in a parent component.
+ * @namespace Models
+ * @module DataDependency
  */
 class DataDependency {
     /**

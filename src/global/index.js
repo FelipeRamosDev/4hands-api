@@ -8,12 +8,28 @@ const toolsCLI = new ToolsCLI();
 const Success = require('@SUCCESS');
 const utils = require('@UTILS');
 
+/**
+ * @global
+ * @name ajax - Does AJAX requests
+ */
 global.ajax = ajax;
-// Resources
+
+/**
+ * @global
+ * @name Resource - Resource instance to call text and other resources.
+ */
 global.Resource = new Resource(configs.defaultLanguage);
+
+/**
+ * @global
+ * @name toolsCLI - CLI tools to use in everywhere.
+ */
 global.toolsCLI = toolsCLI;
 
-// Declarations
+/**
+ * @global
+ * @name Error.Log - To log errors and any other log.
+ */
 global.Error.Log = ErrorLog;
 // Utils
 Boolean.isValid = validation.base.build;
