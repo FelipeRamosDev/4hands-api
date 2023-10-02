@@ -5,6 +5,11 @@ const GetQueryCollection = models.routes.collection.GetQueryCollection;
 const Endpoint = require('@src/models/settings/Endpoint');
 const Response = GetQueryCollection.response;
 
+/**
+ * Represents a controller endpoint for listing documents in a collection.
+ * @name CollectionGetQuery
+ * @type {Endpoint}
+ */
 module.exports = new Endpoint({
     method: 'GET',
     routePath: '/collection/get/query',
