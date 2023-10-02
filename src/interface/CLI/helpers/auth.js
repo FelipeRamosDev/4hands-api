@@ -2,6 +2,14 @@ const FS = require('@services/FS');
 const config = require('@config');
 const sessionCLI = FS.isExist(config.sessionPath) && require('@SESSION_CLI') || {};
 
+/**
+ * Checks if the provided token corresponds to an active authenticated session.
+ * @function
+ * @async
+ * @param {string} token - The token to be authenticated.
+ * @returns {boolean} - True if the token is valid and corresponds to an active session, false otherwise.
+ * @throws {Error} - Throws an error if there is an issue with the authentication process.
+ */
 async function isAuthenticated(token) {
     try {
         const isSessionExist = FS.isExist(config.sessionPath);
@@ -26,6 +34,14 @@ async function isAuthenticated(token) {
     }
 }
 
+/**
+ * Creates or updates a user's session in the command-line interface (CLI) environment.
+ * @function
+ * @async
+ * @param {Object} user - The user object containing session-related information.
+ * @returns {Object} - An object indicating the success or failure of the session creation/update process.
+ * @throws {Error} - Throws an error if there is an issue creating or updating the user's session.
+ */
 async function createUserCLISession(user) {
     try {
         let session = {};
@@ -58,6 +74,12 @@ async function createUserCLISession(user) {
     }
 }
 
+/**
+ * Retrieves the current user ID from the CLI session.
+ * @function
+ * @returns {string|undefined} - The ID of the current user if available, undefined otherwise.
+ * @throws {Error} - Throws an error if there is an issue retrieving the current user ID.
+ */
 function getSessionCurrentUser() {
     try {
         return sessionCLI && sessionCLI.currentUser;

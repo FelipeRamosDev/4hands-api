@@ -2,6 +2,14 @@ const dbHelpers = require('./dbHelpers');
 const relationalHelper = require('./relationalFields');
 const config = require('@config');
 
+/**
+ * Middleware function executed before saving a document.
+ * Increments the counter for the current collection and sets index and cod fields.
+ * @function
+ * @async
+ * @param {function} next - The function to be called to proceed to the next middleware in the stack.
+ * @throws {Error} - Throws an error if there is an issue incrementing the counter or setting fields.
+ */
 async function preSave(next) {
     try {
         const collection = this.collection.collectionName;
@@ -27,6 +35,14 @@ async function preSave(next) {
     }
 }
 
+/**
+ * Middleware function executed before updating a single document.
+ * Updates the modifiedAt timestamp and handles relational updates.
+ * @function
+ * @async
+ * @param {function} next - The function to be called to proceed to the next middleware in the stack.
+ * @throws {Error} - Throws an error if there is an issue updating the document or handling relationships.
+ */
 async function preUpdateOne(next) {
     try {
         const collection = this._collection.collectionName;
@@ -46,6 +62,13 @@ async function preUpdateOne(next) {
     }
 }
 
+/**
+ * Middleware function executed after updating a single document.
+ * Emits events based on the updated document's status and filter.
+ * @function
+ * @async
+ * @throws {Error} - Throws an error if there is an issue emitting events.
+ */
 async function postUpdateOne() {
     try {
         const collection = this.model.modelName;
@@ -63,6 +86,13 @@ async function postUpdateOne() {
     }
 }
 
+/**
+ * Middleware function executed after saving a document.
+ * Handles relational updates and emits a create event for the collection.
+ * @function
+ * @async
+ * @throws {Error} - Throws an error if there is an issue handling relationships or emitting events.
+ */
 async function postSave() {
     try {
         const collection = this.collection.collectionName;
@@ -78,6 +108,14 @@ async function postSave() {
     }
 }
 
+/**
+ * Middleware function executed before deleting a document.
+ * Handles relational updates.
+ * @function
+ * @async
+ * @param {function} next - The function to be called to proceed to the next middleware in the stack.
+ * @throws {Error} - Throws an error if there is an issue handling relationships.
+ */
 async function preDelete(next) {
     try {
         const collection = this._collection.collectionName;
@@ -92,6 +130,13 @@ async function preDelete(next) {
     }
 }
 
+/**
+ * Middleware function executed after deleting a document.
+ * Does not perform any specific action.
+ * @function
+ * @async
+ * @throws {Error} - Throws an error if there is an issue handling the post-delete process.
+ */
 async function postDelete() {
     try {
         return;

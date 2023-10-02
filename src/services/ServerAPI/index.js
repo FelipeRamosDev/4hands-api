@@ -13,7 +13,27 @@ const FS = require('@services/FS');
 const path = require('path');
 const Endpoint = require('@src/models/settings/Endpoint');
 
+/**
+ * Represents the main server class for the API.
+ */
 class ServerAPI {
+    /**
+     * Creates an instance of ServerAPI.
+     * @param {Object} setup - Configuration options for the server.
+     * @param {string} setup.projectName - The name of the project.
+     * @param {Object} setup.databaseConfig - Configuration options for the database.
+     * @param {string} setup.API_SECRET - The API secret key for session encryption.
+     * @param {number} setup.sessionCookiesMaxAge - Maximum age of session cookies (in milliseconds).
+     * @param {string} setup.staticPath - The path to static files.
+     * @param {Function} setup.listenCallback - Callback function to be executed when the server starts listening.
+     * @param {boolean} setup.compileFE - Flag indicating whether to compile frontend code (defaults to false).
+     * @param {string} setup.jsonLimit - Limit of JSON requests (defaults to '10mb').
+     * @param {boolean} setup.sessionResave - Flag indicating whether to save session data back to the session store (defaults to true).
+     * @param {boolean} setup.sessionSaveUninitialized - Flag indicating whether to save uninitialized sessions to the session store (defaults to true).
+     * @param {string} setup.keySSLPath - The path to the SSL key file.
+     * @param {string} setup.certSSLPath - The path to the SSL certificate file.
+     * @param {number} setup.PORT - The port number on which the server will listen (defaults to 80).
+     */
     constructor (setup) {
         const {
             projectName,
@@ -84,6 +104,9 @@ class ServerAPI {
         }
     }
 
+    /**
+     * Initializes the server, setting up routes, middleware, and listeners.
+     */
     init() {
         this.rootPath = path.normalize(__dirname.replace(path.normalize('/node_modules/4hands-api/src/services'), '/'));
         this.app = express();
@@ -123,6 +146,11 @@ class ServerAPI {
         }
     }
 
+    /**
+     * Starts the server to listen on the specified port.
+     * @param {number} PORT - The port number on which the server will listen.
+     * @param {Function} callback - Callback function to be executed when the server starts listening.
+     */
     listen(PORT, callback) {
         if (!this.isListen && PORT) {
             this.app.listen(PORT, () => {
@@ -131,6 +159,13 @@ class ServerAPI {
         }
     }
 
+    /**
+     * Starts the server with SSL encryption to listen on the specified port.
+     * @param {number} PORT - The port number on which the server will listen.
+     * @param {string} keySSLPath - The path to the SSL key file.
+     * @param {string} certSSLPath - The path to the SSL certificate file.
+     * @param {Function} callback - Callback function to be executed when the server starts listening.
+     */
     listenSSL(PORT, keySSLPath, certSSLPath, callback) {
         if (this.PORT || PORT) {
             const SSL_KEY = FS.readFileSync(this.rootPath + keySSLPath);
@@ -155,11 +190,19 @@ class ServerAPI {
         }
     }
 
+    /**
+     * Runs the queued application functions.
+     */
     runAppQueue() {
         this.app_queue.map(item => item());
         this.app_queue = [];
     }
 
+    /**
+     * Creates an endpoint for the server.
+     * @param {Endpoint} endpoint - The endpoint to be created.
+     * @throws {Error.Log} If the endpoint parameter is not an instance of the Endpoint class.
+     */
     createEndpoint(endpoint) {
         if (!endpoint instanceof Endpoint) {
             throw new Error.Log({
