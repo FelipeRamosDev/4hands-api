@@ -162,7 +162,7 @@ class AuthService {
     /**
      * Creates a session for the Command-Line Interface (CLI) user.
      * @async
-     * @returns {undefined}
+     * @returns {void}
      * @throws {Error.Log} If an error occurs during session creation.
      */
     async createSessionCLI() {
@@ -179,7 +179,7 @@ class AuthService {
      * Drops a session for the Command-Line Interface (CLI) user.
      * @async
      * @param {string} token - The JWT token representing the session to be dropped.
-     * @returns {undefined}
+     * @returns {void}
      * @throws {Error.Log} If an error occurs during session dropping.
      */
     async dropSessionCLI(token) {

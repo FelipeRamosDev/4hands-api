@@ -2,22 +2,30 @@ const CollectionField = require('./CollectionField');
 const SchemaDB = require('@models/SchemaDB');
 
 /**
- * Represents a collection on the database.
+ * Represents a collection in the database.
  * @class Collection
  * @extends SchemaDB
  */
 class Collection extends SchemaDB {
+    /**
+     * Represents MongoDB schema types.
+     * @static
+     * @type {mongoose.Schema.Types}
+     */
     static Types = SchemaDB.mongoSchema.Types;
     
     /**
      * Creates a new instance of the Collection class.
-     * @param {Object} setup - The setup object.
+     * @param {Object} setup - The setup object containing collection details and configurations.
      * @param {string} setup.name - The name of the collection.
      * @param {string} setup.symbol - The symbol of the collection.
      * @param {string} setup.displayName - The display name of the collection.
      * @param {string} setup.pluralLabel - The plural label of the collection.
      * @param {string} setup.singularLabel - The singular label of the collection.
+     * @param {string[]} setup.excludeGlobals - Globals to be excluded from the collection.
      * @param {CollectionField[]} setup.fieldsSet - The fields of the collection.
+     * @param {object} setup.Model - The collection's model.
+     * @throws {Error} If collection setup fails.
      */
     constructor(setup) {
         super(setup);
@@ -56,13 +64,13 @@ class Collection extends SchemaDB {
             this.singularLabel = singularLabel;
 
             /**
-             * Globals to be excluded from the collection
+             * Globals to be excluded from the collection.
              * @property {string[]}
              */
             this.excludeGlobals = excludeGlobals;
 
             /**
-             * The collection's model
+             * The collection's model.
              * @property {object}
              */
             this.Model = Model;
@@ -73,12 +81,20 @@ class Collection extends SchemaDB {
              */
             this.fieldsSet = Array.isArray(fieldsSet) && fieldsSet.map(field => new CollectionField(field).toObject()) || [];
         } catch (err) {
+            /**
+             * Thrown if collection setup fails.
+             * @throws {Error.Log}
+             */
             throw new Error.Log(err);
         }
     }
 
-    static Types = SchemaDB.mongoSchema.Types;
-
+    /**
+     * Gets a specific field from the collection's field set.
+     * @param {string} fieldName - The name of the field to retrieve.
+     * @returns {CollectionField} - The CollectionField object representing the specified field.
+     * @throws {Error.Log} - Throws an error if field retrieval fails.
+     */
     getFieldSet(fieldName) {
         try {
             return this.fieldsSet.find(item => item.fieldName === fieldName);
@@ -88,8 +104,8 @@ class Collection extends SchemaDB {
     }
 
     /**
-     * To create a new field on the collection, it only can be called if the Collection instance is not initialized yet.
-     * @param {CollectionField} config 
+     * Adds a new field to the collection.
+     * @param {CollectionField} config - The configuration object for the new field.
      */
     addNewField(config) {
         this.fieldsSet.push(new CollectionField(config).toObject());
