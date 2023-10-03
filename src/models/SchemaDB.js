@@ -10,6 +10,13 @@ const customEvents = require('@schemas/events');
 const FS = require('@src/services/FS');
 const path = require('path');
 
+/**
+ * Represents a schema for MongoDB database, including methods for initializing queries, events, and classes.
+ * @module SchemaDB
+ * @namespace Models
+ * @param {Object} setup - The setup object containing schema details and configurations.
+ * @throws {Error} If initialization fails.
+ */
 class SchemaDB {
     static RefConfig = RefConfig;
 
@@ -74,6 +81,12 @@ class SchemaDB {
         }
     }
 
+    /**
+     * Initializes the schema and returns the initialized instance.
+     * @param {Object} server - The server object to which the schema is associated.
+     * @returns {SchemaDB} - The initialized SchemaDB instance.
+     * @throws {Error} If initialization fails.
+     */
     init(server) {
         try {
             if (this.name !== configs.database.counterCollection) dbHelpers.createCounter(this);
@@ -96,6 +109,11 @@ class SchemaDB {
         } 
     }
 
+    /**
+     * Initializes queries for the schema.
+     * @private
+     * @throws {Error} If query initialization fails.
+     */
     initQueries() {
         try {
             // Adding global and custom queries
@@ -105,6 +123,11 @@ class SchemaDB {
         }
     }
 
+    /**
+     * Initializes events for the schema.
+     * @private
+     * @throws {Error} If event initialization fails.
+     */
     initEvents() {
         try {
             // Adding global event
@@ -127,6 +150,11 @@ class SchemaDB {
         }
     }
 
+    /**
+     * Initializes custom classes for the schema.
+     * @private
+     * @throws {Error} If class initialization fails.
+     */
     initClasses() {
         try {
             const Custom = schemasClass[this.name];
@@ -148,6 +176,11 @@ class SchemaDB {
         }
     }
 
+    /**
+     * Represents MongoDB schema object.
+     * @static
+     * @type {mongoose.Schema}
+     */
     static mongoSchema = mongoose.Schema;
 }
 

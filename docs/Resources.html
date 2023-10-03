@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Class: Resources</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Class: Resources</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2><span class="attribs"><span class="type-signature"></span></span>Resources<span class="signature">(language<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h2>
+        
+            <div class="class-description"><p>Class representing a resource manager for handling language-specific resources.</p></div>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+    
+    <h2>Constructor</h2>
+    
+
+    
+    <h4 class="name" id="Resources"><span class="type-signature"></span>new Resources<span class="signature">(language<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Creates an instance of Resources.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>language</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    'en_US'
+                
+                </td>
+            
+
+            <td class="description last"><p>The language code for the desired language. Defaults to 'en_US'.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="resources_Resources.js.html">resources/Resources.js</a>, <a href="resources_Resources.js.html#line8">line 8</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="error"><span class="type-signature"></span>error<span class="signature">(path, &hellip;params)</span><span class="type-signature"> &rarr; {string|undefined}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Retrieves an error resource at the specified path.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>path</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>The path to the error resource.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>params</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">any</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                    &lt;repeatable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Additional parameters for the error resource function.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="resources_Resources.js.html">resources/Resources.js</a>, <a href="resources_Resources.js.html#line64">line 64</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>The error resource or undefined if the path is not found.</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+|
+
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getPath"><span class="type-signature"></span>getPath<span class="signature">(pathString)</span><span class="type-signature"> &rarr; {function|undefined}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Retrieves a resource at the specified path.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>pathString</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The path to the desired resource.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="resources_Resources.js.html">resources/Resources.js</a>, <a href="resources_Resources.js.html#line79">line 79</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        <p>If the specified path is not found in the resource data.</p>
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type"><a href="ErrorLog.html">ErrorLog</a></span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>The resource function or undefined if the path is not found.</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">function</span>
+|
+
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="loadResources"><span class="type-signature"></span>loadResources<span class="signature">(resources)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Loads additional resources into the resource manager.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>resources</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The additional resources to be loaded.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="resources_Resources.js.html">resources/Resources.js</a>, <a href="resources_Resources.js.html#line96">line 96</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        <p>If an error occurs while loading the resources.</p>
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="templates"><span class="type-signature"></span>templates<span class="signature">(path, &hellip;params)</span><span class="type-signature"> &rarr; {string|function}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Retrieves a template resource at the specified path.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>path</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>The path to the template resource or a template object.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>params</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">any</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                    &lt;repeatable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Additional parameters for the template resource function.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="resources_Resources.js.html">resources/Resources.js</a>, <a href="resources_Resources.js.html#line42">line 42</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>The template resource or a rendering function if the path is found.</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+|
+
+<span class="param-type">function</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="text"><span class="type-signature"></span>text<span class="signature">(path, &hellip;params)</span><span class="type-signature"> &rarr; {string|undefined}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Retrieves a text resource at the specified path.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>path</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>The path to the text resource.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>params</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">any</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                    &lt;repeatable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Additional parameters for the text resource function.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="resources_Resources.js.html">resources/Resources.js</a>, <a href="resources_Resources.js.html#line31">line 31</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>The text resource or undefined if the path is not found.</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+|
+
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-AuthService.html">AuthService</a></li><li><a href="module-DataDependency.html">DataDependency</a></li><li><a href="module-EventsHandlers.html">EventsHandlers</a></li><li><a href="module-FormCtrlCLI.html">FormCtrlCLI</a></li><li><a href="module-NavigatorOption.html">NavigatorOption</a></li><li><a href="module-PoolForm.html">PoolForm</a></li><li><a href="module-QuestionModel.html">QuestionModel</a></li><li><a href="module-ToolsCLI.html">ToolsCLI</a></li><li><a href="module-ViewCLI.html">ViewCLI</a></li></ul><h3>Namespaces</h3><ul><li><a href="Models.html">Models</a></li><li><a href="Services.html">Services</a></li></ul><h3>Classes</h3><ul><li><a href="AuthBucket.html">AuthBucket</a></li><li><a href="AuthService.html">AuthService</a></li><li><a href="CLI.html">CLI</a></li><li><a href="Collection.html">Collection</a></li><li><a href="CollectionField.html">CollectionField</a></li><li><a href="Component.html">Component</a></li><li><a href="ComponentSubscription.html">ComponentSubscription</a></li><li><a href="DatabaseServer.html">DatabaseServer</a></li><li><a href="DocSubscription.html">DocSubscription</a></li><li><a href="Endpoint.html">Endpoint</a></li><li><a href="ErrorLog.html">ErrorLog</a></li><li><a href="EventStd.html">EventStd</a></li><li><a href="EventsHandlers.html">EventsHandlers</a></li><li><a href="FormCtrlCLI.html">FormCtrlCLI</a></li><li><a href="GlobalMap.html">GlobalMap</a></li><li><a href="LogBase.html">LogBase</a></li><li><a href="Logstamp.html">Logstamp</a></li><li><a href="NavigatorOption.html">NavigatorOption</a></li><li><a href="PoolForm.html">PoolForm</a></li><li><a href="Prompt.html">Prompt</a></li><li><a href="QuestionModel.html">QuestionModel</a></li><li><a href="RequestAPI.html">RequestAPI</a></li><li><a href="Resources.html">Resources</a></li><li><a href="SchemaRefConfig.html">SchemaRefConfig</a></li><li><a href="ScreenHelperCLI.html">ScreenHelperCLI</a></li><li><a href="ServerAPI.html">ServerAPI</a></li><li><a href="SocketConnection.html">SocketConnection</a></li><li><a href="SocketServer.html">SocketServer</a></li><li><a href="SocketSubscription.html">SocketSubscription</a></li><li><a href="StringTemplateBuilder.html">StringTemplateBuilder</a></li><li><a href="Success.html">Success</a></li><li><a href="ToolsCLI.html">ToolsCLI</a></li><li><a href="User.html">User</a></li><li><a href="ValidateSchema.html">ValidateSchema</a></li><li><a href="ValidationBase.html">ValidationBase</a></li><li><a href="ViewCLI.html">ViewCLI</a></li><li><a href="ViewNavigator.html">ViewNavigator</a></li><li><a href="XMLManager.html">XMLManager</a></li><li><a href="module-DataDependency-DataDependency.html">DataDependency</a></li></ul><h3>Global</h3><ul><li><a href="global.html##getPath">#getPath</a></li><li><a href="global.html#ApiHealthCheck">ApiHealthCheck</a></li><li><a href="global.html#AuthLogin">AuthLogin</a></li><li><a href="global.html#AuthRegister">AuthRegister</a></li><li><a href="global.html#CollectionCreate">CollectionCreate</a></li><li><a href="global.html#CollectionDelete">CollectionDelete</a></li><li><a href="global.html#CollectionGetDoc">CollectionGetDoc</a></li><li><a href="global.html#CollectionGetQuery">CollectionGetQuery</a></li><li><a href="global.html#CollectionUpdateDocument">CollectionUpdateDocument</a></li><li><a href="global.html#Log-Tologerrorsandanyotherlog.">Log - To log errors and any other log.</a></li><li><a href="global.html#Resource-Resourceinstancetocalltextandotherresources.">Resource - Resource instance to call text and other resources.</a></li><li><a href="global.html#ajax-DoesAJAXrequests">ajax - Does AJAX requests</a></li><li><a href="global.html#build">build</a></li><li><a href="global.html#convertMillisTo">convertMillisTo</a></li><li><a href="global.html#convertToMillis">convertToMillis</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#createCounter">createCounter</a></li><li><a href="global.html#createUserCLISession">createUserCLISession</a></li><li><a href="global.html#defaultRules">defaultRules</a></li><li><a href="global.html#del">del</a></li><li><a href="global.html#end">end</a></li><li><a href="global.html#findRelFields">findRelFields</a></li><li><a href="global.html#getCollectionModel">getCollectionModel</a></li><li><a href="global.html#getDoc">getDoc</a></li><li><a href="global.html#getObjectPath">getObjectPath</a></li><li><a href="global.html#getSessionCurrentUser">getSessionCurrentUser</a></li><li><a href="global.html#getUpdateProps">getUpdateProps</a></li><li><a href="global.html#increaseCounter">increaseCounter</a></li><li><a href="global.html#increaseDocProp">increaseDocProp</a></li><li><a href="global.html#increaseLog">increaseLog</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#isAuthenticated">isAuthenticated</a></li><li><a href="global.html#isCollectionExist">isCollectionExist</a></li><li><a href="global.html#isDocExist">isDocExist</a></li><li><a href="global.html#isObjectID">isObjectID</a></li><li><a href="global.html#navDefaultQuestions">navDefaultQuestions</a></li><li><a href="global.html#oid">oid</a></li><li><a href="global.html#onCreate">onCreate</a></li><li><a href="global.html#onDelete">onDelete</a></li><li><a href="global.html#onUpdate">onUpdate</a></li><li><a href="global.html#overrideListener">overrideListener</a></li><li><a href="global.html#paginate">paginate</a></li><li><a href="global.html#pickQueryType">pickQueryType</a></li><li><a href="global.html#populateAll">populateAll</a></li><li><a href="global.html#postDelete">postDelete</a></li><li><a href="global.html#postSave">postSave</a></li><li><a href="global.html#postUpdateOne">postUpdateOne</a></li><li><a href="global.html#preDelete">preDelete</a></li><li><a href="global.html#preSave">preSave</a></li><li><a href="global.html#preUpdateOne">preUpdateOne</a></li><li><a href="global.html#query">query</a></li><li><a href="global.html#readable">readable</a></li><li><a href="global.html#repeat">repeat</a></li><li><a href="global.html#setListener">setListener</a></li><li><a href="global.html#toolsCLI-CLItoolstouseineverywhere.">toolsCLI - CLI tools to use in everywhere.</a></li><li><a href="global.html#treatFilter">treatFilter</a></li><li><a href="global.html#update">update</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Mon Oct 02 2023 19:49:20 GMT-0300 (Brasilia Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

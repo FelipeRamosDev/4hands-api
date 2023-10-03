@@ -4,17 +4,37 @@ const ToolsCLI = require('@CLI/ToolsCLI');
 const StringTemplate = require('@interface/StringTemplateBuilder');
 const toolsCLI = new ToolsCLI();
 
+/**
+ * Represents a command line prompt utility.
+ * @module Prompt
+ * @namespace Services
+ */
 class Prompt {
+    /**
+     * Creates an instance of Prompt.
+     * @param {Object} setup - Configuration options for the prompt.
+     * @param {string} setup.rootPath - The root path for the prompt (defaults to the current directory).
+     */
     constructor(setup) {
-        const {rootPath} = Object(setup);
-
+        const { rootPath } = Object(setup);
+        /**
+         * The root path for the prompt.
+         * @type {string}
+         */
         this.rootPath = rootPath || __dirname;
     }
 
+    /**
+     * Executes a command in the shell synchronously.
+     * @param {string} command - The command to be executed.
+     * @param {Object} options - Additional options for the execution.
+     * @param {boolean} dontPrint - If true, the command output will not be printed (defaults to false).
+     * @returns {Object|Error.Log} An object containing the execution result or an Error.Log object if an error occurs.
+     */
     cmd(command, options, dontPrint) {
         try {
             if (command) {
-                const cmd = execSync(command, {cwd: this.rootPath, ...options});
+                const cmd = execSync(command, { cwd: this.rootPath, ...options });
 
                 if (cmd) {
                     const output = cmd.toString();
@@ -28,19 +48,24 @@ class Prompt {
 
                 return new Error.Log(cmd);
             } else {
-                return '>> No command provided!'
+                return '>> No command provided!';
             }
         } catch(err) {
             return new Error.Log(err);
         }
     }
 
+    /**
+     * Asynchronously executes a command in the shell and returns a Promise.
+     * @param {string} cmd - The command to be executed.
+     * @returns {Promise} A Promise that resolves with the execution result.
+     */
     async exec(cmd) {
         console.log('>> Starting prompt...');
 
         return new Promise((resolve, reject) => {
             try {
-                const child = exec(cmd, {cwd: this.rootPath}, (err, stdout, stderr) => {
+                const child = exec(cmd, { cwd: this.rootPath }, (err, stdout, stderr) => {
                     if (err) {
                         console.error(stderr);
                         return reject(new Error.Log(err));
@@ -60,6 +85,11 @@ class Prompt {
         });
     }
 
+    /**
+     * Asynchronously asks a question in the terminal and returns the user's input as a Promise.
+     * @param {string} questionText - The text of the question to be asked.
+     * @returns {Promise<string>} A Promise that resolves with the user's input.
+     */
     async question(questionText) {
         return new Promise((resolve, reject) => {
             try {
@@ -86,6 +116,12 @@ class Prompt {
         });
     }
 
+    /**
+     * Converts parameters into a string format suitable for command-line arguments.
+     * @param {Array|Object|string} params - The parameters to be converted.
+     * @returns {string} A string representation of the parameters for command-line use.
+     * @throws {Error.Log} If an error occurs during parameter conversion.
+     */
     strigifyParams(params) {
         let stringParams = '';
 

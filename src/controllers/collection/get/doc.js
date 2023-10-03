@@ -5,6 +5,11 @@ const Response = GetDoc.response;
 const CRUD = require('@services/database/crud');
 const Endpoint = require('@src/models/settings/Endpoint');
 
+/**
+ * Represents a controller endpoint for getting a document in a collection.
+ * @name CollectionGetDoc
+ * @type {Endpoint}
+ */
 module.exports = new Endpoint({
     method: 'GET',
     routePath: '/collection/get/doc',

@@ -5,7 +5,16 @@ const FS = require('@services/FS');
 const config = require('@config');
 const sessionCLI = FS.isExist(config.sessionPath) && require('@SESSION_CLI') || {};
 
+/**
+ * Class representing an authentication service for handling user authentication and authorization.
+ */
 class AuthService {
+    /**
+     * Creates an instance of AuthService.
+     * @constructor
+     * @param {Object} setup - The setup object containing optional parameters.
+     * @param {Object} setup.parent - The parent object to which this AuthService instance belongs.
+     */
     constructor(setup) {
         const { parent } = Object(setup);
 
@@ -16,14 +25,28 @@ class AuthService {
         return this._parentBucket && this._parentBucket();
     }
 
+    /**
+     * Gets the user's unique identifier.
+     * @type {string|undefined}
+     */
     get userUID() {
         return this.getSafe('parentBucket.userUID');
     }
 
+    /**
+     * Gets the secret key for generating JWT tokens.
+     * @type {string}
+     */
     get secretKey() {
         return process.env.API_SECRET;
     }
 
+     /**
+     * Validates user credentials and signs in the user.
+     * @async
+     * @param {string} password - The user's password to be validated.
+     * @returns {Success|Error.Log} A Success object if authentication is successful, or an Error.Log object if authentication fails.
+     */
     async signIn(password) {
         try {
             const isValid = await this.validateCredentials(password);
@@ -38,6 +61,12 @@ class AuthService {
         }
     }
 
+    /**
+     * Generates a salt for password hashing.
+     * @async
+     * @param {number} [length=8] - The length of the generated salt.
+     * @returns {string} The generated salt.
+     */
     async genSalt(length) {
         try {
             const salt = await bcrypt.genSalt(length || 8);
@@ -47,6 +76,13 @@ class AuthService {
         }
     }
 
+    /**
+     * Creates a password hash using the provided password and salt length.
+     * @async
+     * @param {string} password - The password to be hashed.
+     * @param {number} [saltLength=8] - The length of the salt for password hashing.
+     * @returns {string} The hashed password.
+     */
     async createHash(password, saltLength) {
         try {
             const salt = await this.genSalt(saltLength);
@@ -57,6 +93,10 @@ class AuthService {
         }
     }
 
+    /**
+     * Creates a JWT token for the user.
+     * @returns {string} The generated JWT token.
+     */
     createUserToken() {
         try {
             const userName = this.getSafe('parentBucket.userName');
@@ -71,6 +111,11 @@ class AuthService {
         }
     }
 
+    /**
+     * Generates a JWT token based on the provided data.
+     * @param {Object} data - The data to be encoded into the JWT token.
+     * @returns {string} The generated JWT token.
+     */
     genToken(data) {
         try {
             const token = JWT.sign(data, this.secretKey);
@@ -80,6 +125,12 @@ class AuthService {
         }
     }
 
+    /**
+     * Validates a JWT token.
+     * @param {string} token - The JWT token to be validated.
+     * @returns {Object} The decoded data from the validated JWT token.
+     * @throws {Error.Log} If the token validation fails.
+     */
     validateToken(token) {
         try {
             const isValid = JWT.verify(token, this.secretKey);
@@ -93,6 +144,12 @@ class AuthService {
         }
     }
 
+    /**
+     * Validates user credentials against the stored password hash.
+     * @async
+     * @param {string} password - The user's input password to be validated.
+     * @returns {boolean} True if the password matches the stored hash, false otherwise.
+     */
     async validateCredentials(password) {
         try {
             const isMatch = await bcrypt.compare(password, this.parentBucket.password.toString());
@@ -102,6 +159,12 @@ class AuthService {
         }
     }
 
+    /**
+     * Creates a session for the Command-Line Interface (CLI) user.
+     * @async
+     * @returns {void}
+     * @throws {Error.Log} If an error occurs during session creation.
+     */
     async createSessionCLI() {
         try {
             const token = this.createUserToken();
@@ -112,6 +175,13 @@ class AuthService {
         }
     }
 
+    /**
+     * Drops a session for the Command-Line Interface (CLI) user.
+     * @async
+     * @param {string} token - The JWT token representing the session to be dropped.
+     * @returns {void}
+     * @throws {Error.Log} If an error occurs during session dropping.
+     */
     async dropSessionCLI(token) {
         try {
             const userData = this.validateToken(token);
@@ -120,6 +190,13 @@ class AuthService {
         }
     }
 
+    /**
+     * Signs out the user and deletes the corresponding session.
+     * @async
+     * @param {string} token - The JWT token representing the user's session.
+     * @returns {boolean} True if the session is successfully deleted, false otherwise.
+     * @throws {Error.Log} If an error occurs during sign-out.
+     */
     async signOut(token) {
         try {
             const userData = this.validateToken(token);
@@ -139,4 +216,9 @@ class AuthService {
     }
 }
 
+/**
+ * @namespace Services
+ * @module AuthService
+ * @description Class representing an authentication service for handling user authentication and authorization.
+ */
 module.exports = AuthService;

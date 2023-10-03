@@ -1,5 +1,13 @@
 const dbHelpers = require('./dbHelpers');
 
+/**
+ * A function to make query results readable by converting MongoDB documents to plain JavaScript objects.
+ * @function
+ * @async
+ * @param {Object} options - Additional options for query results (not used in the function).
+ * @returns {Array} - An array of plain JavaScript objects representing the query results.
+ * @throws {Error} - Throws an error if there is an issue converting the documents.
+ */
 async function readable(options) {
     const {
         // Futures options can be placed here
@@ -14,6 +22,11 @@ async function readable(options) {
 
 };
 
+/**
+ * Extracts the update properties from the current update operation object.
+ * @function
+ * @returns {Object} - An object containing the update properties to be applied to the document.
+ */
 function getUpdateProps() {
     const updateProps = {...this._update.$set};
 
@@ -21,6 +34,13 @@ function getUpdateProps() {
     return updateProps;
 }
 
+/**
+ * Paginates query results based on the provided options.
+ * @function
+ * @param {Object} options - Pagination options including 'views', 'page', and 'seeMore'.
+ * @returns {Object} - The updated query object with pagination applied.
+ * @throws {Error} - Throws an error if there is an issue with the pagination query.
+ */
 function paginate(options) {
     let {
         views,
@@ -44,6 +64,13 @@ function paginate(options) {
     }
 }
 
+/**
+ * Populates all specified relational fields in the query results.
+ * @function
+ * @param {Object} options - Population options including 'select', 'exclude', and 'levels'.
+ * @returns {Object} - The updated query object with relational fields populated.
+ * @throws {Error} - Throws an error if there is an issue populating relational fields.
+ */
 function populateAll(options) {
     try {
         let {
@@ -65,6 +92,14 @@ function populateAll(options) {
     }
 }
 
+/**
+ * Initializes query results by converting MongoDB documents to objects.
+ * @function
+ * @async
+ * @param {boolean} populate - Flag indicating whether to populate related fields in the documents.
+ * @returns {Array|Object} - An array of initialized objects or a single initialized object representing the query results.
+ * @throws {Error} - Throws an error if there is an issue initializing the documents.
+ */
 async function initialize(populate){
     let docs;
 

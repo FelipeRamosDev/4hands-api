@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: services/database/crud.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: services/database/crud.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const helpersModule = require('../../helpers');
+const helpers = helpersModule.database.dbHelpers;
+
+/**
+ * Creates a new document in the specified collection.
+ * @async
+ * @param {string} collectionName - The name of the collection to create the document in.
+ * @param {Object} data - The data to be added to the document.
+ * @param {Object} [options] - Additional options for document creation.
+ * @param {boolean} [options.isDraft] - Indicates if the document is a draft.
+ * @returns {Promise&lt;Object>} The created document or a draft object, if specified.
+ * @throws {Error.Log} If an error occurs during document creation.
+ */
+async function create(collectionName, data, options) {
+    const { isDraft } = options || {};
+    try {
+        const Collection = helpers.getCollectionModel(collectionName);
+        const newDoc = new Collection(data);
+        
+        newDoc.raw = data;
+        if (isDraft) {
+            return newDoc;
+        }
+    
+        const savedDoc = await newDoc.save(options);
+        return savedDoc;
+    } catch(err) {
+        throw new Error.Log(err).append('database.creating_document', collectionName);
+    }
+}
+
+/**
+ * Performs a query on the specified collection based on the provided filter and sort options.
+ * @param {Object} setup - The query setup object.
+ * @param {string} setup.collectionName - The name of the collection to query.
+ * @param {Object} [setup.filter] - The filter criteria for the query.
+ * @param {Object} [setup.sort] - The sort criteria for the query.
+ * @returns {Query} The query result.
+ * @throws {Error.Log} If the specified collection schema is not found or an error occurs during querying.
+ */
+function query(setup) {
+    try {
+        const schemas = API.database.collections;
+        const {collectionName, filter, sort} = setup || {};
+        const filterObj = helpers.treatFilter(filter || {});
+        const Schema = schemas.find(item => item.name === collectionName);
+
+        if (Schema) {
+            const Collection = Schema.DB;
+
+            if (!sort) {
+                return Collection.find(filterObj);
+            } else {
+                return Collection.find(filterObj).sort(sort);
+            }
+        } else {
+            throw new Error.Log('database.schema_not_found', collectionName);
+        }
+    } catch(err) {
+        throw new Error.Log(err).append('database.querying_collection', setup.collectionName);
+    }
+}
+
+/**
+ * Retrieves a single document from the specified collection based on the provided filter.
+ * @param {Object} setup - The setup object for retrieving the document.
+ * @param {string} setup.collectionName - The name of the collection to retrieve the document from.
+ * @param {Object} [setup.filter] - The filter criteria for retrieving the document.
+ * @returns {Object|null} The retrieved document or null if no document is found.
+ * @throws {Error.Log} If the specified collection schema is not found or an error occurs during document retrieval.
+ */
+function getDoc(setup) {
+    const {collectionName, filter} = setup || {};
+
+    try {
+        const schemas = API.database.collections;
+        const filterObj = helpers.treatFilter(filter);
+        const Schema = schemas.find(item => item.name === collectionName);
+        const Collection = Schema &amp;&amp; Schema.DB;
+
+        if (Collection) {
+            const Doc = Collection.findOne(filterObj);
+            return Doc;
+        } else {
+            throw new Error.Log('database.getting_schema', collectionName);
+        }
+    } catch(err) {
+        throw new Error.Log(err).append('database.getting_document', setup.collection, JSON.stringify(helpers.treatFilter(filter) || {}));
+    }
+}
+
+/**
+ * Updates documents in the specified collection based on the provided filter and update data.
+ * @async
+ * @param {Object} setup - The update setup object.
+ * @param {string} setup.type - The type of update ('one' or 'many').
+ * @param {string} setup.collectionName - The name of the collection to update documents in.
+ * @param {Object} setup.filter - The filter criteria for updating documents.
+ * @param {Object} setup.data - The update data for the documents.
+ * @param {Object} [setup.options] - Additional options for the update operation.
+ * @param {boolean} [setup.options.returnDocs] - Indicates whether to return the updated documents.
+ * @param {Object} [setup.options.mongooseOpt] - Mongoose options for the update operation.
+ * @returns {Promise&lt;Object|Array&lt;Object>>} The updated document(s) or success status, based on the update type and options.
+ * @throws {Error.Log} If an error occurs during document update.
+ */
+async function update(setup) {
+    const {type, collectionName, filter, data, options} = setup || {};
+    const {
+        returnDocs, // boolean
+        mongooseOpt // Object, same as mongoose options, check the mongoose documentation
+    } = options || {};
+
+    try {
+        const updateType = helpers.pickQueryType(filter, type);
+        const query = helpers.treatFilter(filter);
+        const Collection = helpers.getCollectionModel(collectionName);
+
+        switch (updateType) {
+            case 'one': {
+                try {
+                    const updated = await Collection.findOneAndUpdate(query, data, mongooseOpt);
+
+                    if (!updated) throw new Error.Log('database.updating_document', query)
+                    if (returnDocs) return updated;
+                    return { success: true };
+                } catch(err) {
+                    throw new Error.Log(err);
+                }
+            }
+            case 'many': {
+                try {
+                    const docs = await Collection.find(query);
+                    const updated = await Collection.updateMany(query, data, mongooseOpt);
+    
+                    if (returnDocs) return docs;
+                    return updated;
+                } catch(err) {
+                    throw new Error.Log(err).append('database.updating_document', query);
+                }
+            }
+        }
+    } catch(err) {
+        throw new Error.Log(err).append('database.updating_document', helpers.treatFilter(filter));
+    }
+}
+
+/**
+ * Deletes documents from the specified collection based on the provided filter and delete type.
+ * @async
+ * @param {Object} setup - The delete setup object.
+ * @param {string} setup.deleteType - The delete type ('one' or 'many').
+ * @param {string} setup.collectionName - The name of the collection to delete documents from.
+ * @param {string|Object} setup.filter - The filter criteria for deleting documents.
+ * @param {Object} [setup.options] - Additional options for the delete operation.
+ * @returns {Promise&lt;Object>} The delete result.
+ * @throws {Error.Log} If an error occurs during document deletion.
+ */
+async function del(setup) {
+    const {
+        deleteType, // 'one' || 'many'
+        collectionName, // 'CollectionName'
+        filter, // '_id' || {mongoose-filter}
+        options // mongoose options
+    } = setup || {};
+
+    try {
+        const Collection = helpers.getCollectionModel(collectionName);
+        const query = helpers.treatFilter(filter);
+        let deleted;
+
+        switch(deleteType || 'one'){
+            case 'many': {
+                deleted = await Collection.deleteMany(query, options);
+                break;
+            }
+            case 'one':
+            default: {
+                deleted = await Collection.deleteOne(query, options);
+            }
+        }
+
+        return deleted;
+    } catch(err) {
+        throw new Error.Log(err).append('database.deleting_document', collectionName, JSON.stringify(filter));
+    }
+}
+
+/**
+ * Module providing CRUD (Create, Read, Update, Delete) operations for interacting with a database.
+ * @module CRUD
+ * @namespace Services
+ */
+module.exports = {
+    create,
+    query,
+    getDoc,
+    update,
+    del
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-AuthService.html">AuthService</a></li><li><a href="module-DataDependency.html">DataDependency</a></li><li><a href="module-EventsHandlers.html">EventsHandlers</a></li><li><a href="module-FormCtrlCLI.html">FormCtrlCLI</a></li><li><a href="module-NavigatorOption.html">NavigatorOption</a></li><li><a href="module-PoolForm.html">PoolForm</a></li><li><a href="module-QuestionModel.html">QuestionModel</a></li><li><a href="module-ToolsCLI.html">ToolsCLI</a></li><li><a href="module-ViewCLI.html">ViewCLI</a></li></ul><h3>Namespaces</h3><ul><li><a href="Models.html">Models</a></li><li><a href="Services.html">Services</a></li></ul><h3>Classes</h3><ul><li><a href="AuthBucket.html">AuthBucket</a></li><li><a href="AuthService.html">AuthService</a></li><li><a href="CLI.html">CLI</a></li><li><a href="Collection.html">Collection</a></li><li><a href="CollectionField.html">CollectionField</a></li><li><a href="Component.html">Component</a></li><li><a href="ComponentSubscription.html">ComponentSubscription</a></li><li><a href="DatabaseServer.html">DatabaseServer</a></li><li><a href="DocSubscription.html">DocSubscription</a></li><li><a href="Endpoint.html">Endpoint</a></li><li><a href="ErrorLog.html">ErrorLog</a></li><li><a href="EventStd.html">EventStd</a></li><li><a href="EventsHandlers.html">EventsHandlers</a></li><li><a href="FormCtrlCLI.html">FormCtrlCLI</a></li><li><a href="GlobalMap.html">GlobalMap</a></li><li><a href="LogBase.html">LogBase</a></li><li><a href="Logstamp.html">Logstamp</a></li><li><a href="NavigatorOption.html">NavigatorOption</a></li><li><a href="PoolForm.html">PoolForm</a></li><li><a href="Prompt.html">Prompt</a></li><li><a href="QuestionModel.html">QuestionModel</a></li><li><a href="RequestAPI.html">RequestAPI</a></li><li><a href="Resources.html">Resources</a></li><li><a href="SchemaRefConfig.html">SchemaRefConfig</a></li><li><a href="ScreenHelperCLI.html">ScreenHelperCLI</a></li><li><a href="ServerAPI.html">ServerAPI</a></li><li><a href="SocketConnection.html">SocketConnection</a></li><li><a href="SocketServer.html">SocketServer</a></li><li><a href="SocketSubscription.html">SocketSubscription</a></li><li><a href="StringTemplateBuilder.html">StringTemplateBuilder</a></li><li><a href="Success.html">Success</a></li><li><a href="ToolsCLI.html">ToolsCLI</a></li><li><a href="User.html">User</a></li><li><a href="ValidateSchema.html">ValidateSchema</a></li><li><a href="ValidationBase.html">ValidationBase</a></li><li><a href="ViewCLI.html">ViewCLI</a></li><li><a href="ViewNavigator.html">ViewNavigator</a></li><li><a href="XMLManager.html">XMLManager</a></li><li><a href="module-DataDependency-DataDependency.html">DataDependency</a></li></ul><h3>Global</h3><ul><li><a href="global.html##getPath">#getPath</a></li><li><a href="global.html#ApiHealthCheck">ApiHealthCheck</a></li><li><a href="global.html#AuthLogin">AuthLogin</a></li><li><a href="global.html#AuthRegister">AuthRegister</a></li><li><a href="global.html#CollectionCreate">CollectionCreate</a></li><li><a href="global.html#CollectionDelete">CollectionDelete</a></li><li><a href="global.html#CollectionGetDoc">CollectionGetDoc</a></li><li><a href="global.html#CollectionGetQuery">CollectionGetQuery</a></li><li><a href="global.html#CollectionUpdateDocument">CollectionUpdateDocument</a></li><li><a href="global.html#Log-Tologerrorsandanyotherlog.">Log - To log errors and any other log.</a></li><li><a href="global.html#Resource-Resourceinstancetocalltextandotherresources.">Resource - Resource instance to call text and other resources.</a></li><li><a href="global.html#ajax-DoesAJAXrequests">ajax - Does AJAX requests</a></li><li><a href="global.html#build">build</a></li><li><a href="global.html#convertMillisTo">convertMillisTo</a></li><li><a href="global.html#convertToMillis">convertToMillis</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#createCounter">createCounter</a></li><li><a href="global.html#createUserCLISession">createUserCLISession</a></li><li><a href="global.html#defaultRules">defaultRules</a></li><li><a href="global.html#del">del</a></li><li><a href="global.html#end">end</a></li><li><a href="global.html#findRelFields">findRelFields</a></li><li><a href="global.html#getCollectionModel">getCollectionModel</a></li><li><a href="global.html#getDoc">getDoc</a></li><li><a href="global.html#getObjectPath">getObjectPath</a></li><li><a href="global.html#getSessionCurrentUser">getSessionCurrentUser</a></li><li><a href="global.html#getUpdateProps">getUpdateProps</a></li><li><a href="global.html#increaseCounter">increaseCounter</a></li><li><a href="global.html#increaseDocProp">increaseDocProp</a></li><li><a href="global.html#increaseLog">increaseLog</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#isAuthenticated">isAuthenticated</a></li><li><a href="global.html#isCollectionExist">isCollectionExist</a></li><li><a href="global.html#isDocExist">isDocExist</a></li><li><a href="global.html#isObjectID">isObjectID</a></li><li><a href="global.html#navDefaultQuestions">navDefaultQuestions</a></li><li><a href="global.html#oid">oid</a></li><li><a href="global.html#onCreate">onCreate</a></li><li><a href="global.html#onDelete">onDelete</a></li><li><a href="global.html#onUpdate">onUpdate</a></li><li><a href="global.html#overrideListener">overrideListener</a></li><li><a href="global.html#paginate">paginate</a></li><li><a href="global.html#pickQueryType">pickQueryType</a></li><li><a href="global.html#populateAll">populateAll</a></li><li><a href="global.html#postDelete">postDelete</a></li><li><a href="global.html#postSave">postSave</a></li><li><a href="global.html#postUpdateOne">postUpdateOne</a></li><li><a href="global.html#preDelete">preDelete</a></li><li><a href="global.html#preSave">preSave</a></li><li><a href="global.html#preUpdateOne">preUpdateOne</a></li><li><a href="global.html#query">query</a></li><li><a href="global.html#readable">readable</a></li><li><a href="global.html#repeat">repeat</a></li><li><a href="global.html#setListener">setListener</a></li><li><a href="global.html#toolsCLI-CLItoolstouseineverywhere.">toolsCLI - CLI tools to use in everywhere.</a></li><li><a href="global.html#treatFilter">treatFilter</a></li><li><a href="global.html#update">update</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Mon Oct 02 2023 19:49:20 GMT-0300 (Brasilia Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

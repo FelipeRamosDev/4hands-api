@@ -4,6 +4,7 @@ const SchemaRefConfig = require('./SchemaRefConfig');
  * Represents a field in a collection.
  * 
  * @module CollectionField
+ * @namespace Models
  */
 class CollectionField {
     /**
@@ -96,7 +97,12 @@ class CollectionField {
             throw new Error.Log(err);
         }
     }
-    
+
+    /**
+     * Converts the CollectionField object to a plain JavaScript object.
+     * @method
+     * @returns {Object} - The plain JavaScript object representing the CollectionField.
+     */
     toObject() {
         return {...this};
     }

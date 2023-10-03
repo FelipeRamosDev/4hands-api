@@ -4,13 +4,18 @@ const routeModels = models.routes.collection.Create;
 const Endpoint = require('@src/models/settings/Endpoint');
 const Response = routeModels.response;
 
+/**
+ * Represents a controller endpoint for creating a document in a collection.
+ * @name CollectionCreate
+ * @type {Endpoint}
+ */
 module.exports = new Endpoint({
     method: 'PUT',
     routePath: '/collection/create',
     bodySchema: {
         collectionName: { type: String, required: true },
         data: { type: Object, required: true },
-        options: { type: Object, default: {} } // Mongoose .save(options)
+        options: { type: Object, default: {} }
     },
     controller: async (req, res) => {
         try {

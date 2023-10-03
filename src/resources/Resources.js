@@ -2,7 +2,15 @@ const source = require('.');
 const ErrorLog = require('../models/logs/ErrorLog');
 const FS = require('@services/FS');
 
+/**
+ * Class representing a resource manager for handling language-specific resources.
+ */
 class Resources {
+    /**
+     * Creates an instance of Resources.
+     * @constructor
+     * @param {string} [language='en_US'] - The language code for the desired language. Defaults to 'en_US'.
+     */
     constructor(language) {
         this.projectPath = __dirname.replace('\\node_modules\\4hands-api\\src\\resources', '\\').replace(/\\/g, '/');
         this.language = language || 'en_US';
@@ -14,11 +22,23 @@ class Resources {
         }
     }
 
+    /**
+     * Retrieves a text resource at the specified path.
+     * @param {string} path - The path to the text resource.
+     * @param {...any} params - Additional parameters for the text resource function.
+     * @returns {string|undefined} The text resource or undefined if the path is not found.
+     */
     text(path, ...params) {
         const current = this.getPath('texts.' + path);
         return Boolean.isValid(current).function().eval() && current(...params);
     }
 
+    /**
+     * Retrieves a template resource at the specified path.
+     * @param {string|object} path - The path to the template resource or a template object.
+     * @param {...any} params - Additional parameters for the template resource function.
+     * @returns {string|Function} The template resource or a rendering function if the path is found.
+     */
     templates(path, ...params) {
         if (!path) {
             return () => '';
@@ -35,6 +55,12 @@ class Resources {
         }
     }
 
+    /**
+     * Retrieves an error resource at the specified path.
+     * @param {string} path - The path to the error resource.
+     * @param {...any} params - Additional parameters for the error resource function.
+     * @returns {string|undefined} The error resource or undefined if the path is not found.
+     */
     error(path, ...params) {
         try {
             const current = this.getPath('errors.' + path);
@@ -43,7 +69,13 @@ class Resources {
             return new Error.Log(err).consolePrint();
         }
     }
-    
+
+    /**
+     * Retrieves a resource at the specified path.
+     * @param {string} pathString - The path to the desired resource.
+     * @returns {Function|undefined} The resource function or undefined if the path is not found.
+     * @throws {ErrorLog} If the specified path is not found in the resource data.
+     */
     getPath(pathString) {
         const parsedPath = Boolean.isValid(pathString).filled().string().eval() && pathString.split('.');
         let result = this.base;
@@ -56,6 +88,11 @@ class Resources {
         return Boolean.isValid(result).function().eval() && result;
     }
 
+    /**
+     * Loads additional resources into the resource manager.
+     * @param {Object} resources - The additional resources to be loaded.
+     * @throws {Error} If an error occurs while loading the resources.
+     */
     loadResources(resources) {
         try {
             this.base = {...this.base, ...resources};
