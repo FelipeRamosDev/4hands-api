@@ -5,6 +5,11 @@ const Delete = models.routes.collection.Delete;
 const Endpoint = require('@src/models/settings/Endpoint');
 const Response = Delete.response;
 
+/**
+ * Represents a controller endpoint for deleting a document in a collection.
+ * @name CollectionDelete
+ * @type {Endpoint}
+ */
 module.exports = new Endpoint({
     method: 'DELETE',
     routePath: '/collection/delete',

@@ -1,6 +1,15 @@
 const {Schema, model} = require('mongoose');
 
+/**
+ * Utility class for validating and handling MongoDB schemas in the application.
+ */
 class ValidateSchema {
+    /**
+     * Constructs a ValidateSchema instance based on the provided rules.
+     * @param {string|Object} rules - A string indicating the collection name to use as schema,
+     * or an object specifying the Mongoose schema configurations.
+     * @throws {Error} - Throws an error if the provided rules are invalid or the collection name is not found.
+     */
     constructor(rules) {
         const schemas = API.database.collections;
 
@@ -36,6 +45,13 @@ class ValidateSchema {
         }
     }
 
+    /**
+     * Validates the provided data against the schema and returns the validation result.
+     * @param {Object} data - The data to be validated against the schema.
+     * @param {boolean} [returnValidObj=false] - A flag indicating whether to return the validated object.
+     * @returns {ValidationError|Object} - If `returnValidObj` is true, returns the validated object.
+     * Otherwise, returns the validation error object.
+     */
     validate(data, returnValidObj) {
         if (!this._schema) return;
 
@@ -52,6 +68,11 @@ class ValidateSchema {
         return this.validationResult;
     }
 
+    /**
+     * Populates the schema fields with their default values if not provided in the input object.
+     * @param {Object} [customSelf] - The custom object to be populated (optional, uses the instance itself by default).
+     * @returns {Object} - The populated object with default values.
+     */
     placeDefault(customSelf) {
         const self = customSelf || this;
 

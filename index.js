@@ -16,11 +16,39 @@ const schemas = require('./src/schemas');
 const services = require('./src/services');
 const validation = require('./src/validation');
 
+/**
+ * @class
+ * @name DatabaseServer
+ */
 exports.Database = DatabaseServer;
+
+/**
+ * @class
+ * @name ServerAPI
+ */
 exports.ServerAPI = ServerAPI;
+
+/**
+ * @class
+ * @name SocketServer
+ */
 exports.SocketServer = SocketServer;
+
+/**
+ * @class
+ * @name Endpoint
+ */
 exports.Endpoint = Endpoint;
+
+/**
+ * @class
+ * @name Collection
+ */
 exports.Collection = Collection;
+
+/**
+ * @module CRUD
+ */
 exports.CRUD = CRUD;
 
 exports.collections = collections;

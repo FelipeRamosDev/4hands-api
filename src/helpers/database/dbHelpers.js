@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 const configs = require('@config');
 
+/**
+ * Checks if a collection exists in the MongoDB database.
+ * @param {string} collection - The name of the collection to check.
+ * @returns {string|undefined} - The name of the existing collection or undefined if the collection does not exist.
+ * @throws {Error} - Throws an error if there is an issue accessing the database.
+ */
 function isCollectionExist(collection) {
     try {
         return mongoose.modelNames().find(model => model === collection);
@@ -9,6 +15,13 @@ function isCollectionExist(collection) {
     }
 }
 
+/**
+ * Checks if a document exists in a specific collection based on the provided filter.
+ * @param {string} collectionName - The name of the collection to check.
+ * @param {Object} filter - The filter object to search for the document.
+ * @returns {Promise<boolean>} - A promise that resolves to true if the document exists, false otherwise.
+ * @throws {Error} - Throws an error if there is an issue accessing the database.
+ */
 function isDocExist(collectionName, filter) {
     return new Promise((resolve, reject) => {
         mongoose.model(collectionName).exists(filter, (err, res) => {
@@ -22,6 +35,12 @@ function isDocExist(collectionName, filter) {
 
 }
 
+/**
+ * Retrieves the Mongoose model for a given collection name.
+ * @param {string} collection - The name of the collection to retrieve the model for.
+ * @returns {Model} - The Mongoose model for the specified collection.
+ * @throws {Error} - Throws an error if the collection does not exist.
+ */
 function getCollectionModel(collection) {
     try {
         if (isCollectionExist(collection)) {
@@ -34,6 +53,11 @@ function getCollectionModel(collection) {
     }
 }
 
+/**
+ * Creates a counter document for a specific collection if it does not already exist.
+ * @param {Object} collection - The collection object containing 'name' and 'symbol' properties.
+ * @throws {Error} - Throws an error if there is an issue creating the counter document.
+ */
 async function createCounter(collection){
     try {
         const Counters = mongoose.model(configs.database.counterCollection);
@@ -52,6 +76,12 @@ async function createCounter(collection){
     }
 }
 
+/**
+ * Increases the counter value for a specific collection and returns the updated counter object.
+ * @param {string} collection - The name of the collection to increase the counter for.
+ * @returns {Object} - The updated counter object.
+ * @throws {Error} - Throws an error if there is an issue increasing the counter.
+ */
 async function increaseCounter(collection) {
     try {
         const Counters = mongoose.model(configs.database.counterCollection);
@@ -63,6 +93,12 @@ async function increaseCounter(collection) {
     }
 }
 
+/**
+ * Increases the 'groupedLogs' property of a specific log document and returns the updated log object.
+ * @param {string} logUID - The unique identifier of the log document to increase the property for.
+ * @returns {Object} - The updated log object.
+ * @throws {Error} - Throws an error if there is an issue increasing the log property.
+ */
 async function increaseLog(logUID) {   
     try {
         const Logs = mongoose.model(configs.database.logCollection);
@@ -74,6 +110,14 @@ async function increaseLog(logUID) {
     }
 }
 
+/**
+ * Increases specified properties of a document based on the provided filter and data object.
+ * @param {string} collectionName - The name of the collection to update the document in.
+ * @param {Object} filter - The filter object to match the document.
+ * @param {Object} data - The data object containing properties to be incremented.
+ * @returns {Object} - The updated document object.
+ * @throws {Error} - Throws an error if there is an issue updating the document properties.
+ */
 async function increaseDocProp(collectionName, filter, data) {   
     try {
         const DBModel = mongoose.model(collectionName);
@@ -85,6 +129,12 @@ async function increaseDocProp(collectionName, filter, data) {
     }
 }
 
+/**
+ * Determines the type of query based on the provided filter and the desired query type.
+ * @param {*} filter - The filter object to analyze.
+ * @param {string} type - The desired query type ('one' for single document, 'many' for multiple documents).
+ * @returns {string} - The determined query type ('one' or 'many').
+ */
 function pickQueryType(filter, type) {
     let filterType = typeof filter;
 
@@ -104,6 +154,12 @@ function pickQueryType(filter, type) {
     return 'one';
 }
 
+/**
+ * Validates and transforms a filter object to a format suitable for querying the database.
+ * @param {string|Object} filter - The filter to be validated and transformed.
+ * @returns {Object} - The transformed filter object suitable for database queries.
+ * @throws {Error} - Throws an error if the filter is invalid.
+ */
 function treatFilter(filter) {
     let query;
 
@@ -128,6 +184,15 @@ function treatFilter(filter) {
     return query;
 }
 
+/**
+ * Finds and returns fields in a Mongoose schema that are references to other schemas.
+ * @param {Object} schema - The Mongoose schema object to search for related fields.
+ * @param {Array} exclude - An array of field names to exclude from the result.
+ * @param {number} levels - The number of levels to search for related fields (default is 1).
+ * @param {number} currentLevel - The current level of recursion (default is 1).
+ * @returns {Array} - An array of objects representing related fields and their respective schemas.
+ * @throws {Error} - Throws an error if there is an issue analyzing the schema.
+ */
 function findRelFields(schema, exclude, levels, currentLevel) {
     if (!levels) levels = 1;
     if (!currentLevel) currentLevel = 1;

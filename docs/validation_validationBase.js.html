@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: validation/validationBase.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: validation/validationBase.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Utility class for validating and manipulating data types and structures.
+ */
+class ValidationBase {
+    /**
+     * Constructs a ValidationBase instance with the provided value for validation.
+     * @param {*} value - The value to be validated.
+     */
+    constructor(value) {
+        this._value = value;
+        this.success = true;
+    }
+
+    /**
+     * Gets the current value being validated.
+     * @returns {*} - The value being validated.
+     */
+    get value() {
+        return this._value;
+    }
+
+    /**
+     * Sets a new value for validation.
+     * @param {*} newValue - The new value to be set for validation.
+     * @returns {*} - The new value after setting.
+     */
+    setValue(newValue) {
+        this._value = newValue;
+        return this._value;
+    }
+
+    /**
+     * Validates if the value is a string.
+     * @returns {ValidationBase} - Returns the current instance if the value is a string; otherwise, rejects the validation.
+     */
+    string() {
+        const typeOf = typeof this.value;
+        return typeOf === 'string' ? this : this.reject();
+    }
+
+    /**
+     * Validates if the value is a number and not NaN.
+     * @returns {ValidationBase} - Returns the current instance if the value is a valid number; otherwise, rejects the validation.
+     */
+    number() {
+        return typeof this.value === 'number' &amp;&amp; !isNaN(this.value) ? this : this.reject();
+    }
+
+    /**
+     * Validates if the value is an array.
+     * @returns {ValidationBase} - Returns the current instance if the value is an array; otherwise, rejects the validation.
+     */
+    array() {
+        return Array.isArray(this.value) ? this : this.reject();
+    }
+
+    /**
+     * Validates if the value is an object (excluding arrays).
+     * @returns {ValidationBase} - Returns the current instance if the value is a non-array object; otherwise, rejects the validation.
+     */
+    object() {
+        return (typeof this.value === 'object' &amp;&amp; !Array.isArray(this.value)) ? this : this.reject();
+    }
+
+    /**
+     * Validates if the value is a function.
+     * @returns {ValidationBase} - Returns the current instance if the value is a function; otherwise, rejects the validation.
+     */
+    function() {
+        return typeof this.value === 'function' ? this : this.reject();
+    }
+
+    /**
+     * Validates if the value exists and is not null, undefined, empty string, empty object, empty array, or zero (if zeroIsFalse is true for numbers).
+     * @param {boolean} [zeroIsFalse=false] - A flag indicating whether zero should be considered a false value for numbers.
+     * @returns {ValidationBase} - Returns the current instance if the value is non-empty; otherwise, rejects the validation.
+     */
+    path(keys) {
+        let result = this.value;
+
+        typeof keys === 'string' &amp;&amp; keys.split('.').map(key => {
+            if (result) result = result[key];
+        });
+
+        if (result) {
+            this.setValue(result);
+            return this;
+        } else {
+            return this.reject();
+        }
+    }
+
+    /**
+     * Determines if the current value is considered filled based on its type and optional condition.
+     * @param {boolean} zeroIsFalse - A flag indicating whether the value 0 should be treated as false (optional).
+     * @returns {Object} - Returns the current object instance if the value is considered filled, otherwise rejects the object.
+     */
+    filled(zeroIsFalse) {
+        switch (typeof this.value) {
+            case 'number': {
+                /**
+                 * If the value is a number, checks if it is zero and zeroIsFalse is true,
+                 * then rejects the object; otherwise, considers the object as filled.
+                 */
+                if (zeroIsFalse &amp;&amp; this.value === 0) return this.reject();
+                return this;
+            }
+            case 'object': {
+                /**
+                 * If the value is an object, checks if it is falsy or an empty array or an empty object,
+                 * then rejects the object; otherwise, considers the object as filled.
+                 */
+                if (!this.value) return this.reject();
+                if (Array.isArray(this.value)) return this.value.length ? this : this.reject();
+                return Object.keys(this.value).length ? this : this.reject();
+            }
+            case 'string':
+            default: 
+                /**
+                 * For strings and other data types, checks if the value is truthy,
+                 * then considers the object as filled; otherwise, rejects the object.
+                 */
+                return this.value ? this : this.reject();
+        }
+    }
+
+    /**
+     * Validates if the number is non-zero and not NaN.
+     * @returns {boolean} - Returns `true` if the number is non-zero and not NaN; otherwise, `false`.
+     */
+    numberFilled() {
+        return this.number().filled().eval();
+    }
+
+    /**
+     * Validates if the string is non-empty.
+     * @returns {boolean} - Returns `true` if the string is non-empty; otherwise, `false`.
+     */
+    stringFilled() {
+        return this.string().filled().eval();
+    }
+
+    /**
+     * Validates if the object is non-empty (not null, undefined, or empty object).
+     * @returns {boolean} - Returns `true` if the object is non-empty; otherwise, `false`.
+     */
+    objectFilled() {
+        return this.object().filled().eval();
+    }
+
+    /**
+     * Validates if the array is non-empty.
+     * @returns {boolean} - Returns `true` if the array is non-empty; otherwise, `false`.
+     */
+    arrayFilled() {
+        return this.array().filled().eval();
+    }
+
+    /**
+     * Marks the validation as unsuccessful and sets the success flag to false.
+     * @returns {ValidationBase} - Returns the current instance after marking it as unsuccessful.
+     */
+    reject() {
+        this.success = false;
+        return this;
+    }
+
+    /**
+     * Checks if the validation was successful and evaluates the result.
+     * @param {boolean} [dontReturnValue=false] - A flag indicating whether to return the value on success.
+     * @returns {boolean|*} - Returns `true` if successful, the validated value if `dontReturnValue` is false, 
+     * or `false` on failure.
+     */
+    eval(dontReturnValue) {
+        if (!this.success) return false;
+        return dontReturnValue ? true : this.value; 
+    }
+
+    /**
+     * Static method to determine if the provided object is a MongoDB ObjectID.
+     * @param {*} obj - The object to be checked.
+     * @returns {boolean} - `true` if the object is a MongoDB ObjectID, `false` otherwise.
+     */
+    static isObjectID(obj) {
+        if (typeof obj === 'object') {
+            if (Array.isArray(obj) &amp;&amp; obj.length) {
+                return isObjectID(obj[0]);
+            }
+
+            return Boolean(Object(obj)._bsontype === 'ObjectID');
+        }
+    
+        return false
+    }
+
+    /**
+     * Static method to determine if the provided object IS A COMPLETE DOC
+     * @param {*} obj - The object to be checked.
+     * @returns {boolean} - `true` if the object is a MongoDB ObjectID, `false` otherwise.
+     */
+    static isCompleteDoc(doc) {
+        return [
+            (!ValidationBase.isObjectID(doc)),
+            (typeof doc === 'object')
+        ].every(item => item);
+    }
+}
+
+/**
+ * Factory function to create a ValidationBase instance for a specific value.
+ * @param {*} value - The value to be validated.
+ * @returns {ValidationBase} - A ValidationBase instance for the provided value.
+ */
+function build(value) {
+    const isValid = new ValidationBase(value);
+    return isValid;
+}
+
+module.exports = {
+    build,
+    ValidationBase
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-AuthService.html">AuthService</a></li><li><a href="module-DataDependency.html">DataDependency</a></li><li><a href="module-EventsHandlers.html">EventsHandlers</a></li><li><a href="module-FormCtrlCLI.html">FormCtrlCLI</a></li><li><a href="module-NavigatorOption.html">NavigatorOption</a></li><li><a href="module-PoolForm.html">PoolForm</a></li><li><a href="module-QuestionModel.html">QuestionModel</a></li><li><a href="module-ToolsCLI.html">ToolsCLI</a></li><li><a href="module-ViewCLI.html">ViewCLI</a></li></ul><h3>Namespaces</h3><ul><li><a href="Models.html">Models</a></li><li><a href="Services.html">Services</a></li></ul><h3>Classes</h3><ul><li><a href="AuthBucket.html">AuthBucket</a></li><li><a href="AuthService.html">AuthService</a></li><li><a href="CLI.html">CLI</a></li><li><a href="Collection.html">Collection</a></li><li><a href="CollectionField.html">CollectionField</a></li><li><a href="Component.html">Component</a></li><li><a href="ComponentSubscription.html">ComponentSubscription</a></li><li><a href="DatabaseServer.html">DatabaseServer</a></li><li><a href="DocSubscription.html">DocSubscription</a></li><li><a href="Endpoint.html">Endpoint</a></li><li><a href="ErrorLog.html">ErrorLog</a></li><li><a href="EventStd.html">EventStd</a></li><li><a href="EventsHandlers.html">EventsHandlers</a></li><li><a href="FormCtrlCLI.html">FormCtrlCLI</a></li><li><a href="GlobalMap.html">GlobalMap</a></li><li><a href="LogBase.html">LogBase</a></li><li><a href="Logstamp.html">Logstamp</a></li><li><a href="NavigatorOption.html">NavigatorOption</a></li><li><a href="PoolForm.html">PoolForm</a></li><li><a href="Prompt.html">Prompt</a></li><li><a href="QuestionModel.html">QuestionModel</a></li><li><a href="RequestAPI.html">RequestAPI</a></li><li><a href="Resources.html">Resources</a></li><li><a href="SchemaRefConfig.html">SchemaRefConfig</a></li><li><a href="ScreenHelperCLI.html">ScreenHelperCLI</a></li><li><a href="ServerAPI.html">ServerAPI</a></li><li><a href="SocketConnection.html">SocketConnection</a></li><li><a href="SocketServer.html">SocketServer</a></li><li><a href="SocketSubscription.html">SocketSubscription</a></li><li><a href="StringTemplateBuilder.html">StringTemplateBuilder</a></li><li><a href="Success.html">Success</a></li><li><a href="ToolsCLI.html">ToolsCLI</a></li><li><a href="User.html">User</a></li><li><a href="ValidateSchema.html">ValidateSchema</a></li><li><a href="ValidationBase.html">ValidationBase</a></li><li><a href="ViewCLI.html">ViewCLI</a></li><li><a href="ViewNavigator.html">ViewNavigator</a></li><li><a href="XMLManager.html">XMLManager</a></li><li><a href="module-DataDependency-DataDependency.html">DataDependency</a></li></ul><h3>Global</h3><ul><li><a href="global.html##getPath">#getPath</a></li><li><a href="global.html#ApiHealthCheck">ApiHealthCheck</a></li><li><a href="global.html#AuthLogin">AuthLogin</a></li><li><a href="global.html#AuthRegister">AuthRegister</a></li><li><a href="global.html#CollectionCreate">CollectionCreate</a></li><li><a href="global.html#CollectionDelete">CollectionDelete</a></li><li><a href="global.html#CollectionGetDoc">CollectionGetDoc</a></li><li><a href="global.html#CollectionGetQuery">CollectionGetQuery</a></li><li><a href="global.html#CollectionUpdateDocument">CollectionUpdateDocument</a></li><li><a href="global.html#Log-Tologerrorsandanyotherlog.">Log - To log errors and any other log.</a></li><li><a href="global.html#Resource-Resourceinstancetocalltextandotherresources.">Resource - Resource instance to call text and other resources.</a></li><li><a href="global.html#ajax-DoesAJAXrequests">ajax - Does AJAX requests</a></li><li><a href="global.html#build">build</a></li><li><a href="global.html#convertMillisTo">convertMillisTo</a></li><li><a href="global.html#convertToMillis">convertToMillis</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#createCounter">createCounter</a></li><li><a href="global.html#createUserCLISession">createUserCLISession</a></li><li><a href="global.html#defaultRules">defaultRules</a></li><li><a href="global.html#del">del</a></li><li><a href="global.html#end">end</a></li><li><a href="global.html#findRelFields">findRelFields</a></li><li><a href="global.html#getCollectionModel">getCollectionModel</a></li><li><a href="global.html#getDoc">getDoc</a></li><li><a href="global.html#getObjectPath">getObjectPath</a></li><li><a href="global.html#getSessionCurrentUser">getSessionCurrentUser</a></li><li><a href="global.html#getUpdateProps">getUpdateProps</a></li><li><a href="global.html#increaseCounter">increaseCounter</a></li><li><a href="global.html#increaseDocProp">increaseDocProp</a></li><li><a href="global.html#increaseLog">increaseLog</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#isAuthenticated">isAuthenticated</a></li><li><a href="global.html#isCollectionExist">isCollectionExist</a></li><li><a href="global.html#isDocExist">isDocExist</a></li><li><a href="global.html#isObjectID">isObjectID</a></li><li><a href="global.html#navDefaultQuestions">navDefaultQuestions</a></li><li><a href="global.html#oid">oid</a></li><li><a href="global.html#onCreate">onCreate</a></li><li><a href="global.html#onDelete">onDelete</a></li><li><a href="global.html#onUpdate">onUpdate</a></li><li><a href="global.html#overrideListener">overrideListener</a></li><li><a href="global.html#paginate">paginate</a></li><li><a href="global.html#pickQueryType">pickQueryType</a></li><li><a href="global.html#populateAll">populateAll</a></li><li><a href="global.html#postDelete">postDelete</a></li><li><a href="global.html#postSave">postSave</a></li><li><a href="global.html#postUpdateOne">postUpdateOne</a></li><li><a href="global.html#preDelete">preDelete</a></li><li><a href="global.html#preSave">preSave</a></li><li><a href="global.html#preUpdateOne">preUpdateOne</a></li><li><a href="global.html#query">query</a></li><li><a href="global.html#readable">readable</a></li><li><a href="global.html#repeat">repeat</a></li><li><a href="global.html#setListener">setListener</a></li><li><a href="global.html#toolsCLI-CLItoolstouseineverywhere.">toolsCLI - CLI tools to use in everywhere.</a></li><li><a href="global.html#treatFilter">treatFilter</a></li><li><a href="global.html#update">update</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Mon Oct 02 2023 19:49:20 GMT-0300 (Brasilia Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -4,6 +4,10 @@ const ListTiles = require('@CLI/templates/ListTiles');
 const Prompt = require('@services/Prompt');
 const { QuestionModel } = require('./PoolForm');
 
+/**
+ * Default navigation questions for the ViewNavigator class.
+ * @type {Object}
+ */
 const navDefaultQuestions = {
     startQuestion: 'navigation',
     questions: [
@@ -15,39 +19,90 @@ const navDefaultQuestions = {
     ]
 };
 
+/**
+ * Class representing a view navigator with navigation options.
+ * @extends ToolsCLI
+ */
 class ViewNavigator extends ToolsCLI {
     static navDefaultQuestions = navDefaultQuestions;
 
+    /**
+     * Creates an instance of ViewNavigator.
+     * @constructor
+     * @param {Object} [setup] - The configuration for the view navigator instance.
+     * @param {string} [setup.type='nav'] - The type of navigation ('nav' or 'doc-list').
+     * @param {Array} [setup.options=[]] - Array of navigation options.
+     * @param {Function} [setup.navSuccessCallback] - Callback function on successful navigation.
+     * @param {Function} [setup.navErrorCallback] - Callback function on navigation error.
+     * @param {Object} [setup.question] - Question configuration for prompting user input.
+     * @param {ViewCLI} parentView - The parent view associated with this navigator.
+     */
     constructor(setup = {
-        ...this,
-        type: '', // nav or doc-list
-        options: [NavigatorOption.prototype],
+        type: 'nav',
+        options: [],
         navSuccessCallback,
         navErrorCallback,
         question
     }, parentView) {
         super();
-        const {type, options, question, navSuccessCallback, navErrorCallback} = new Object(setup || {});
+        const { type, options, question, navSuccessCallback, navErrorCallback } = setup || {};
         const self = this;
 
+        /**
+         * The type of navigation ('nav' or 'doc-list').
+         * @type {string}
+         */
         this.type = type || 'nav';
+
+        /**
+         * Array of navigation options.
+         * @type {Array}
+         */
         this.options = [];
+
+        /**
+         * Question configuration for prompting user input.
+         * @type {Object}
+         */
         this.question = question ? new QuestionModel(question) : {};
+
+        /**
+         * Callback function on successful navigation.
+         * @type {Function}
+         */
         this.navSuccessCallback = navSuccessCallback && navSuccessCallback.bind(this);
+
+        /**
+         * Callback function on navigation error.
+         * @type {Function}
+         */
         this.navErrorCallback = navErrorCallback && navErrorCallback.bind(this);
 
-        this.prompt = new Prompt();
+        /**
+         * The parent view associated with this navigator.
+         * @type {ViewCLI}
+         */
         this._parentView = () => parentView;
 
         if (Array.isArray(options)) {
-            this.options = options.map((opt, index) => new NavigatorOption({...opt, index}, self));
+            this.options = options.map((opt, index) => new NavigatorOption({ ...opt, index }, self));
         }
     }
 
+    /**
+     * Retrieves the parent view associated with this navigator.
+     * @returns {ViewCLI} The parent view instance.
+     */
     get parentView() {
         return this._parentView();
     }
 
+    /**
+     * Navigates to a specific navigation option by its index.
+     * @param {string} index - The index of the navigation option to navigate to.
+     * @param {Object} [params] - Additional parameters to be passed to the view.
+     * @throws {Error.Log} When an error occurs during navigation.
+     */
     async navTo(index, params) {
         const opt = this.getOption(index);
 
@@ -69,10 +124,20 @@ class ViewNavigator extends ToolsCLI {
         }
     }
 
+    /**
+     * Retrieves a navigation option by its index.
+     * @param {string} index - The index of the navigation option to retrieve.
+     * @returns {NavigatorOption} The navigation option instance.
+     */
     getOption(index) {
         return this.options.find(opt => opt.index === index);
     }
 
+    /**
+     * Adds a new navigation option to the navigator.
+     * @param {Object} data - Data for the new navigation option.
+     * @returns {ViewNavigator} The current ViewNavigator instance.
+     */
     addOption(data) {
         const newOption = new NavigatorOption(data, this);
 
@@ -81,22 +146,34 @@ class ViewNavigator extends ToolsCLI {
         return this;
     }
 
-    setOption(index, data, override) {
+    /**
+     * Sets or updates an existing navigation option by its index.
+     * @param {string} index - The index of the navigation option to set or update.
+     * @param {Object} data - Data for the navigation option.
+     * @param {boolean} [override=false] - Indicates whether to override the existing option or merge the data.
+     */
+    setOption(index, data, override = false) {
         const i = String(index);
 
         if (override) {
             this.options[i] = new NavigatorOption(data, this);
         } else {
-            this.options[i] = {...this.options[i], ...data};
+            this.options[i] = { ...this.options[i], ...data };
         }
     }
 
+    /**
+     * Renders the navigation options and displays them to the user.
+     * @param {Object} [params] - Additional parameters for rendering.
+     * @returns {string} The rendered string output of the navigation options.
+     * @throws {Error.Log} When an error occurs during rendering.
+     */
     render(params) {
         let { exclude } = params || {};
         let options = [];
 
         if (this.type === 'doc-list') {
-            this.options.map((opt) => options.push( opt.doc ));
+            this.options.map((opt) => options.push(opt.doc));
         } else {
             options = this.options;
             exclude = ['type', 'targetView', ...(exclude || [])];
@@ -104,7 +181,7 @@ class ViewNavigator extends ToolsCLI {
 
         try {
             if (Array.isArray(options) && options.length) {
-                const template = new ListTiles({items: options});
+                const template = new ListTiles({ items: options });
                 const stringOutput = template.renderToString();
                 
                 this.printTemplate(stringOutput);
@@ -117,6 +194,12 @@ class ViewNavigator extends ToolsCLI {
         }
     }
 
+    /**
+     * Prompts user input based on the provided question text and navigates to the chosen option.
+     * @param {Object} [params] - Additional parameters for rendering and navigation.
+     * @returns {Promise} A promise resolving to the result of navigation.
+     * @throws {Error.Log} When an error occurs during navigation.
+     */
     async fire(params) {
         try {
             this.render(params);

@@ -2,6 +2,7 @@
  * Represents the reference configuration for a schema field.
  * 
  * @module SchemaRefConfig
+ * @namespace Models
  */
 class SchemaRefConfig {
     /**
