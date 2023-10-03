@@ -165,7 +165,8 @@ module.exports = {
 ```
 
 #### Query File
-Take a look on the example below to see how a **Query File** should look.
+Take a look on the example below to see how a **Query File** should look. A good example is when you need to populate the document.
+> ℹ️ _This file is not mandatory, at least you need to perform some action in one of the mongoose query._
 
 ```javascript
 function defaultPopulate() {
