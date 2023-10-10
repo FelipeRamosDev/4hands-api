@@ -4,10 +4,6 @@ const AuthBucket = require('@models/collections/AuthBucket');
 class UsersClass {
     static Model = User;
 
-    get frontURL() {
-        return `users/read-edit/${this.index}`;
-    }
-
     async signUp() {
         try {
             if (this.isNew) {
