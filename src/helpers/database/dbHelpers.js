@@ -23,14 +23,8 @@ function isCollectionExist(collection) {
  * @throws {Error} - Throws an error if there is an issue accessing the database.
  */
 function isDocExist(collectionName, filter) {
-    return new Promise((resolve, reject) => {
-        mongoose.model(collectionName).exists(filter, (err, res) => {
-            if (err) {
-                reject(new Error.Log(err));
-            }
-
-            resolve(res);
-        });
+    return new Promise(async (resolve, reject) => {
+        resolve(await mongoose.model(collectionName).exists(filter));
     });
 
 }
