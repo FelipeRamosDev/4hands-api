@@ -32,9 +32,9 @@ class SchemaDB {
         try {
             this.name = setup.name;
             this.projectPath = path.normalize(__dirname.replace(path.normalize('/node_modules/4hands-api/src/models'), '/'));
-            this.projectQueriesPath = `${this.projectPath}src/collections/queries/${this.name}.query.js`;
-            this.projectEventsPath = `${this.projectPath}src/collections/events/${this.name}.event.js`;
-            this.projectClassesPath = `${this.projectPath}src/collections/Class/${this.name}.class.js`;
+            this.projectQueriesPath = path.normalize(`${this.projectPath}src/collections/queries/${this.name}.query.js`);
+            this.projectEventsPath = path.normalize(`${this.projectPath}src/collections/events/${this.name}.event.js`);
+            this.projectClassesPath = path.normalize(`${this.projectPath}src/collections/Class/${this.name}.class.js`);
             this.symbol = setup.symbol;
             this.DB = null;
 
