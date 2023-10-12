@@ -309,7 +309,7 @@ class User extends _Global {
      * @returns {Promise} - A promise resolving to the user creation status.
      * @throws {Error.Log} If there is an error during user creation.
      */
-    static async create(setup) {
+    static async create(setup, options) {
         try {
             const { userName, email } = Object(setup);
 
