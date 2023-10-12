@@ -32,19 +32,16 @@ module.exports = new Endpoint({
                     status = 401;
                 }
     
-                return res.status(status).send(user.toJSON());
+                return res.status(status).send(user.response());
             }
     
             
             const response = user.toSession();
             req.session.currentUser = response;
     
-            res.cookie('sessionToken', user.token, cookiesConfig);
-            res.cookie('currentUserUID', user._id, cookiesConfig);
-    
-            return res.status(200).send(response.toSuccess().toJSON());
+            return res.status(200).send(response);
         } catch(err) {
-            return res.status(500).send(new Error.Log(err).toJSON());
+            return res.status(500).send(new Error.Log(err).response());
         }
     }
 });
