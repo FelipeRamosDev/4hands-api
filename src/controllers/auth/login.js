@@ -3,13 +3,11 @@ const User = require('@models/collections/User');
 const Configs = require('@config');
 
 const cookiesConfig = {
-    maxAge: Configs.sessionMaxAge,
-    httpOnly: true,
-    secure: Configs.secureCookies
+    maxAge: Configs.sessionMaxAge
 };
 
 /**
- * Represents a controller endpoint for authenticate an user.
+ * Represents a controller endpoint to authenticate an user.
  * @name AuthLogin
  * @type {Endpoint}
  */
@@ -20,28 +18,34 @@ module.exports = new Endpoint({
         email: { type: String, required: true },
         password: { type: String, required: true }
     },
-    controller: async (req, res) => {
-        try {
-            const body = req.body;
-            const user = await User.signIn(body.email, body.password);
-    
-            if (user instanceof Error.Log) {
-                let status = 500;
-    
-                if (user.name === 'AUTH_INVALID_CREDENTIALS') {
-                    status = 401;
+    middlewares: [
+        async (req, res, next) => {
+            try {
+                const body = req.body;
+                const user = await User.signIn(body.email, body.password);
+        
+                if (user instanceof Error.Log) {
+                    let status = 500;
+        
+                    if (user.name === 'AUTH_INVALID_CREDENTIALS') {
+                        status = 401;
+                    }
+        
+                    return res.status(status).send(user.response());
                 }
+        
+                
+                const response = user.toSession();
     
-                return res.status(status).send(user.response());
+                req.session.user = response;
+                req.session.isAuthorized = true;
+                return next();
+            } catch(err) {
+                return res.status(500).send(new Error.Log(err).response());
             }
-    
-            
-            const response = user.toSession();
-            req.session.currentUser = response;
-    
-            return res.status(200).send(response);
-        } catch(err) {
-            return res.status(500).send(new Error.Log(err).response());
         }
+    ],
+    controller: async (req, res) => {
+        return res.status(200).send({...req.session.user, sessionID: req.session.id});
     }
 });

@@ -41,8 +41,9 @@ module.exports = new Endpoint({
             }
 
             req.session.user = newUser;
+            req.session.isAuthorized = true;
     
-            return res.status(200).send(newUser);
+            return res.status(200).send({...newUser, sessionID: req.session.id});
         } catch(err) {
             return res.status(500).send(new Error.Log(err).response());
         }
