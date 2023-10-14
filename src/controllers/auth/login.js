@@ -2,10 +2,6 @@ const Endpoint = require('@models/settings/Endpoint');
 const User = require('@models/collections/User');
 const Configs = require('@config');
 
-const cookiesConfig = {
-    maxAge: Configs.sessionMaxAge
-};
-
 /**
  * Represents a controller endpoint to authenticate an user.
  * @name AuthLogin
@@ -35,7 +31,7 @@ module.exports = new Endpoint({
                 }
         
                 
-                const response = user.toSession();
+                const response = await user.toSession(req.session);
     
                 req.session.user = response;
                 req.session.isAuthorized = true;
@@ -46,6 +42,6 @@ module.exports = new Endpoint({
         }
     ],
     controller: async (req, res) => {
-        return res.status(200).send({...req.session.user, sessionID: req.session.id});
+        return res.status(200).send(req.session.user);
     }
 });
