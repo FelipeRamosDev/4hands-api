@@ -1,8 +1,24 @@
 module.exports = async (req, res, next) => {
-    if (!req.session.currentUser) {
-        res.setHeader('Content-Type', 'text/html');
-        return res.redirect('/user/signin');
-    } else {
-        return next();
-    }
+    const { session, sessionStore, headers } = req;
+
+    sessionStore.get(headers.token, (err, data) => {
+        if (err || !data || !data.isAuthorized) {
+            if (!data) {
+                delete req.session.currentUser;
+                delete req.session.user;
+                delete req.session.isAuthorized;
+            }
+
+            return res.status(401).send({
+                name: 'USER_NOT_AUTHORIZED',
+                message: 'The user is not authorized for this endpoint!'
+            });
+        } else {
+            session.user = data.user;
+            session.isAuthorized = data.isAuthorized;
+
+            return next();
+        }
+    });
+
 }
