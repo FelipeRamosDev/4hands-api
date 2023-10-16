@@ -111,7 +111,6 @@ class AuthService {
         }
     }
 
-    
     /**
      * Creates a JWT token for the user.
      * @returns {string} The generated JWT token.

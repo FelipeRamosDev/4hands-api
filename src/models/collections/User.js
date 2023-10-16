@@ -294,6 +294,10 @@ class User extends _Global {
                 return false;
             }
         } catch (err) {
+            /**
+             * Thrown if there is an error during the existence check.
+             * @throws {Error.Log}
+             */
             throw new Error.Log(err);
         }
     }
