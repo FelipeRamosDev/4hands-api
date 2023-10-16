@@ -12,6 +12,7 @@ const Response = routeModels.response;
 module.exports = new Endpoint({
     method: 'PUT',
     routePath: '/collection/create',
+    isAuthRoute: true,
     bodySchema: {
         collectionName: { type: String, required: true },
         data: { type: Object, required: true },

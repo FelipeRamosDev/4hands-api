@@ -1,6 +1,7 @@
 const source = require('.');
 const ErrorLog = require('../models/logs/ErrorLog');
 const FS = require('@services/FS');
+const path = require('path');
 
 /**
  * Class representing a resource manager for handling language-specific resources.
@@ -12,11 +13,11 @@ class Resources {
      * @param {string} [language='en_US'] - The language code for the desired language. Defaults to 'en_US'.
      */
     constructor(language) {
-        this.projectPath = __dirname.replace('\\node_modules\\4hands-api\\src\\resources', '\\').replace(/\\/g, '/');
+        this.projectPath = path.normalize(__dirname.replace(path.normalize('/node_modules/4hands-api/src/models'), '/'));
         this.language = language || 'en_US';
         this.base = source[this.language];
 
-        const resourcePath = this.projectPath + 'src/resources/' + this.language;
+        const resourcePath = path.normalize(this.projectPath + 'src/resources/' + this.language);
         if (FS.isExist(resourcePath)) {
             this.loadResources(require(resourcePath));
         }

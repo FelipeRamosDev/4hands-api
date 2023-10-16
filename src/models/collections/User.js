@@ -192,10 +192,7 @@ class User extends _Global {
             lastName: this.lastName,
             fullName: this.fullName,
             email: this.email,
-            jira: this.jira,
             userToken: this.token,
-            gitHubToken: this.auth.gitHubToken,
-            gitHubUser: this.auth.gitHubUser,
         };
     }
 
@@ -280,14 +277,14 @@ class User extends _Global {
      * @returns {Promise<boolean|string>} - A promise resolving to `true` if the user exists, or the user ID if `returnUID` is `true`.
      * @throws {Error.Log} If there is an error during the existence check.
      */
-    static async isExist(userName, returnUID) {
+    static async isExist(email, returnUID) {
         try {
-            const result = await dbHelpers.isDocExist('users', { userName });
+            const result = await dbHelpers.isDocExist('users', { email });
             if (result instanceof Error.Log) {
                 throw result;
             }
 
-            if (result && result._id.oid()) {
+            if (result) {
                 if (returnUID) {
                     return result.toString();
                 } else {
@@ -315,8 +312,7 @@ class User extends _Global {
      */
     static async create(setup, options) {
         try {
-            const { userName, email, password } = Object(setup);
-            const { preventSignIn } = Object(options);
+            const { userName, email } = Object(setup);
 
             // Check if the userName or email (that can be a username) is already in use
             const isExist = await this.isExist(userName || email);
@@ -330,7 +326,7 @@ class User extends _Global {
                 throw newUser;
             }
 
-            return Object().toSuccess();
+            return newUser.toObject();
         } catch (err) {
             /**
              * Thrown if there is an error during user creation.

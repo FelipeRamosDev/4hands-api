@@ -41,7 +41,7 @@ class AuthService {
         return process.env.API_SECRET;
     }
 
-     /**
+    /**
      * Validates user credentials and signs in the user.
      * @async
      * @param {string} password - The user's password to be validated.
@@ -110,6 +110,22 @@ class AuthService {
             throw new Error.Log(err);
         }
     }
+    
+    /**
+     * Creates a JWT token for the user.
+     * @returns {string} The generated JWT token.
+     */
+    async createSessionToken(session) {
+        try {
+            const sessionSalt = await this.genSalt();
+            const token = JWT.sign({ sessionID: session.id, sessionSalt }, this.secretKey, {expiresIn: Date.now() + 80000000});
+
+            session.sessionSalt = sessionSalt;
+            return token;
+        } catch (err) {
+            throw new Error.Log(err);
+        }
+    }
 
     /**
      * Generates a JWT token based on the provided data.
@@ -133,6 +149,10 @@ class AuthService {
      */
     validateToken(token) {
         try {
+            if (typeof token !== 'string') {
+                return;
+            }
+
             const isValid = JWT.verify(token, this.secretKey);
             const data = JWT.decode(token);
 
