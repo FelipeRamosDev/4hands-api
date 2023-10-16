@@ -13,6 +13,7 @@ const Response = Delete.response;
 module.exports = new Endpoint({
     method: 'DELETE',
     routePath: '/collection/delete',
+    isAuthRoute: true,
     bodySchema: {
         deleteType: { type: String, default: 'one', enum: ['one', 'many'] },
         collectionName: { type: String, required: true },
