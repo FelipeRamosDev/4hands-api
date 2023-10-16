@@ -13,6 +13,7 @@ const Response = GetQueryCollection.response;
 module.exports = new Endpoint({
     method: 'GET',
     routePath: '/collection/get/query',
+    isAuthRoute: true,
     bodySchema: {
         collectionName: {
             type: String,

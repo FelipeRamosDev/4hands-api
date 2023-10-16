@@ -13,6 +13,7 @@ const Endpoint = require('@src/models/settings/Endpoint');
 module.exports = new Endpoint({
     method: 'GET',
     routePath: '/collection/get/doc',
+    isAuthRoute: true,
     bodySchema: {
         collectionName: {
             type: String,
