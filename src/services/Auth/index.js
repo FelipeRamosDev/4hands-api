@@ -150,6 +150,10 @@ class AuthService {
      */
     validateToken(token) {
         try {
+            if (typeof token !== 'string') {
+                return;
+            }
+
             const isValid = JWT.verify(token, this.secretKey);
             const data = JWT.decode(token);
 
