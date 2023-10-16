@@ -13,6 +13,7 @@ const Response = UpdateDocument.response;
 module.exports = new Endpoint({
     method: 'POST',
     routePath: '/collection/update/document',
+    isAuthRoute: true,
     bodySchema: {
         updateType: {
             type: String,

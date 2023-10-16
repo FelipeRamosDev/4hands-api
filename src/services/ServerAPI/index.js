@@ -27,6 +27,7 @@ class ServerAPI {
      * @param {string} setup.API_SECRET - The API secret key for session encryption.
      * @param {number} setup.sessionCookiesMaxAge - Maximum age of session cookies (in milliseconds).
      * @param {string} setup.staticPath - The path to static files.
+     * @param {string} setup.redisURL - The redis database url to use. Default is "redis://localhost:6379"
      * @param {Function} setup.listenCallback - Callback function to be executed when the server starts listening.
      * @param {boolean} setup.compileFE - Flag indicating whether to compile frontend code (defaults to false).
      * @param {string} setup.jsonLimit - Limit of JSON requests (defaults to '10mb').
@@ -42,6 +43,7 @@ class ServerAPI {
             databaseConfig,
             API_SECRET,
             sessionCookiesMaxAge,
+            redisURL,
             staticPath,
             listenCallback,
             compileFE,
@@ -58,6 +60,7 @@ class ServerAPI {
         this.API_SECRET = API_SECRET;
         this.sessionCookiesMaxAge = sessionCookiesMaxAge || 86400000;
         this.staticPath = staticPath;
+        this.redisURL = redisURL;
         this.compileFE = compileFE;
         this.jsonLimit = jsonLimit || '10mb';
         this.sessionResave = (sessionResave !== undefined) ? sessionResave : true;
@@ -102,14 +105,18 @@ class ServerAPI {
                 }
             });
         } else {
-            this.init();
+            this.init().catch(err => {
+                throw err;
+            });
         }
     }
 
     /**
      * Initializes the server, setting up routes, middleware, and listeners.
      */
-    init() {
+    async init() {
+        const redis = require('redis');
+
         this.rootPath = path.normalize(__dirname.replace(path.normalize('/node_modules/4hands-api/src/services'), '/'));
         this.app = express();
         this.serverState = 'loading';
@@ -121,24 +128,41 @@ class ServerAPI {
             console.log(compile.toString());
         }
 
+        this.redisClient = redis.createClient({
+            url: this.redisURL || 'redis://localhost:6379'
+        }).on('error', err => {
+            throw new Error.Log(err);
+        });
+
+        this.redisDB = await this.redisClient.connect();
+        const RedisStore = require('connect-redis').default;
+
         // Configuring server
-        this.app.use(cors());
+        this.app.use(cors({
+            origin: ['http://localhost:8080', 'http://localhost:3000'],
+            credentials: true
+        }));
+
         this.app.use(bodyParser.json({ limit: this.jsonLimit }));
         this.app.use(express.json());
 
-        if (this.staticPath) {
-            this.app.use(express.static(this.rootPath + this.staticPath));
-        }
-
         if (this.API_SECRET) {
             this.app.use(session({
+                store: new RedisStore({ client: this.redisClient }),
                 secret: this.API_SECRET,
                 resave: this.sessionResave,
                 saveUninitialized: this.sessionSaveUninitialized,
-                cookie: { maxAge: this.sessionCookiesMaxAge }
+                cookie: {
+                    secure: this.useSSL, // Set secure to true if using HTTPS
+                    maxAge: this.sessionCookiesMaxAge
+                }
             }));
         } else {
             throw 'You need to provide a API SECRET to start the server!';
+        }
+
+        if (this.staticPath) {
+            this.app.use(express.static(this.rootPath + this.staticPath));
         }
 
         if (this.useSSL) {

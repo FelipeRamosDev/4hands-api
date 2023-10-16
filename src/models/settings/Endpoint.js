@@ -85,6 +85,14 @@ class Endpoint {
             });
         }
     }
+
+    /**
+     * Updated the body schema of the endpoint.
+     * @param {object} data 
+     */
+    updateBodySchema(data) {
+        this.bodySchema = {...this.bodySchema, ...data};
+    }
 }
 
 module.exports = Endpoint;

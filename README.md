@@ -1,4 +1,4 @@
-# 4Hands API (v0.1.3 BETA)
+# 4Hands API (v0.1.4 BETA)
 This is a API framework to create a backend for your applications.
 
 ## Instalation
@@ -16,9 +16,10 @@ With the database running, follow the next steps:
 3. Run the command `npm install`
 
 ## Getting Started
-- Create Server
-- Create Collection
-- Create Endpoint
+- [Create Server 🔗](https://github.com/FelipeRamosDev/4hands-api#create-server)
+- [Create Collection 🔗](https://github.com/FelipeRamosDev/4hands-api#create-collection)
+- [Create Endpoint 🔗](https://github.com/FelipeRamosDev/4hands-api#create-endpoint)
+- [User Authentication 🔗](https://github.com/FelipeRamosDev/4hands-api#user-authentication)
 
 ### Create Server
 To create a server you will need to instantiate a ServerAPI class into you project main file, or whenever you need it. Check the example below:
@@ -203,3 +204,103 @@ module.exports = {
     defaultPopulate
 };
 ```
+
+### Create Endpoint
+In order to create an endpoint for your API, you'll have to follow two steps: Create the controller file and loaded it into your server declaration.
+
+#### Create the controller
+In your project create your controller files under `src > controllers`, you can organized whenever you want, but it's recommandable that your folders structure follows the endpoint URL.
+
+On the example below I created a new controller under `src > controllers > transfer > deposit.js`. Check the cde example below:
+
+```javascript
+const { Endpoint, CRUD } = require('4hands-api');
+
+module.exports = new Endpoint({
+    method: 'PUT',                                    // Choose the method of the endpoint
+    routePath: '/transfer/deposit',                   // Path for the endpoint
+    isAuthRoute: true,                                // Protect the route for authenticated users
+    bodySchema: {                                     // This is the schema for the params be validated
+        master: { type: String, required: true },
+        type: { type: String, required: true },
+        value: { type: Number, required: true }
+    },
+    controller: async (req, res) => {                 // The controller to handle the endpoint
+        try {
+            const body = req.body;
+            const transfered = await CRUD.create('transfers', {...body, user: req.session?.user?._id});
+            const response = transfered.toObject();
+
+            response.success = true;
+            return res.status(201).send(response);
+        } catch(err) {
+            const error = new Error.Log(err).append('apiResponse.transfer.deposit_withdraw', req.body.type, req.body.value);
+            return res.status(500).json(error.response());
+        }
+    }
+});
+
+```
+
+#### Load the controller into main server file
+Got to the main server file on you api, the place where you declared the `ServerAPI` instance.
+
+```javascript
+const { ServerAPI } = require('4hands-api');
+
+global.API = new ServerAPI({
+    projectName: 'project-name',
+    API_SECRET: process.env.API_SECRET,
+    databaseConfig: {
+        HOST: 'mongodb://192.168.15.102:27017/',
+        dbName: 'project-name',
+        collections: [
+            require('./src/collections/users'),
+            require('./src/collections/master_accounts'),
+            require('./src/collections/slot_accounts')
+        ]
+    },
+    listenCallback: () => {
+        // Your callback after the server is connected with success
+    }
+});
+
+// Examples of endpoints being declared
+API.createEndpoint(require('./src/controllers/master-account/create'));
+API.createEndpoint(require('./src/controllers/master-account/delete'));
+
+API.createEndpoint(require('./src/controllers/slot-account/create'));
+API.createEndpoint(require('./src/controllers/slot-account/delete'));
+
+// ############################################################################
+// ADD THE NEW CONTROLLER HERE
+API.createEndpoint(require('./src/controllers/transfer/deposit'));
+// ############################################################################
+```
+
+### User Authentication
+The 4hands API has two default endpoints to be used on authentication that is loaded when a ServerAPI is instantiated: `/auth/login` and `/auth/register`.
+
+#### Endpoint [POST] /auth/register
+##### Params
+| name | type | description |
+| ---- | ---- | ----------- |
+| email | string | (Required) The email param will be the username of the new user. |
+| password | string | (Required) Password of account |
+| confirmPassword | string | (Required) Confirmation of password |
+| firstName | string | (Required) The user's first name |
+| lastName | string | (Required) The user's last name |
+| phone | string | The user's phone |
+
+##### Success Response
+Returns the new user document. One of the properties on the response is `token`, this "token" will be required on the request headers for every endpoint requested that is auth protected with `isAuthRoute` set as `true` on the Endpoint declaration, so store it into the cookies to use later.
+
+#### Endpoint [POST] /auth/login
+##### Params
+| name | type | description |
+| ---- | ---- | ----------- |
+| email | string | (Required) The email param will be the username of the new user. |
+| password | string | (Required) Password of account |
+
+##### Success Response
+Returns the new user document. One of the properties on the response is `token`, this "token" will be required on the request headers for every endpoint requested that is auth protected with `isAuthRoute` set as `true` on the Endpoint declaration, so store it into the cookies to use later.
