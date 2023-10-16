@@ -192,10 +192,7 @@ class User extends _Global {
             lastName: this.lastName,
             fullName: this.fullName,
             email: this.email,
-            jira: this.jira,
             userToken: this.token,
-            gitHubToken: this.auth.gitHubToken,
-            gitHubUser: this.auth.gitHubUser,
         };
     }
 

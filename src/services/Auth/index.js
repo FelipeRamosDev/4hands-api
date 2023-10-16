@@ -41,7 +41,7 @@ class AuthService {
         return process.env.API_SECRET;
     }
 
-     /**
+    /**
      * Validates user credentials and signs in the user.
      * @async
      * @param {string} password - The user's password to be validated.
