@@ -110,7 +110,6 @@ class AuthService {
             throw new Error.Log(err);
         }
     }
-
     
     /**
      * Creates a JWT token for the user.
