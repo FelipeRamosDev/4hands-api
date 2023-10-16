@@ -21,7 +21,6 @@ With the database running, follow the next steps:
 - [Create Endpoint 🔗](https://github.com/FelipeRamosDev/4hands-api#create-endpoint)
 - [User Authentication 🔗](https://github.com/FelipeRamosDev/4hands-api#user-authentication)
 
-
 ### Create Server
 To create a server you will need to instantiate a ServerAPI class into you project main file, or whenever you need it. Check the example below:
 
@@ -305,4 +304,3 @@ Returns the new user document. One of the properties on the response is `token`,
 
 ##### Success Response
 Returns the new user document. One of the properties on the response is `token`, this "token" will be required on the request headers for every endpoint requested that is auth protected with `isAuthRoute` set as `true` on the Endpoint declaration, so store it into the cookies to use later.
-
