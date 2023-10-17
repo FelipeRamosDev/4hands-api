@@ -77,8 +77,10 @@ class GlobalMap extends ValidateSchema {
      * @throws {Error} If there is an error during the saving process.
      */
     async saveDB(collectionName) {
+        const CRUDDB = require('@CRUD');
+
         try {
-            const created = await CRUD.create(collectionName || this.collectionName, {...this});
+            const created = await CRUDDB.create(collectionName || this.collectionName, {...this});
 
             if (created instanceof Error.Log) {
                 return new Error.Log(created);

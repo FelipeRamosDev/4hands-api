@@ -77,8 +77,8 @@ class AuthService {
      * To generate a random IV (Initialization Vector)
      * @returns {Buffer} 16 bytes (128 bits) IV for AES-256
      */
-    generateRandomIV() {
-        return crypto.randomBytes(16);
+    generateRandom(length) {
+        return crypto.randomBytes(length || 16);
     }
 
     /**
@@ -88,7 +88,7 @@ class AuthService {
      * @returns {Object} Returns an object with the "iv" and the "encryptedToken".
      */
     encryptToken(token, key) {
-        const iv = generateRandomIV();
+        const iv = this.generateRandom();
         const cipher = crypto.createCipheriv(this.algorithm, key, iv);
     
         return {
