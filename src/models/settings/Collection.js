@@ -1,4 +1,5 @@
 const CollectionField = require('./CollectionField');
+const CollectionEncrypt = require('./CollectionEncrypt');
 const SchemaDB = require('@models/SchemaDB');
 
 /**
@@ -80,7 +81,13 @@ class Collection extends SchemaDB {
              * The fields of the collection.
              * @property {CollectionField[]}
              */
-            this.fieldsSet = Array.isArray(fieldsSet) && fieldsSet.map(field => new CollectionField(field).toObject()) || [];
+            this.fieldsSet = Array.isArray(fieldsSet) && fieldsSet.map(field => {
+                if (field.isEncrypt) {
+                    return new CollectionEncrypt(field).toObject();
+                } else {
+                    return new CollectionField(field).toObject();
+                }
+            }) || [];
         } catch (err) {
             /**
              * Thrown if collection setup fails.

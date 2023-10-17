@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const counters = require('@schemas/counters');
 const logs = require('@schemas/logs');
-const auth_buckets = require('@schemas/auth_buckets');
+const safe_values = require('@schemas/safe_values');
 
 /**
  * Represents a database server with specified configurations and collections.
@@ -47,6 +47,7 @@ class DatabaseServer {
         // Initialize default collections
         this.collections.push(counters.init(this));
         this.collections.push(logs.init(this));
+        this.collections.push(safe_values.init(this));
 
         // Initialize additional collections, if provided
         if (Array.isArray(collections)) {
