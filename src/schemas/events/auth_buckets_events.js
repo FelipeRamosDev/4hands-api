@@ -9,10 +9,6 @@ async function preSave(next) {
             throw hash;
         }
 
-        if (this.gitHubToken) {
-            this.gitHubToken = auth.genToken(this.gitHubToken);
-        }
-
         this.password = hash;
         next();
     } catch (err) {

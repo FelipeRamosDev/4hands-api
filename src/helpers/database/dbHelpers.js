@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const configs = require('@config');
+const SafeValue = require('@models/collections/SafeValue');
 
 /**
  * Checks if a collection exists in the MongoDB database.
@@ -231,6 +232,20 @@ function findRelFields(schema, exclude, levels, currentLevel) {
     }
 }
 
+async function createEncryptField(context) {
+    const SafeValue = require('@models/collections/SafeValue');
+
+    for (let key of context.encryptedFields) {
+        const rawValue = context.raw['_' + key];
+
+        if (rawValue) {
+            context[key] = await SafeValue.createEncrypt(rawValue);
+        }
+    }
+
+    return context;
+}
+
 module.exports = {
     createCounter,
     increaseCounter,
@@ -241,5 +256,6 @@ module.exports = {
     getCollectionModel,
     pickQueryType,
     treatFilter,
-    findRelFields
+    findRelFields,
+    createEncryptField
 };

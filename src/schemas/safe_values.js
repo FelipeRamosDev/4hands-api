@@ -9,8 +9,7 @@ module.exports = new Collection({
     fieldsSet: [
         {
             fieldName: 'encrypted',
-            type: Buffer,
-            required: true
+            type: Buffer
         },
         {
             fieldName: 'type',
@@ -22,6 +21,18 @@ module.exports = new Collection({
             fieldName: 'algorithm',
             type: String,
             default: 'aes-256-ctr'
+        },
+        {
+            fieldName: 'iv',
+            type: Buffer
+        },
+        {
+            fieldName: 'salt',
+            type: Buffer
+        },
+        {
+            fieldName: 'derivatedKey',
+            type: Buffer
         }
     ]
 });
