@@ -1,6 +1,7 @@
 const Success = require('@SUCCESS');
 const bcrypt = require('bcrypt');
 const JWT = require('jsonwebtoken');
+const crypto = require('crypto');
 const FS = require('@services/FS');
 const config = require('@config');
 const sessionCLI = FS.isExist(config.sessionPath) && require('@SESSION_CLI') || {};
@@ -18,6 +19,7 @@ class AuthService {
     constructor(setup) {
         const { parent } = Object(setup);
 
+        this.algorithm = 'aes-256-ctr';
         this._parentBucket = () => parent;
     }
 
@@ -59,6 +61,53 @@ class AuthService {
         } catch (err) {
             throw new Error.Log(err);
         }
+    }
+
+    /**
+     * To generate a key using PBKDF2
+     * @param {string} SECRET_KEY 
+     * @param {Buffer} salt 
+     * @returns {Buffer} 100000 iterations, 32-byte key
+     */
+    generateKey(SECRET_KEY, salt) {
+        return crypto.pbkdf2Sync(SECRET_KEY, salt, 100000, 32, 'sha512');
+    }
+
+    /**
+     * To generate a random IV (Initialization Vector)
+     * @returns {Buffer} 16 bytes (128 bits) IV for AES-256
+     */
+    generateRandomIV() {
+        return crypto.randomBytes(16);
+    }
+
+    /**
+     * To encrypt a token
+     * @param {string} token 
+     * @param {Buffer} key 
+     * @returns {Object} Returns an object with the "iv" and the "encryptedToken".
+     */
+    encryptToken(token, key) {
+        const iv = generateRandomIV();
+        const cipher = crypto.createCipheriv(this.algorithm, key, iv);
+    
+        return {
+          iv: iv.toString('hex'),
+          encryptedToken: cipher.update(token, 'utf8', 'hex') + cipher.final('hex'),
+        };
+    }
+
+    /**
+     * To decrypt a token
+     * @param {string} encryptedToken The encrypted string token.
+     * @param {Buffer} iv The "iv" used on the encrypt generator.
+     * @param {Buffer} key The key used on the encrypt generator.
+     * @returns {string} The decrypted string of the value.
+     */
+    decryptToken(encryptedToken, iv, key) {
+        const decipher = crypto.createDecipheriv(this.algorithm, key, Buffer.from(iv, 'hex'));
+    
+        return decipher.update(encryptedToken, 'hex', 'utf8') + decipher.final('utf8');
     }
 
     /**
@@ -112,7 +161,7 @@ class AuthService {
     }
     
     /**
-     * Creates a JWT token for the user.
+     * Creates a JWT session token for the user.
      * @returns {string} The generated JWT token.
      */
     async createSessionToken(session) {
