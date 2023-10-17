@@ -47,7 +47,6 @@ class DatabaseServer {
         // Initialize default collections
         this.collections.push(counters.init(this));
         this.collections.push(logs.init(this));
-        this.collections.push(auth_buckets.init(this));
 
         // Initialize additional collections, if provided
         if (Array.isArray(collections)) {
