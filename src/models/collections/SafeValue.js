@@ -2,6 +2,8 @@ const _Global = require('../maps/_Global');
 
 class SafeValue extends _Global {
     constructor(setup) {
+        super(setup);
+
         try {
             const { encrypted, type, algorithm } = Object(setup);
 
