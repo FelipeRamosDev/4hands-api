@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const configs = require('@config');
+const SafeValue = require('@models/collections/SafeValue');
 
 /**
  * Checks if a collection exists in the MongoDB database.
@@ -231,6 +232,72 @@ function findRelFields(schema, exclude, levels, currentLevel) {
     }
 }
 
+/**
+ * Encrypts specified fields in the given context object and adds encrypted values to the context of Mongoose Event.
+ *
+ * @param {Object} context - The context object containing data and encryptedFields property coming for the Mongoose Event.
+ * @returns {Object} Updated context object with encrypted fields.
+ * @throws {Error} If there's an error during encryption, it is caught and logged.
+ * @async
+ */
+async function createEncryptFields(context) {
+    const SafeValue = require('@models/collections/SafeValue');
+
+    for (let key of context.encryptedFields) {
+        const rawValue = context.raw['_' + key];
+
+        if (rawValue) {
+            context[key] = await SafeValue.createEncrypt(rawValue);
+        }
+    }
+
+    return context;
+}
+
+/**
+ * Updates encrypted fields in the given context object with new encrypted values of Mongoose Event.
+ *
+ * @param {Object} context - The context object containing data, schema, and _update property coming for the Mongoose Event.
+ * @throws {Error} If there's an error during encryption update, it is caught and logged.
+ * @async
+ */
+async function updateEncryptFields(context) {
+    try {
+        const { CRUD } = require('4hands-api');
+        const schemaObj = context.schema.obj;
+        const encryptFields = [];
+
+        Object.keys(schemaObj).map(key => {
+            const rawValue = context._update['_' + key];
+
+            if (rawValue) {
+                encryptFields.push(key);
+            }
+        })
+
+        for (let key of encryptFields) {
+            const currentValue = context._update[key];
+            const rawValue = context._update['_' + key];
+
+            if (currentValue) {
+                const safeValueDoc = await CRUD.getDoc({
+                    collectionName: 'safe_values',
+                    filter: currentValue
+                });
+
+                const safeValue = safeValueDoc.initialize();
+                const updated = await safeValue.setEncrypted(rawValue);
+
+                if (!updated.success) {
+                    throw new Error.Log({ name: 'UPDATING_ENCRYPTED_FIELD', message: `Error caught when updating a encrypted field!` }).append(err);
+                }
+            }
+        }
+    } catch (err) {
+        throw new Error.Log(err);
+    }
+}
+
 module.exports = {
     createCounter,
     increaseCounter,
@@ -241,5 +308,7 @@ module.exports = {
     getCollectionModel,
     pickQueryType,
     treatFilter,
-    findRelFields
+    findRelFields,
+    createEncryptFields,
+    updateEncryptFields
 };

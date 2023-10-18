@@ -16,10 +16,11 @@ class CollectionField {
      * @param {boolean} setup.required - Indicates if the field is required.
      * @param {boolean} setup.unique - Indicates if the field is unique.
      * @param {boolean} setup.immutable - Indicates if the field is immutable.
+     * @param {boolean} setup.isEncrypt - Defines if the field should be saved encrypted on the database.
      * @param {string[]} setup.enum - Array with the allowed options for the field.
-     * @param {object} setup.enumLabels - Array with the allowed options for the field.
      * @param {SchemaRefConfig} setup.refConfig - The configuration for related fields with other collections.
-     * @param {string|number|Object|Array|Date|Buffer|function} setup.default - If a function was provided, it will axecute the function runtime, and the default will be the result of the function.
+     * @param {object} setup.enumLabels - Array with the allowed options for the field.
+     * @param {string|number|Object|Array|Date|Buffer|function} setup.default - If a function was provided, it will execute the function runtime, and the default will be the result of the function.
      */
     constructor(setup) {
         try {
@@ -30,6 +31,7 @@ class CollectionField {
                 required,
                 unique,
                 immutable,
+                isEncrypt,
                 refConfig,
                 enumLabels
             } = Object(setup);
@@ -69,6 +71,12 @@ class CollectionField {
              * @type {boolean}
              */
             if (immutable) this.immutable = immutable;
+
+            /**
+             * Indicates if the field is encrypted when saved to database.
+             * @type {boolean}
+             */
+            this.isEncrypt = isEncrypt || false;
 
             /**
              * Array with the allowed options for the field.

@@ -76,7 +76,7 @@ class ValidateSchema {
     placeDefault(customSelf) {
         const self = customSelf || this;
 
-        Object.entries(this._schema.obj).map(([key, field]) => {
+        Object.entries(Object(this?._schema?.obj)).map(([key, field]) => {
             const selfCurrent = self[key];
 
             if (!selfCurrent && field.default){

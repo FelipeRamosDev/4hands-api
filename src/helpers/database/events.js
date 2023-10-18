@@ -16,9 +16,9 @@ async function preSave(next) {
 
         if (collection !== config.database.counterCollection) {
             const counter = await dbHelpers.increaseCounter(collection);
-            
+
             // Incrementing the index field
-            if(counter) {
+            if (counter) {
                 const count = counter.value;
                 const symbol = counter.symbol;
 
@@ -28,6 +28,7 @@ async function preSave(next) {
                 throw new Error.Log('database.counter_not_found', collection);
             }
 
+            await dbHelpers.createEncryptFields(this);
             next();
         }
     } catch(err) {
@@ -51,11 +52,12 @@ async function preUpdateOne(next) {
         this._update.modifiedAt = Date.now();
         this.sessionUser = this._update.sessionUser;
         delete this._update.sessionUser;
-        
+
         if (!this._update.onlyAct && collection !== config.database.counterCollection) {
             await relationalHelper.onUpdate.call(this);
         }
 
+        await dbHelpers.updateEncryptFields(this);
         next();
     } catch(err) {
         throw new Error.Log(err).append('database.events.post_save');
@@ -77,7 +79,7 @@ async function postUpdateOne() {
         if ($set.status) {
             process.emit(`status:transition:${collection}:${$set.status}`, this);
         }
-        
+
         delete $set.status;
         process.emit(`update:${collection}`, this);
         process.emit(`socket:update:${collection}:${JSON.stringify(this.getFilter())}`, this);
@@ -123,7 +125,7 @@ async function preDelete(next) {
         if (collection !== config.database.counterCollection) {
             await relationalHelper.onDelete.call(this);
         }
-        
+
         next();
     } catch(err) {
         throw new Error.Log('database.events.pre_delete');
