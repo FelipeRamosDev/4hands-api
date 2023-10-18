@@ -1,9 +1,27 @@
 const SafeValue = require('@models/collections/SafeValue');
 const AuthService = require('@services/Auth');
 
+/**
+ * Represents a utility class providing encryption and decryption methods for sensitive data.
+ * It uses SafeValue and AuthService classes to perform encryption and decryption operations.
+ *
+ * @class
+ */
 class SafeValueClass {
+    /**
+     * The SafeValue class used for encryption and decryption operations.
+     * @type {SafeValue}
+     * @static
+     */
     static BSModel = SafeValue;
 
+    /**
+     * Retrieves a masked version of the decrypted data for display purposes.
+     *
+     * @returns {string|undefined} The masked version of the decrypted data or undefined if not encrypted.
+     * @memberof SafeValueClass
+     * @instance
+     */
     get displayValue() {
         if (!this.encrypted) {
             return;
@@ -25,6 +43,14 @@ class SafeValueClass {
         return result;
     }
 
+    /**
+     * Encrypts the raw value and returns the encryption details.
+     *
+     * @returns {Object|undefined} An object containing encryption details (salt, derivatedKey, iv, encrypted),
+     * or undefined if raw value is missing.
+     * @memberof SafeValueClass
+     * @instance
+     */
     get encrypt() {
         if (!this?.raw?.rawValue) {
             return;
