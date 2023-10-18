@@ -232,7 +232,7 @@ function findRelFields(schema, exclude, levels, currentLevel) {
     }
 }
 
-async function createEncryptField(context) {
+async function createEncryptFields(context) {
     const SafeValue = require('@models/collections/SafeValue');
 
     for (let key of context.encryptedFields) {
@@ -246,6 +246,43 @@ async function createEncryptField(context) {
     return context;
 }
 
+async function updateEncryptFields(context) {
+    try {
+        const { CRUD } = require('4hands-api');
+        const schemaObj = context.schema.obj;
+        const encryptFields = [];
+
+        Object.keys(schemaObj).map(key => {
+            const rawValue = context._update['_' + key];
+
+            if (rawValue) {
+                encryptFields.push(key);
+            }
+        })
+
+        for (let key of encryptFields) {
+            const currentValue = context._update[key];
+            const rawValue = context._update['_' + key];
+
+            if (currentValue) {
+                const safeValueDoc = await CRUD.getDoc({
+                    collectionName: 'safe_values',
+                    filter: currentValue
+                });
+
+                const safeValue = safeValueDoc.initialize();
+                const updated = await safeValue.updateEncrypted(rawValue);
+
+                if (!updated.success) {
+                    throw new Error.Log({ name: 'UPDATING_ENCRYPTED_FIELD', message: `Error caught when updating a encrypted field!` }).append(err);
+                }
+            }
+        }
+    } catch (err) {
+        throw new Error.Log(err);
+    }
+}
+
 module.exports = {
     createCounter,
     increaseCounter,
@@ -257,5 +294,6 @@ module.exports = {
     pickQueryType,
     treatFilter,
     findRelFields,
-    createEncryptField
+    createEncryptFields,
+    updateEncryptFields
 };

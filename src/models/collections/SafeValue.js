@@ -37,6 +37,16 @@ class SafeValue extends _Global {
         });
     }
 
+    async updateEncrypted(newValue) {
+        const CRUD = require('@CRUD');
+
+        return await CRUD.update({
+            collectionName: 'safe_values',
+            filter: this._id,
+            data: { rawValue: newValue }
+        });
+    }
+
     value(secret) {
 
     }

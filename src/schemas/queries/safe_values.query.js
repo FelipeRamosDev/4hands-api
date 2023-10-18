@@ -1,18 +1,11 @@
-const SafeValue = require('@models/collections/SafeValue');
 const AuthService = require('@services/Auth');
 
-class SafeValueClass {
-    static BSModel = SafeValue;
-
-    get encrypt() {
-        if (!this?.raw?.rawValue) {
-            return;
-        }
-
+module.exports = {
+    encrypt() {
         const authService = new AuthService();
         const salt = authService.generateRandom();
         const derivatedKey = authService.generateKey(process.env.API_SECRET, salt);
-        const { iv, encryptedToken } = authService.encryptToken(this.raw.rawValue, derivatedKey);
+        const { iv, encryptedToken } = authService.encryptToken(this._update.rawValue, derivatedKey);
 
         return {
             salt,
@@ -21,6 +14,4 @@ class SafeValueClass {
             encrypted: encryptedToken
         }
     }
-}
-
-module.exports = SafeValueClass;
+};

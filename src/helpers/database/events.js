@@ -28,7 +28,7 @@ async function preSave(next) {
                 throw new Error.Log('database.counter_not_found', collection);
             }
 
-            await dbHelpers.createEncryptField(this);
+            await dbHelpers.createEncryptFields(this);
             next();
         }
     } catch(err) {
@@ -57,6 +57,7 @@ async function preUpdateOne(next) {
             await relationalHelper.onUpdate.call(this);
         }
 
+        await dbHelpers.updateEncryptFields(this);
         next();
     } catch(err) {
         throw new Error.Log(err).append('database.events.post_save');
