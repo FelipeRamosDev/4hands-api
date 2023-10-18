@@ -42,8 +42,30 @@ class GlobalClass {
         }
     }
 
+    /**
+     * @readonly
+     * @returns {boolean} Return if the document is fully loaded
+     */
     get isComplete() {
         return true;
+    }
+
+    /**
+     * @readonly
+     * @returns {string[]} The fields that needs to save as encrypted buffer.
+     */
+    get encryptedFields() {
+        const result = [];
+
+        Object.keys(this.schema.obj).map(key => {
+            const curr = this.schema.obj[key];
+
+            if (curr.isEncrypt) {
+                result.push(key);
+            }
+        });
+
+        return result;
     }
 }
 

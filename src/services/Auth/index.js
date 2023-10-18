@@ -1,6 +1,7 @@
 const Success = require('@SUCCESS');
 const bcrypt = require('bcrypt');
 const JWT = require('jsonwebtoken');
+const crypto = require('crypto');
 const FS = require('@services/FS');
 const config = require('@config');
 const sessionCLI = FS.isExist(config.sessionPath) && require('@SESSION_CLI') || {};
@@ -18,6 +19,7 @@ class AuthService {
     constructor(setup) {
         const { parent } = Object(setup);
 
+        this.algorithm = 'aes-256-ctr';
         this._parentBucket = () => parent;
     }
 
@@ -59,6 +61,53 @@ class AuthService {
         } catch (err) {
             throw new Error.Log(err);
         }
+    }
+
+    /**
+     * To generate a key using PBKDF2
+     * @param {string} SECRET_KEY 
+     * @param {Buffer} salt 
+     * @returns {Buffer} 100000 iterations, 32-byte key
+     */
+    generateKey(SECRET_KEY, salt) {
+        return crypto.pbkdf2Sync(SECRET_KEY, salt, 100000, 32, 'sha512');
+    }
+
+    /**
+     * To generate a random IV (Initialization Vector)
+     * @returns {Buffer} 16 bytes (128 bits) IV for AES-256
+     */
+    generateRandom(length) {
+        return crypto.randomBytes(length || 16);
+    }
+
+    /**
+     * To encrypt a token
+     * @param {string} token 
+     * @param {Buffer} key 
+     * @returns {Object} Returns an object with the "iv" and the "encryptedToken".
+     */
+    encryptToken(token, key) {
+        const iv = this.generateRandom();
+        const cipher = crypto.createCipheriv(this.algorithm, key, iv);
+    
+        return {
+          iv: iv.toString('hex'),
+          encryptedToken: cipher.update(token, 'utf8', 'hex') + cipher.final('hex'),
+        };
+    }
+
+    /**
+     * To decrypt a token
+     * @param {string} encryptedToken The encrypted string token.
+     * @param {Buffer} iv The "iv" used on the encrypt generator.
+     * @param {Buffer} derivatedKey The key used on the encrypt generator.
+     * @returns {string} The decrypted string of the value.
+     */
+    decryptToken(encryptedToken, iv, derivatedKey) {
+        const decipher = crypto.createDecipheriv(this.algorithm, derivatedKey, Buffer.from(iv, 'hex'));
+    
+        return decipher.update(encryptedToken, 'hex', 'utf8') + decipher.final('utf8');
     }
 
     /**
@@ -111,6 +160,22 @@ class AuthService {
         }
     }
     
+    /**
+     * Creates a JWT session token for the user.
+     * @returns {string} The generated JWT token.
+     */
+    async createSessionToken(session) {
+        try {
+            const sessionSalt = await this.genSalt();
+            const token = JWT.sign({ sessionID: session.id, sessionSalt }, this.secretKey, {expiresIn: Date.now() + 80000000});
+
+            session.sessionSalt = sessionSalt;
+            return token;
+        } catch (err) {
+            throw new Error.Log(err);
+        }
+    }
+
     /**
      * Creates a JWT token for the user.
      * @returns {string} The generated JWT token.

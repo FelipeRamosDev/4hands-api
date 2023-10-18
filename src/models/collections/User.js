@@ -206,7 +206,6 @@ class User extends _Global {
 
         delete dataOut.auth;
         delete dataOut._schema;
-        delete dataOut.gitHubConnection;
         return dataOut;
     }
 
