@@ -232,6 +232,14 @@ function findRelFields(schema, exclude, levels, currentLevel) {
     }
 }
 
+/**
+ * Encrypts specified fields in the given context object and adds encrypted values to the context of Mongoose Event.
+ *
+ * @param {Object} context - The context object containing data and encryptedFields property coming for the Mongoose Event.
+ * @returns {Object} Updated context object with encrypted fields.
+ * @throws {Error} If there's an error during encryption, it is caught and logged.
+ * @async
+ */
 async function createEncryptFields(context) {
     const SafeValue = require('@models/collections/SafeValue');
 
@@ -246,6 +254,13 @@ async function createEncryptFields(context) {
     return context;
 }
 
+/**
+ * Updates encrypted fields in the given context object with new encrypted values of Mongoose Event.
+ *
+ * @param {Object} context - The context object containing data, schema, and _update property coming for the Mongoose Event.
+ * @throws {Error} If there's an error during encryption update, it is caught and logged.
+ * @async
+ */
 async function updateEncryptFields(context) {
     try {
         const { CRUD } = require('4hands-api');

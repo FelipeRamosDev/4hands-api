@@ -201,6 +201,17 @@ class GlobalMap extends ValidateSchema {
         }
     }
 
+    /**
+     * Encrypts and sets the specified field with the provided value. If the field does not have a current encrypted value,
+     * it creates a new SafeValue instance and updates the field in the database. If the field already has an encrypted value,
+     * it updates the existing SafeValue instance with the new value.
+     *
+     * @param {string} fieldName - The name of the field to be encrypted and updated.
+     * @param {string} value - The raw value to be encrypted and set.
+     * @returns {Promise<Object>} A Promise that resolves to an object containing success status, message, and data.
+     * @throws {Error.Log} If there is an error during encryption, database update, or if a required value is missing.
+     * @async
+     */
     async setEncryptField(fieldName, value) {
         const SafeValue = require('4hands-api/src/models/collections/SafeValue');
         const currValue = this[fieldName];

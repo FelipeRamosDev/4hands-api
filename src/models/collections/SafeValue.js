@@ -1,7 +1,20 @@
 const _Global = require('../maps/_Global');
 const AuthService = require('@services/Auth');
 
+/**
+ * Represents a SafeValue object used for encrypting and decrypting sensitive data.
+ * Extends _Global class and encapsulates encryption and decryption functionality.
+ *
+ * @class
+ */
 class SafeValue extends _Global {
+    /**
+     * Creates a new SafeValue instance with the provided setup parameters.
+     *
+     * @constructor
+     * @param {Object} setup - The setup object containing encryption details (encrypted, type, algorithm, iv, salt, derivatedKey, displayValue).
+     * @throws {Error} If there's an error during instantiation, it is caught and logged.
+     */
     constructor(setup) {
         super(Object(setup));
 
@@ -29,10 +42,24 @@ class SafeValue extends _Global {
         }
     }
 
+    /**
+     * Returns the binary string representation of the encrypted data.
+     *
+     * @readonly
+     * @returns {string} Binary string representation of the encrypted data.
+     */
     get binString() {
         return this.encrypted.toString();
     }
 
+    /**
+     * Creates a new encrypted SafeValue instance with the given raw value.
+     *
+     * @param {string} rawValue - The raw value to be encrypted.
+     * @returns {Promise<Object>} A Promise that resolves to the created SafeValue object.
+     * @async
+     * @static
+     */
     static async createEncrypt(rawValue) {
         const CRUD = require('@CRUD');
 
@@ -42,6 +69,13 @@ class SafeValue extends _Global {
         });
     }
 
+    /**
+     * Updates the encrypted data with a new encrypted value.
+     *
+     * @param {string} newValue - The new encrypted value to be set.
+     * @returns {Promise<Object>} A Promise that resolves to the updated SafeValue object.
+     * @async
+     */
     async setEncrypted(newValue) {
         const CRUD = require('@CRUD');
 
@@ -56,6 +90,11 @@ class SafeValue extends _Global {
         }
     }
 
+     /**
+     * Decrypts and returns the original data from the SafeValue object.
+     *
+     * @returns {string|undefined} The decrypted original data, or undefined if the SafeValue is empty.
+     */
     read() {
         if (this.isEmpty) return;
 

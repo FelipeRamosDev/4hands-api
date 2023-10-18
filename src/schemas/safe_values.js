@@ -1,3 +1,9 @@
+/**
+ * Represents a Collection model for storing encrypted data.
+ * Defines the schema for 'safe_values' collection, specifying fields for encrypted data along with their types and constraints.
+ *
+ * @module SafeValuesCollection
+ */
 const Collection = require('@models/settings/Collection');
 
 module.exports = new Collection({

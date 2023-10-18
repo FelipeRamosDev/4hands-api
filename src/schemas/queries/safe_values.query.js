@@ -1,6 +1,14 @@
 const AuthService = require('@services/Auth');
 
 module.exports = {
+    /**
+     * Encrypts the provided raw value using a generated salt, a derived key from the API secret, and an initialization vector (iv).
+     * 
+     * @returns {Object} An object containing encryption details: salt, derived key, iv, and encrypted token.
+     * @throws {Error} If there's an error during encryption process.
+     * @function
+     * @memberof module:EncryptionUtility
+     */
     encrypt() {
         const authService = new AuthService();
         const salt = authService.generateRandom();
