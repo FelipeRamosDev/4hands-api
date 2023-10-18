@@ -6,7 +6,7 @@ class SafeValue extends _Global {
         super(Object(setup));
 
         try {
-            const { encrypted, type, algorithm, iv, salt, derivatedKey } = Object(setup);
+            const { encrypted, type, algorithm, iv, salt, derivatedKey, displayValue } = Object(setup);
 
             if (!setup) {
                 this.isEmpty = true;
@@ -16,6 +16,7 @@ class SafeValue extends _Global {
             this.type = type;
             this.authService = new AuthService({ parent: this });
             this.algorithm = algorithm || 'aes-256-ctr';
+            this.displayValue = displayValue;
 
             if (this.type === 'encrypt') {
                 this.encrypted = encrypted;
@@ -26,6 +27,10 @@ class SafeValue extends _Global {
         } catch (err) {
             throw new Error.Log(err);
         }
+    }
+
+    get binString() {
+        return this.encrypted.toString();
     }
 
     static async createEncrypt(rawValue) {
@@ -51,8 +56,10 @@ class SafeValue extends _Global {
         }
     }
 
-    value(secret) {
+    read() {
+        if (this.isEmpty) return;
 
+        return this.authService.decryptToken(this.encrypted.toString(), this.iv.toString(), this.derivatedKey.buffer);
     }
 }
 
