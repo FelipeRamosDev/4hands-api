@@ -3,13 +3,13 @@ const AuthService = require('@services/Auth');
 
 class SafeValue extends _Global {
     constructor(setup) {
-        super(setup);
+        super(Object(setup));
 
         try {
             const { encrypted, type, algorithm, iv, salt, derivatedKey } = Object(setup);
 
-            if (!type) {
-                throw 'The param "type" should be "hash" or "encrypt" but received undefined!';
+            if (!setup) {
+                this.isEmpty = true;
             }
 
             this.collectionName = 'safe_values';
@@ -37,14 +37,18 @@ class SafeValue extends _Global {
         });
     }
 
-    async updateEncrypted(newValue) {
+    async setEncrypted(newValue) {
         const CRUD = require('@CRUD');
 
-        return await CRUD.update({
-            collectionName: 'safe_values',
-            filter: this._id,
-            data: { rawValue: newValue }
-        });
+        if (this.isEmpty) {
+            return await SafeValue.createEncrypt(newValue);
+        } else {
+            return await CRUD.update({
+                collectionName: 'safe_values',
+                filter: this._id,
+                data: { rawValue: newValue }
+            });
+        }
     }
 
     value(secret) {
