@@ -271,7 +271,7 @@ async function updateEncryptFields(context) {
                 });
 
                 const safeValue = safeValueDoc.initialize();
-                const updated = await safeValue.updateEncrypted(rawValue);
+                const updated = await safeValue.setEncrypted(rawValue);
 
                 if (!updated.success) {
                     throw new Error.Log({ name: 'UPDATING_ENCRYPTED_FIELD', message: `Error caught when updating a encrypted field!` }).append(err);
