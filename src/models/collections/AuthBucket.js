@@ -70,9 +70,7 @@ class AuthBucket extends _Global {
             const auth = await CRUD.create('auth_buckets', {
                 user: user.id,
                 rule: user.raw.rule,
-                password: user.raw.password,
-                gitHubToken: user.raw.gitHubToken,
-                jiraToken: user.raw.jiraToken
+                password: user.raw.password
             });
 
             if (auth instanceof Error.Log || !auth) {

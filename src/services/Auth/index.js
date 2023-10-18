@@ -77,8 +77,8 @@ class AuthService {
      * To generate a random IV (Initialization Vector)
      * @returns {Buffer} 16 bytes (128 bits) IV for AES-256
      */
-    generateRandomIV() {
-        return crypto.randomBytes(16);
+    generateRandom(length) {
+        return crypto.randomBytes(length || 16);
     }
 
     /**
@@ -88,7 +88,7 @@ class AuthService {
      * @returns {Object} Returns an object with the "iv" and the "encryptedToken".
      */
     encryptToken(token, key) {
-        const iv = generateRandomIV();
+        const iv = this.generateRandom();
         const cipher = crypto.createCipheriv(this.algorithm, key, iv);
     
         return {
@@ -101,11 +101,11 @@ class AuthService {
      * To decrypt a token
      * @param {string} encryptedToken The encrypted string token.
      * @param {Buffer} iv The "iv" used on the encrypt generator.
-     * @param {Buffer} key The key used on the encrypt generator.
+     * @param {Buffer} derivatedKey The key used on the encrypt generator.
      * @returns {string} The decrypted string of the value.
      */
-    decryptToken(encryptedToken, iv, key) {
-        const decipher = crypto.createDecipheriv(this.algorithm, key, Buffer.from(iv, 'hex'));
+    decryptToken(encryptedToken, iv, derivatedKey) {
+        const decipher = crypto.createDecipheriv(this.algorithm, derivatedKey, Buffer.from(iv, 'hex'));
     
         return decipher.update(encryptedToken, 'hex', 'utf8') + decipher.final('utf8');
     }

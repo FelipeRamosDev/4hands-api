@@ -17,11 +17,11 @@ class GlobalMap extends ValidateSchema {
      * @throws {Error} If the creation of GlobalMap fails.
      */
     constructor(setup, parent) {
+        const { _id, index, author, cod, createdAt, modifiedAt, collectionName} = setup || {};
         super(setup.validationRules || {});
         if (isObjectID(setup)) return;
 
         const User = require('@models/collections/User');
-        const { _id, index, author, cod, createdAt, modifiedAt, collectionName} = setup || {};
 
         try {
             this.collectionName = collectionName;
@@ -77,8 +77,10 @@ class GlobalMap extends ValidateSchema {
      * @throws {Error} If there is an error during the saving process.
      */
     async saveDB(collectionName) {
+        const CRUDDB = require('@CRUD');
+
         try {
-            const created = await CRUD.create(collectionName || this.collectionName, {...this});
+            const created = await CRUDDB.create(collectionName || this.collectionName, {...this});
 
             if (created instanceof Error.Log) {
                 return new Error.Log(created);
@@ -129,12 +131,13 @@ class GlobalMap extends ValidateSchema {
      * @throws {Error} If there is an error during the update process.
      */
     async updateDB({collectionName, filter, data}) {
+        const crud = require('../../services/database/crud');
         const collection = collectionName || this.collectionName;
 
         try {
             if (!collection) throw new Error.Log('database.missing_params', 'collectionName', '_Global.updateDB');
 
-            const loaded = await CRUD.update({collectionName: collection, filter: filter || this._id, data, options: {returnDocs: true} });
+            const loaded = await crud.update({collectionName: collection, filter: filter || this._id, data, options: {returnDocs: true} });
             if (loaded instanceof Error.Log) {
                 throw new Error.Log(loaded);
             }
@@ -195,6 +198,37 @@ class GlobalMap extends ValidateSchema {
             return increased;
         } catch (err) {
             throw new Error.Log('helpers.increase_doc_prop', this.collectionName, this._id, increaseValue);
+        }
+    }
+
+    async setEncryptField(fieldName, value) {
+        const SafeValue = require('4hands-api/src/models/collections/SafeValue');
+        const currValue = this[fieldName];
+
+        if (!value) {
+            throw new Error.Log({ name: `It's required to have a value to proceed on setting a safe value!`});
+        }
+
+        if (!currValue || currValue.isEmpty) {
+            const newSafeValue = await SafeValue.createEncrypt(value);
+
+            const updated = await this.updateDB({
+                data: { [fieldName]: newSafeValue.id }
+            });
+
+            if (!updated || updated instanceof Error.Log) {
+                throw new Error.Log(updated);
+            } else {
+                return { success: true, message: 'New safe value created!', data: newSafeValue };
+            }
+        } else {
+            const updated = await currValue.setEncrypted(value);
+
+            if (!updated || updated instanceof Error.Log) {
+                throw new Error.Log(updated);
+            } else {
+                return { success: true, message: 'SafeValue updated!', data: updated };
+            }
         }
     }
 }
