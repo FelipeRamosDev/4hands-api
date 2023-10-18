@@ -193,6 +193,22 @@ class AuthService {
     }
 
     /**
+     * Creates a JWT token for the user.
+     * @returns {string} The generated JWT token.
+     */
+    async createSessionToken(session) {
+        try {
+            const sessionSalt = await this.genSalt();
+            const token = JWT.sign({ sessionID: session.id, sessionSalt }, this.secretKey, {expiresIn: Date.now() + 80000000});
+
+            session.sessionSalt = sessionSalt;
+            return token;
+        } catch (err) {
+            throw new Error.Log(err);
+        }
+    }
+
+    /**
      * Generates a JWT token based on the provided data.
      * @param {Object} data - The data to be encoded into the JWT token.
      * @returns {string} The generated JWT token.
