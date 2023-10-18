@@ -9,5 +9,17 @@ module.exports = {
         this.salt = salt;
 
         next();
+    },
+
+    async preUpdate(next) {
+        const encrypt = this.encrypt();
+        const { derivatedKey, encrypted, iv, salt } = encrypt;
+
+        this._update.encrypted = encrypted;
+        this._update.derivatedKey = derivatedKey;
+        this._update.iv = iv;
+        this._update.salt = salt;
+
+        next();
     }
 };
