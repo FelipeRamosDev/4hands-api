@@ -101,11 +101,11 @@ class AuthService {
      * To decrypt a token
      * @param {string} encryptedToken The encrypted string token.
      * @param {Buffer} iv The "iv" used on the encrypt generator.
-     * @param {Buffer} key The key used on the encrypt generator.
+     * @param {Buffer} derivatedKey The key used on the encrypt generator.
      * @returns {string} The decrypted string of the value.
      */
-    decryptToken(encryptedToken, iv, key) {
-        const decipher = crypto.createDecipheriv(this.algorithm, key, Buffer.from(iv, 'hex'));
+    decryptToken(encryptedToken, iv, derivatedKey) {
+        const decipher = crypto.createDecipheriv(this.algorithm, derivatedKey, Buffer.from(iv, 'hex'));
     
         return decipher.update(encryptedToken, 'hex', 'utf8') + decipher.final('utf8');
     }

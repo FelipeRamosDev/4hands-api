@@ -4,6 +4,27 @@ const AuthService = require('@services/Auth');
 class SafeValueClass {
     static BSModel = SafeValue;
 
+    get displayValue() {
+        if (!this.encrypted) {
+            return;
+        }
+
+        const authService = new AuthService();
+        const value = authService.decryptToken(this.encrypted.toString(), this.iv.toString(), this.derivatedKey);
+        const lengthToShow = parseInt(value.length * 0.15);
+        let result = '';
+
+        for (let i = 0; i < value.length; i++) {
+            if ((i >= lengthToShow) && (i < (value.length - lengthToShow))) {
+                result += '*';
+            } else {
+                result += value[i];
+            }
+        } 
+
+        return result;
+    }
+
     get encrypt() {
         if (!this?.raw?.rawValue) {
             return;
