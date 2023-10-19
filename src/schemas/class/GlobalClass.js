@@ -3,7 +3,7 @@ const CRUD = require('@CRUD');
 class GlobalClass {
     initialize() {
         try {
-            const Model = this.schema && this.schema.statics && this.schema.statics.BSModel;
+            const Model = this.BSModel || this?.schema?.statics?.BSModel;
 
             if (Model) {
                 const builded = new Model(this.toObject());
