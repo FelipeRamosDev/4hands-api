@@ -23,7 +23,7 @@ class ServerAPI {
      * Creates an instance of ServerAPI.
      * @param {Object} setup - Configuration options for the server.
      * @param {string} setup.projectName - The name of the project.
-     * @param {Object} setup.databaseConfig - Configuration options for the database.
+     * @param {Database} setup.databaseConfig - Configuration options for the database.
      * @param {string} setup.API_SECRET - The API secret key for session encryption.
      * @param {number} setup.sessionCookiesMaxAge - Maximum age of session cookies (in milliseconds).
      * @param {string} setup.staticPath - The path to static files.
