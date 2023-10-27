@@ -40,10 +40,13 @@ module.exports = new Endpoint({
                 return res.status(500).send(newUser.response());
             }
 
-            req.session.user = newUser;
+            const login = await User.signIn(body.email, body.password);
+            const response = await login.toSession(req.session);
+    
+            req.session.user = response;
             req.session.isAuthorized = true;
     
-            return res.status(200).send({...newUser, sessionID: req.session.id});
+            return res.status(200).send(response);
         } catch(err) {
             return res.status(500).send(new Error.Log(err).response());
         }
