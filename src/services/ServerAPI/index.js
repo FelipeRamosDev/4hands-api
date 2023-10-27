@@ -91,6 +91,7 @@ class ServerAPI {
         this.createEndpoint(require('@controllers/api/health-check'));
         this.createEndpoint(require('@controllers/auth/login'));
         this.createEndpoint(require('@controllers/auth/register'));
+        this.createEndpoint(require('@controllers/auth/signout'));
         this.createEndpoint(require('@controllers/collection/create'));
         this.createEndpoint(require('@controllers/collection/delete'));
         this.createEndpoint(require('@controllers/collection/get/doc'));
