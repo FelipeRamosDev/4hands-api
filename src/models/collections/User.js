@@ -242,7 +242,7 @@ class User extends _Global {
      */
     static async getUser(filter) {
         try {
-            const userDOC = await CRUD.getDoc({collectionName: 'users', filter}).defaultPopulate();
+            const userDOC = await CRUD.getDoc({ collectionName: 'users', filter }).defaultPopulate();
 
             if (!userDOC) {
                 /**
@@ -252,14 +252,7 @@ class User extends _Global {
                 return new Error.Log('user.not_found', filter);
             }
 
-            const initialized = userDOC.initialize();
-            if (!initialized.gitHub && initialized.auth.gitHubToken) {
-                await initialized.updateDB({data: {
-                    gitHub: await initialized.loadGitHubData()
-                }});
-            } 
-
-            return initialized;
+            return userDOC.initialize();
         } catch (err) {
             /**
              * Thrown if there is an error during user retrieval.

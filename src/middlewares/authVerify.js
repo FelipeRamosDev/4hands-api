@@ -30,6 +30,7 @@ module.exports = async (req, res, next) => {
             session.user = data.user;
             session.isAuthorized = data.isAuthorized;
             session.sessionSalt = data.sessionSalt;
+            req.sessionID = tokenData.sessionID;
 
             return next();
         }
