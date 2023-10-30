@@ -1,27 +1,40 @@
 const nodemailer = require('nodemailer');
+const EmailConfirmation = require('@src/templates/EmailConfirmation');
 
 class MailService {
     constructor(setup) {
-        const { type, smtpHost, smtpPort, isSecure, smtpUser, smtpPassword } = Object(setup);
+        const { type, host, smtpPort, isSecure, emailUser, emailPassword } = Object(setup);
+
+        this.options;
 
         try {
             switch (type) {
                 case 'smtp': {
-                    this.transporter = nodemailer.createTransport({
-                        host: smtpHost,
-                        port: smtpPort || 587,
-                        secure: isSecure || false,
+                    this.options = {
+                        host,
+                        port: Number(smtpPort || 465),
+                        secure: false,
                         auth: {
-                            user: smtpUser,
-                            pass: smtpPassword,
-                        }
-                    });
+                            user: emailUser,
+                            pass: emailPassword
+                        },
+                    };
 
                     break;
                 }
 
                 case 'gmail': {
-                    console.log('Sending Gmail...');
+                    this.options = {
+                        service: 'gmail',
+                        secure: isSecure || false,
+                        auth: {
+                            user: emailUser,
+                            pass: emailPassword,
+                        },
+                        tls: {
+                            rejectUnauthorized: isSecure || false
+                        }
+                    };
                     break;
                 }
 
@@ -29,24 +42,38 @@ class MailService {
                     throw new Error.Log('common.bad_format_param', 'type', 'MailService.constructor', 'smpt | gmail', type);
                 }
             }
+
+            this.transporter = nodemailer.createTransport(this.options);
         } catch (err) {
             throw new Error.Log(err);
         }
     }
 
-    async send(to, subject, cc, body) {
-        try {
-            return new Promise((resolve, reject) => {
-                this.transporter.sendMail({ to, subject, cc, body }, (err, info) => {
-                    if (err) {
-                        return reject(err);
-                    }
+    async send(to, subject, body, cc) {
+        return new Promise((resolve, reject) => {
+            this.transporter.sendMail({ to, subject, cc, html: body }, (err, info) => {
+                if (err) {
+                    return reject(err);
+                }
 
-                    return resolve(info);
-                });
+                return resolve({ success: true, info });
             });
+        });
+    }
+
+    async sendConfirmation(userEmail, confirmationURL, options) {
+        const { customSubject } = Object(options);
+
+        try {
+            const body = new EmailConfirmation({
+                userEmail,
+                confirmationURL,
+                ...Object(options)
+            }).renderToString();
+
+            return await this.send(userEmail, customSubject || 'Confirmation Email', body);
         } catch (err) {
-            throw new Error.Log(err);
+            return new Error.Log(err);
         }
     }
 }

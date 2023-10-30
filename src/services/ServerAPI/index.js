@@ -12,6 +12,7 @@ const Database = require('@services/database/DatabaseServer');
 const FS = require('@services/FS');
 const path = require('path');
 const Endpoint = require('@src/models/settings/Endpoint');
+const MailService = require('4hands-api/src/services/Mail');
 
 /**
  * Represents the main server class for the API.
@@ -36,6 +37,7 @@ class ServerAPI {
      * @param {string} setup.keySSLPath - The path to the SSL key file.
      * @param {string} setup.certSSLPath - The path to the SSL certificate file.
      * @param {number} setup.PORT - The port number on which the server will listen (defaults to 80).
+     * @param {MailService} setup.emailConfig - Configurations for the server emails sent.
      */
     constructor (setup) {
         const {
@@ -52,7 +54,8 @@ class ServerAPI {
             sessionSaveUninitialized,
             keySSLPath,
             certSSLPath,
-            PORT
+            PORT,
+            emailConfig
         } = Object(setup);
 
         this.projectName = projectName;
@@ -69,6 +72,10 @@ class ServerAPI {
         this.certSSLPath = certSSLPath;
         this.listenCallback = listenCallback;
         this.PORT = PORT || 80;
+
+        if (emailConfig) {
+            this.mailService = new MailService(emailConfig);
+        }
 
         this.isSuccess = (customCallback) => {
             try {
