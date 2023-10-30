@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>%{{title:string}}%</title>
+
+    <style>
+        .container {
+            width: 95%;
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        .message-wrap {
+            width: 95%;
+            margin: 0 auto;
+        }
+
+        .text-message {
+            text-align: center;
+        }
+
+        button {
+            display: inline-block;
+            margin: 0 auto;
+            text-transform: uppercase;
+            padding: 1rem;
+            text-decoration: none;
+        }
+
+        .container.custom {
+            %{{containerCSS:string}}%
+        }
+
+        .message-wrap.custom {
+            %{{messageWrapCSS:string}}%
+        }
+
+        .text-message.custom {
+            %{{textMesssageCSS:string}}%
+        }
+
+        button.custom {
+            %{{buttonCSS:string}}%
+        }
+    </style>
+</head>
+<body>
+    <div class="container custom">
+        <h1>%{{title:string}}%</h1>
+    
+        <div class="message-wrap custom">
+            <p class="text-message custom">%{{message:string}}%</p>
+
+            <a class="button custom" href="%{{confirmationURL:string}}%">Confirm e-mail</a>
+        </div>
+    </div>
+</body>
+</html>
