@@ -1,10 +1,29 @@
 const Component = require('@interface/Component');
 
+/**
+ * Represents an email confirmation component extending the base Component class.
+ * @class
+ * @extends Component
+ */
 class EmailConfirmation extends Component {
     get SOURCE_PATH() {
         return require.resolve('./EmailConfirmation.html');
     }
 
+    /**
+     * Constructs an instance of EmailConfirmation with the provided settings.
+     * @constructor
+     * @param {Object} settings - Configuration settings for the email confirmation component.
+     * @param {string} settings.userEmail - User's email address for confirmation.
+     * @param {string} settings.projectLogoURL - URL of the project logo to be displayed in the email.
+     * @param {string} settings.customTitle - Custom title for the email confirmation message (optional).
+     * @param {string} settings.customMessage - Custom message content for the email confirmation (optional).
+     * @param {string} settings.confirmationURL - URL for confirming the user's email address.
+     * @param {string} settings.containerCSS - CSS class for styling the email container (optional).
+     * @param {string} settings.messageWrapCSS - CSS class for styling the message wrapper (optional).
+     * @param {string} settings.textMessageCSS - CSS class for styling the text message (optional).
+     * @param {string} settings.buttonCSS - CSS class for styling the confirmation button (optional).
+     */
     constructor(settings) {
         super(settings);
 
