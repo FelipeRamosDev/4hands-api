@@ -1,4 +1,5 @@
 const Component = require('@interface/Component');
+const ImageTemplate = require('4hands-api/src/templates/Image');
 
 /**
  * Represents an email confirmation component extending the base Component class.
@@ -22,6 +23,7 @@ class EmailConfirmation extends Component {
      * @param {string} settings.containerCSS - CSS class for styling the email container (optional).
      * @param {string} settings.messageWrapCSS - CSS class for styling the message wrapper (optional).
      * @param {string} settings.textMessageCSS - CSS class for styling the text message (optional).
+     * @param {string} settings.titleCSS - CSS class for styling the text message (optional).
      * @param {string} settings.buttonCSS - CSS class for styling the confirmation button (optional).
      */
     constructor(settings) {
@@ -36,6 +38,7 @@ class EmailConfirmation extends Component {
             containerCSS,
             messageWrapCSS,
             textMesssageCSS,
+            titleCSS,
             buttonCSS
         } = Object(settings);
 
@@ -44,7 +47,9 @@ class EmailConfirmation extends Component {
         this.containerCSS = containerCSS;
         this.messageWrapCSS = messageWrapCSS;
         this.textMesssageCSS = textMesssageCSS;
+        this.titleCSS = titleCSS;
         this.buttonCSS = buttonCSS;
+        this.projectLogo = new ImageTemplate({ src: projectLogoURL, alt: 'Project Logo' });
 
         if (customTitle) {
             this.title = customTitle;

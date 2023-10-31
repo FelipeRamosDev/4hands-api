@@ -6,6 +6,10 @@
     <title>%{{title:string}}%</title>
 
     <style>
+        a {
+            color: white;
+        }
+
         .container {
             width: 95%;
             max-width: 1440px;
@@ -15,18 +19,31 @@
         .message-wrap {
             width: 95%;
             margin: 0 auto;
+            text-align: center;
+            background-color: black;
+            color: white;
+            border-radius: 10px;
+            padding: 1rem;
         }
 
         .text-message {
             text-align: center;
         }
 
-        button {
-            display: inline-block;
+        .title {
+            text-align: center;
+            color: white;
+        }
+
+        .button {
+            display: block;
             margin: 0 auto;
             text-transform: uppercase;
-            padding: 1rem;
+            padding: 15px;
+            border-radius: 10px;
             text-decoration: none;
+            background-color: greenyellow;
+            color: white;
         }
 
         .container.custom {
@@ -41,18 +58,22 @@
             %{{textMesssageCSS:string}}%
         }
 
-        button.custom {
+        .title.custom {
+            %{{titleCSS:string}}%
+        }
+
+        .button.custom {
             %{{buttonCSS:string}}%
         }
     </style>
 </head>
 <body>
     <div class="container custom">
-        <h1>%{{title:string}}%</h1>
-    
         <div class="message-wrap custom">
-            <p class="text-message custom">%{{message:string}}%</p>
+            %{{projectLogo:component}}%
+            <h1 class="title custom">%{{title:string}}%</h1>
 
+            <p class="text-message custom">%{{message:string}}%</p>
             <a class="button custom" href="%{{confirmationURL:string}}%">Confirm e-mail</a>
         </div>
     </div>
