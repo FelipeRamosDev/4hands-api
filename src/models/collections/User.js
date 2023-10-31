@@ -28,7 +28,8 @@ class User extends _Global {
             firstName,
             lastName,
             email,
-            phone
+            phone,
+            isEmailConfirmed
         } = Object(setup);
 
         try {
@@ -48,7 +49,7 @@ class User extends _Global {
              * The display name of the user.
              * @property {string}
              */
-            this.displayName = `${firstName} ${lastName} (${email})`;
+            this.displayName = `${firstName} ${lastName}`;
 
             /**
              * The first name of the user.
@@ -79,6 +80,12 @@ class User extends _Global {
              * @property {string}
              */
             this.frontURL = frontURL;
+
+            /**
+             * Mark if the user's email is confirmed.
+             * @property {string}
+             */
+            this.isEmailConfirmed = isEmailConfirmed;
 
             /**
              * The AuthBucket instance associated with this user.
@@ -181,6 +188,17 @@ class User extends _Global {
     }
 
     /**
+     * To generate a confimation token to be used in a confirmation URL.
+     * @returns {string} - The confirmation token.
+     */
+    generateConfirmationToken() {
+        if (!this.isEmailConfirmed) {
+            this.confirmationToken = this.authService.generateKey(this.authService.secretKey, this.authService.generateRandom(10));
+            return this.confirmationToken.toString('hex');
+        }
+    }
+
+    /**
      * Converts the user information to a session object.
      * @returns {Object} - The session object representing the user information.
      */
@@ -193,6 +211,7 @@ class User extends _Global {
             fullName: this.fullName,
             email: this.email,
             userToken: this.token,
+            isEmailConfirmed: this.isEmailConfirmed
         };
     }
 
@@ -298,13 +317,14 @@ class User extends _Global {
      * Static method to create a new user.
      * @param {Object} setup - The user setup object containing necessary details.
      * @param {Object} options - Additional options for user creation.
-     * @param {boolean} options.preventSignIn - Indicates whether to prevent automatic sign-in after user creation.
+     * @param {boolean} options.confirmationEmail - Indicates whether to confirm the new user's email or not.
      * @returns {Promise} - A promise resolving to the user creation status.
      * @throws {Error.Log} If there is an error during user creation.
      */
     static async create(setup, options) {
         try {
             const { userName, email } = Object(setup);
+            const { confirmationEmail } = Object(options);
 
             // Check if the userName or email (that can be a username) is already in use
             const isExist = await this.isExist(userName || email);
@@ -318,12 +338,19 @@ class User extends _Global {
                 throw newUser;
             }
 
-            return newUser.toObject();
+            const user = newUser.initialize();
+
+            if (confirmationEmail && API.mailService) {
+                const confirmationToken = user.generateConfirmationToken();
+
+                await API.mailService.sendConfirmation(
+                    user.email,
+                    'http://localhost:8080/dashboard/email-confirmation?confirmationtoken=' + confirmationToken.toString('hex')
+                );
+            }
+
+            return user;
         } catch (err) {
-            /**
-             * Thrown if there is an error during user creation.
-             * @throws {Error.Log}
-             */
             throw new Error.Log(err);
         }
     }
@@ -340,10 +367,6 @@ class User extends _Global {
             const userDOC = await CRUD.getDoc({ collectionName: 'users', filter: { userName }}).defaultPopulate();
 
             if (!userDOC) {
-                /**
-                 * Thrown if the user is not found during sign-in.
-                 * @throws {Error.Log}
-                 */
                 return new Error.Log('auth.user_not_found', userName);
             }
 
@@ -353,17 +376,9 @@ class User extends _Global {
             if (signedIn.success) {
                 return user;
             } else {
-                /**
-                 * Thrown if there is an error during sign-in.
-                 * @throws {Error.Log}
-                 */
                 return signedIn;
             }
         } catch (err) {
-            /**
-             * Thrown if there is an error during sign-in.
-             * @throws {Error.Log}
-             */
             throw new Error.Log(err);
         }
     }
