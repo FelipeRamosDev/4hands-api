@@ -39,6 +39,11 @@ module.exports = new Collection({
         {
             fieldName: 'phone',
             type: String
+        },
+        {
+            fieldName: 'isEmailConfirmed',
+            type: Boolean,
+            default: false
         }
     ]
 });
