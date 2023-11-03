@@ -3,7 +3,7 @@ const Endpoint = require('@src/models/settings/Endpoint');
 
 /**
  * Represents a controller endpoint for register an user.
- * @name AuthRegister
+ * @name AuthSignOut
  * @type {Endpoint}
  */
 module.exports = new Endpoint({
