@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
-const EmailConfirmation = require('@src/templates/EmailConfirmation');
+const EmailConfirmation = require('4hands-api/src/templates/emails/EmailConfirmation');
+const ResetPassword = require('4hands-api/src/templates/emails/ResetPassword');
 
 /**
  * Represents a Mail Service that utilizes nodemailer to send emails and handle email confirmation functionality.
@@ -122,6 +123,40 @@ class MailService {
             return await this.send(userEmail, customSubject || 'Confirmation Email', body);
         } catch (err) {
             return new Error.Log(err);
+        }
+    }
+
+    /**
+     * Sends a confirmation email to a user with a specified confirmation URL.
+     *
+     * @async
+     * @method
+     * @param {string} userEmail - User's email address.
+     * @param {string} resetURL - URL for sending the reset password email email address.
+     * @param {Object} options - Additional options for customizing the confirmation email (optional).
+     * @param {string} options.customSubject - Custom subject for the confirmation email (optional).
+     * @param {string} options.projectLogoURL - URL of the project logo to be displayed in the email.
+     * @param {string} options.customTitle - Custom title for the email confirmation message (optional).
+     * @param {string} options.customMessage - Custom message content for the email confirmation (optional).
+     * @param {string} options.containerCSS - CSS class for styling the email container (optional).
+     * @param {string} options.messageWrapCSS - CSS class for styling the message wrapper (optional).
+     * @param {string} options.textMessageCSS - CSS class for styling the text message (optional).
+     * @param {string} options.buttonCSS - CSS class for styling the confirmation button (optional).
+     * @returns {Promise<Object>} A Promise that resolves to an object indicating the success of the email sending operation.
+     * @throws Will throw an error if the email sending operation fails.
+     */
+    async sendResetPassword(userEmail, resetURL, options) {
+        const { customSubject } = Object(options);
+
+        try {
+            const body = new ResetPassword({
+                userEmail,
+                resetURL
+            });
+
+            return await this.send(userEmail, customSubject || body.title, body.renderToString());
+        } catch (err) {
+            throw new Error.Log(err);
         }
     }
 }

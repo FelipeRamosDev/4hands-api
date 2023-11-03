@@ -56,6 +56,15 @@ class AuthBucket extends _Global {
     get userUID() {
         return this.user;
     }
+    
+    async changePassword(newPassword) {
+        try {
+            const updated = await this.updateDB({ data: { password: newPassword }});
+            return { success: true };
+        } catch (err) {
+            throw new Error.Log(err);
+        }
+    }
 
     /**
      * Creates a draft AuthBucket for the given user.
