@@ -83,14 +83,14 @@ class AuthService {
 
     /**
      * To encrypt a token
-     * @param {string} token 
-     * @param {Buffer} key 
+     * @param {string} token The string token you'd like to encrypt.
+     * @param {Buffer} key The key's buffer.
      * @returns {Object} Returns an object with the "iv" and the "encryptedToken".
      */
     encryptToken(token, key) {
         const iv = this.generateRandom();
         const cipher = crypto.createCipheriv(this.algorithm, key, iv);
-    
+
         return {
           iv: iv.toString('hex'),
           encryptedToken: cipher.update(token, 'utf8', 'hex') + cipher.final('hex'),
@@ -101,19 +101,18 @@ class AuthService {
      * To decrypt a token
      * @param {string} encryptedToken The encrypted string token.
      * @param {Buffer} iv The "iv" used on the encrypt generator.
-     * @param {Buffer} derivatedKey The key used on the encrypt generator.
+     * @param {Buffer} derivatedKey The key's buffer used on the encryptToken() "key" param.
      * @returns {string} The decrypted string of the value.
      */
     decryptToken(encryptedToken, iv, derivatedKey) {
         const decipher = crypto.createDecipheriv(this.algorithm, derivatedKey, Buffer.from(iv, 'hex'));
-    
         return decipher.update(encryptedToken, 'hex', 'utf8') + decipher.final('utf8');
     }
 
     /**
      * Generates a salt for password hashing.
      * @async
-     * @param {number} [length=8] - The length of the generated salt.
+     * @param {number} [length=8] - The length of the generated salt. Default is 8.
      * @returns {string} The generated salt.
      */
     async genSalt(length) {
@@ -159,7 +158,7 @@ class AuthService {
             throw new Error.Log(err);
         }
     }
-    
+
     /**
      * Creates a JWT session token for the user.
      * @returns {string} The generated JWT token.
@@ -177,15 +176,12 @@ class AuthService {
     }
 
     /**
-     * Creates a JWT token for the user.
+     * Creates a JWT reset token for the user reset his password.
      * @returns {string} The generated JWT token.
      */
-    async createSessionToken(session) {
+    async createResetToken(sessionID, userEmail, expiresIn) {
         try {
-            const sessionSalt = await this.genSalt();
-            const token = JWT.sign({ sessionID: session.id, sessionSalt }, this.secretKey, {expiresIn: Date.now() + 80000000});
-
-            session.sessionSalt = sessionSalt;
+            const token = JWT.sign({ sessionID, userEmail }, this.secretKey, { expiresIn: expiresIn || (Date.now() + 80000000)});
             return token;
         } catch (err) {
             throw new Error.Log(err);
@@ -245,37 +241,6 @@ class AuthService {
     }
 
     /**
-     * Creates a session for the Command-Line Interface (CLI) user.
-     * @async
-     * @returns {void}
-     * @throws {Error.Log} If an error occurs during session creation.
-     */
-    async createSessionCLI() {
-        try {
-            const token = this.createUserToken();
-
-            debugger;
-        } catch (err) {
-            throw new Error.Log(err);
-        }
-    }
-
-    /**
-     * Drops a session for the Command-Line Interface (CLI) user.
-     * @async
-     * @param {string} token - The JWT token representing the session to be dropped.
-     * @returns {void}
-     * @throws {Error.Log} If an error occurs during session dropping.
-     */
-    async dropSessionCLI(token) {
-        try {
-            const userData = this.validateToken(token);
-        } catch (err) {
-            throw new Error.Log(err);
-        }
-    }
-
-    /**
      * Signs out the user and deletes the corresponding session.
      * @async
      * @param {string} token - The JWT token representing the user's session.
@@ -285,7 +250,7 @@ class AuthService {
     async signOut(token) {
         try {
             const userData = this.validateToken(token);
-            
+
             if (userData instanceof Error.Log) {
                 throw userData;
             }

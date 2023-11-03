@@ -1,5 +1,6 @@
 const _Global = require('../maps/_Global');
 const AuthBucket = require('./AuthBucket');
+const AuthService = require('../../services/Auth');
 const CRUD = require('@CRUD');
 const dbHelpers = require('@helpers/database/dbHelpers');
 const FS = require('@services/FS');
@@ -198,6 +199,30 @@ class User extends _Global {
         }
     }
 
+    async sendResetPassEmail(req) {
+        try {
+            return await API.mailService.sendResetPassword(this.email, await this.genResetPassLink(req));
+        } catch (err) {
+            throw new Error.Log(err);
+        }
+    }
+
+    async genResetPassLink(req) {
+        const { headers, session } = Object(req);
+        const feOrigin = headers.origin;
+        const resetToken = await this.genResetPassToken(session.id, this.email);
+        const url = new URL(feOrigin + '/dashboard/reset-password/create-new');
+
+        url.searchParams.set('useremail', this.email);
+        url.searchParams.set('resettoken', resetToken);
+
+        return url.toString();
+    }
+
+    async genResetPassToken(sessionID) {
+        return await this.authService.createResetToken(sessionID, this.email);
+    }
+
     /**
      * Converts the user information to a session object.
      * @returns {Object} - The session object representing the user information.
@@ -339,14 +364,12 @@ class User extends _Global {
             }
 
             const user = newUser.initialize();
-
             if (confirmationEmail && API.mailService) {
                 const confirmationToken = user.generateConfirmationToken();
+                const emailLink = new URL('http://localhost:8080/dashboard/email-confirmation');
 
-                await API.mailService.sendConfirmation(
-                    user.email,
-                    'http://localhost:8080/dashboard/email-confirmation?confirmationtoken=' + confirmationToken.toString('hex')
-                );
+                emailLink.searchParams.set('confirmationtoken', confirmationToken.toString('hex'));
+                await API.mailService.sendConfirmation(user.email, emailLink.toString());
             }
 
             return user;

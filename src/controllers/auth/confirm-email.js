@@ -2,8 +2,8 @@ const User = require('@models/collections/User');
 const Endpoint = require('@src/models/settings/Endpoint');
 
 /**
- * Represents a controller endpoint for register an user.
- * @name AuthRegister
+ * Represents a controller endpoint to confirm email of user.
+ * @name AuthConfirmEmail
  * @type {Endpoint}
  */
 module.exports = new Endpoint({
