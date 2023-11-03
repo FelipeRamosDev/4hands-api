@@ -56,10 +56,21 @@ class AuthBucket extends _Global {
     get userUID() {
         return this.user;
     }
-    
+
+    /**
+     * Change the user's password.
+     * @async
+     * @param {string} newPassword The new password string. 
+     * @returns {object} 
+     */
     async changePassword(newPassword) {
         try {
             const updated = await this.updateDB({ data: { password: newPassword }});
+
+            if (updated instanceof Error.Log) {
+                throw updated;
+            }
+
             return { success: true };
         } catch (err) {
             throw new Error.Log(err);
