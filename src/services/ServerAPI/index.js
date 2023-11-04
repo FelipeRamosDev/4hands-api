@@ -12,7 +12,7 @@ const Database = require('@services/database/DatabaseServer');
 const FS = require('@services/FS');
 const path = require('path');
 const Endpoint = require('@src/models/settings/Endpoint');
-const MailService = require('4hands-api/src/services/Mail');
+const MailService = require('../Mail');
 
 /**
  * Represents the main server class for the API.
