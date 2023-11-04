@@ -1,4 +1,4 @@
-# 4Hands API (v0.1.4 BETA)
+# 4Hands API (v0.2.1 BETA)
 This is a API framework to create a backend for your applications.
 
 ## Instalation
@@ -7,6 +7,7 @@ Proceed with the following steps to install the framework.
 ### Requirements
 - **Node Version:** `16.20.2`
 - **Database:** MongoDB Community ([Install MongoDB](https://www.mongodb.com/docs/manual/administration/install-community/))
+- **Redis:** The Redis is used to store sessions and other needs you have on your project. Please follow the link to install the Redis, it's required to create a Server API. ([Install Redis](https://redis.io/docs/install/install-redis/))
 
 ### Installation Steps
 With the database running, follow the next steps:
@@ -20,6 +21,9 @@ With the database running, follow the next steps:
 - [Create Collection 🔗](https://github.com/FelipeRamosDev/4hands-api#create-collection)
 - [Create Endpoint 🔗](https://github.com/FelipeRamosDev/4hands-api#create-endpoint)
 - [User Authentication 🔗](https://github.com/FelipeRamosDev/4hands-api#user-authentication)
+- - [E-mail Confirmation 🔗](https://github.com/FelipeRamosDev/4hands-api#sign-up-e-mail-confirmation)
+- - [Password Recovery 🔗](https://github.com/FelipeRamosDev/4hands-api#password-recovery)
+- [Send E-mails (MailService) 🔗](https://github.com/FelipeRamosDev/4hands-api#Send-e-mails-mailservice)
 
 ### Create Server
 To create a server you will need to instantiate a ServerAPI class into you project main file, or whenever you need it. Check the example below:
@@ -31,13 +35,20 @@ global.API = new ServerAPI({
     projectName: 'project-name',
     API_SECRET: process.env.API_SECRET,
     databaseConfig: {
-        HOST: 'mongodb://192.168.15.102:27017/',
-        dbName: 'project-name',
+        redisURL: 'redis://192.168.15.102:6379', // Your Redis host address. Default is 'redis://localhost:6379'
+        HOST: 'mongodb://192.168.15.102:27017/', // Your MongoDB host address. Default is 'mongodb://0.0.0.0:27017/'
+        dbName: 'project-name', // Your MongoDB database name.
         collections: [
             require('./src/collections/users'),
             require('./src/collections/master_accounts'),
             require('./src/collections/slot_accounts')
         ]
+    },
+    // Configuring your server e-mail
+    emailConfig: {
+        type: 'gmail', // Type of email service ('smtp' or 'gmail'). It's recommended to use environment variables .env for this;
+        emailUser: 'testing@gmail.com', // User email for authentication. It's recommended to use environment variables .env for this;
+        emailPassword: 'Af09f09sddssd0fssd09fs0df', // Password for authentication. It's recommended to use environment variables .env for this;
     },
     listenCallback: () => {
         // Your callback after the server is connected with success
@@ -209,7 +220,7 @@ module.exports = {
 In order to create an endpoint for your API, you'll have to follow two steps: Create the controller file and loaded it into your server declaration.
 
 #### Create the controller
-In your project create your controller files under `src > controllers`, you can organized whenever you want, but it's recommandable that your folders structure follows the endpoint URL.
+In your project create your controller files under `src > controllers`, you can organized whenever you want, but it's recommanded that your folders structure follows the endpoint URL.
 
 On the example below I created a new controller under `src > controllers > transfer > deposit.js`. Check the cde example below:
 
@@ -249,28 +260,8 @@ Got to the main server file on you api, the place where you declared the `Server
 const { ServerAPI } = require('4hands-api');
 
 global.API = new ServerAPI({
-    projectName: 'project-name',
-    API_SECRET: process.env.API_SECRET,
-    databaseConfig: {
-        HOST: 'mongodb://192.168.15.102:27017/',
-        dbName: 'project-name',
-        collections: [
-            require('./src/collections/users'),
-            require('./src/collections/master_accounts'),
-            require('./src/collections/slot_accounts')
-        ]
-    },
-    listenCallback: () => {
-        // Your callback after the server is connected with success
-    }
+    // ServerAPI settings properties
 });
-
-// Examples of endpoints being declared
-API.createEndpoint(require('./src/controllers/master-account/create'));
-API.createEndpoint(require('./src/controllers/master-account/delete'));
-
-API.createEndpoint(require('./src/controllers/slot-account/create'));
-API.createEndpoint(require('./src/controllers/slot-account/delete'));
 
 // ############################################################################
 // ADD THE NEW CONTROLLER HERE
@@ -281,7 +272,7 @@ API.createEndpoint(require('./src/controllers/transfer/deposit'));
 ### User Authentication
 The 4hands API has two default endpoints to be used on authentication that is loaded when a ServerAPI is instantiated: `/auth/login` and `/auth/register`.
 
-#### Endpoint [POST] /auth/register
+#### [POST] /auth/register
 ##### Params
 | name | type | description |
 | ---- | ---- | ----------- |
@@ -293,9 +284,9 @@ The 4hands API has two default endpoints to be used on authentication that is lo
 | phone | string | The user's phone |
 
 ##### Success Response
-Returns the new user document. One of the properties on the response is `token`, this "token" will be required on the request headers for every endpoint requested that is auth protected with `isAuthRoute` set as `true` on the Endpoint declaration, so store it into the cookies to use later.
+Returns the new user document. One of the properties on the response is `token`, this token will be required on the request headers for every endpoint that is auth protected with `isAuthRoute` set as `true`, so store it into the cookies to use later.
 
-#### Endpoint [POST] /auth/login
+#### [POST] /auth/login
 ##### Params
 | name | type | description |
 | ---- | ---- | ----------- |
@@ -303,4 +294,75 @@ Returns the new user document. One of the properties on the response is `token`,
 | password | string | (Required) Password of account |
 
 ##### Success Response
-Returns the new user document. One of the properties on the response is `token`, this "token" will be required on the request headers for every endpoint requested that is auth protected with `isAuthRoute` set as `true` on the Endpoint declaration, so store it into the cookies to use later.
+Returns the new user document. One of the properties on the response is `token`, this token will be required on the request headers for every endpoint that is auth protected with `isAuthRoute` set as `true`, so store it into the cookies to use later.
+
+#### Sign-up E-mail Confirmation
+If you'd like to set the ServerAPI to send a confirmation e-mail and a new user sign-up, you need first to set the `emailConfig` property of `ServerAPI` instance. Check below:
+[Check how to set the emailConfig](https://github.com/FelipeRamosDev/4hands-api#Send-e-mails-mailservice)
+
+##### Validating a confirmation e-mail
+To validate the confirmation e-mail link received, you'll have to create a page on your project **front-end** side with the following path: **/dashboard/email-confirmation**.
+This page will receive the `confirmationtoken` as a query string param on the page's URL. This token needs to be sent to the API endpoint in charge of validate the email and enable the user. Check below the endpoint which should receive the token to validate.
+
+###### [POST] /auth/confirm-email
+**Params**
+| name | type | description |
+| ---- | ---- | ----------- |
+| confirmationtoken | string | (Required) It's the token received on the e-mail's URL as a search param |
+
+**Success Response**
+You'll receive back a `{ success: true }` if the e-mail was successfully validated.
+
+#### Password Recovery
+To reset a user's password you'll have to first send a **New Password E-mail** using the endpoint `/auth/reset-password/send-email` as a **POST** request, and then when you received the e-mail with the link you'll send a ajax **PUT** request to `/auth/reset-password/create-new`.
+
+###### [POST] /auth/reset-password/send-email
+**Params**
+| name | type | description |
+| ---- | ---- | ----------- |
+| email | string | (Required) The user's email account to recover the password. |
+
+**Success Response**
+You'll receive back a `{ success: true }` if the e-mail was successfully validated.
+
+###### [PUT] /auth/reset-password/create-new
+**Params**
+| name | type | description |
+| ---- | ---- | ----------- |
+| newPassword | string | (Required) The user's new password. |
+| confirmPassword | string | (Required) The confirmation for the new password |
+| resettoken | string | (Required) The `resettoken` searchparam received on the e-mail link. |
+| useremail | string | (Required) The `useremail` searchparam received on the e-mail link. |
+
+**Success Response**
+You'll receive back a `{ success: true }` if the e-mail was successfully validated.
+
+
+### Send E-mails (MailService)
+To use e-mails on your ServerAPI instance, you'll need to set the `emailConfig` property of `ServerAPI`. The `MailService` instance will be always available at ServerAPI properties after instantiated, to access e-mail features use the **ServerAPI.mailService** property.
+Check below a example of email configuring:
+
+```javascript
+global.API = new ServerAPI({
+    // ...
+    emailConfig: {
+        type: 'gmail', // (Required) Type of email service ('smtp' or 'gmail').
+        host: 'smtp.mydomain.com', // Hostname for the SMTP server (for 'smtp' type). It's recommended to use environment variables .env for this;
+        smtpPort: 465, // Port number for the SMTP server (for 'smtp' type). Default is 465.
+        isSecure: true, // Indicates whether the connection is secure (for 'smtp' type). Default is false.
+        emailUser: 'testing@gmail.com', // (Required) User email for authentication. It's recommended to use environment variables .env for this;
+        emailPassword: 'Af09f09sddssd0fssd09fs0df' // (Required) Password for authentication. It's recommended to use environment variables .env for this;
+    },
+    // ...
+});
+```
+
+## Current Release (v0.2.1 BETA) - Notes
+### New Features
+1. Send E-mails (MailService)
+2. Sign-up user e-mail confirm
+3. Password recovery
+
+### Bugs fixed
+1. User wasn’t login after sign-up
+2. Errors when initializing virtual models
