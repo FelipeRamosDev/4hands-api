@@ -16,6 +16,26 @@ async function preSave(next) {
     }
 }
 
+async function preUpdate(next) {
+    try {
+        if (this._update.password) {
+            const auth = new AuthService();
+            const hash = await auth.createHash(this._update.password);
+    
+            if (hash instanceof Error.Log || !hash) {
+                throw hash;
+            }
+    
+            this._update.password = hash;
+        }
+
+        next();
+    } catch (err) {
+        throw new Error.Log(err);
+    }
+}
+
 module.exports = {
-    preSave
+    preSave,
+    preUpdate
 };
