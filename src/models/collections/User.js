@@ -199,6 +199,11 @@ class User extends _Global {
         }
     }
 
+    /**
+     * Send a reset password e-mail to the user's e-mail.
+     * @param {object} req The http request object
+     * @returns {*}
+     */
     async sendResetPassEmail(req) {
         try {
             return await API.mailService.sendResetPassword(this.email, await this.genResetPassLink(req));
@@ -207,6 +212,11 @@ class User extends _Global {
         }
     }
 
+    /**
+     * Generate a link to build the reset password email.
+     * @param {object} req The http request object
+     * @returns {string} The reset password link.
+     */
     async genResetPassLink(req) {
         const { headers, session } = Object(req);
         const feOrigin = headers.origin;
@@ -219,6 +229,11 @@ class User extends _Global {
         return url.toString();
     }
 
+    /**
+     * Generate a reset password token
+     * @param {string} sessionID 
+     * @returns {string} Return the token string.
+     */
     async genResetPassToken(sessionID) {
         return await this.authService.createResetToken(sessionID, this.email);
     }

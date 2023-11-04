@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
-const EmailConfirmation = require('4hands-api/src/templates/emails/EmailConfirmation');
-const ResetPassword = require('4hands-api/src/templates/emails/ResetPassword');
+const EmailConfirmation = require('../../templates/emails/EmailConfirmation');
+const ResetPassword = require('../../templates/emails/ResetPassword');
 
 /**
  * Represents a Mail Service that utilizes nodemailer to send emails and handle email confirmation functionality.
@@ -14,16 +14,18 @@ class MailService {
      * @param {Object} setup - Configuration object for the mail service.
      * @param {string} setup.type - Type of email service ('smtp' or 'gmail').
      * @param {string} setup.host - Hostname for the SMTP server (for 'smtp' type).
-     * @param {number} setup.smtpPort - Port number for the SMTP server (for 'smtp' type).
+     * @param {number} setup.smtpPort - Port number for the SMTP server (for 'smtp' type). Default is 465.
      * @param {boolean} setup.isSecure - Indicates whether the connection is secure (for 'smtp' type).
      * @param {string} setup.emailUser - User email for authentication.
      * @param {string} setup.emailPassword - Password for authentication.
+     * @param {boolean} setup.signUpConfirmationEmail - To set if you like to send a confirmation e-mail when the user sign-up.
      * @throws Will throw an error if the provided email service type is neither 'smtp' nor 'gmail'.
      */
     constructor(setup) {
-        const { type, host, smtpPort, isSecure, emailUser, emailPassword } = Object(setup);
+        const { type, host, smtpPort, isSecure, emailUser, emailPassword, signUpConfirmationEmail } = Object(setup);
 
         this.options;
+        this.signUpConfirmationEmail = signUpConfirmationEmail;
 
         try {
             switch (type) {
@@ -112,6 +114,13 @@ class MailService {
      */
     async sendConfirmation(userEmail, confirmationURL, options) {
         const { customSubject } = Object(options);
+
+        if (!this.signUpConfirmationEmail) {
+            return new Error.Log({
+                name: 'DONT_SEND_CONFIRMATION',
+                message: `API configured to don't send a confirmation email.`
+            });
+        }
 
         try {
             const body = new EmailConfirmation({
