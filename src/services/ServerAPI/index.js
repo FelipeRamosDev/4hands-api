@@ -12,6 +12,7 @@ const Database = require('@services/database/DatabaseServer');
 const FS = require('@services/FS');
 const path = require('path');
 const Endpoint = require('@src/models/settings/Endpoint');
+const MailService = require('../Mail');
 
 /**
  * Represents the main server class for the API.
@@ -23,7 +24,7 @@ class ServerAPI {
      * Creates an instance of ServerAPI.
      * @param {Object} setup - Configuration options for the server.
      * @param {string} setup.projectName - The name of the project.
-     * @param {Object} setup.databaseConfig - Configuration options for the database.
+     * @param {Database} setup.databaseConfig - Configuration options for the database.
      * @param {string} setup.API_SECRET - The API secret key for session encryption.
      * @param {number} setup.sessionCookiesMaxAge - Maximum age of session cookies (in milliseconds).
      * @param {string} setup.staticPath - The path to static files.
@@ -36,6 +37,7 @@ class ServerAPI {
      * @param {string} setup.keySSLPath - The path to the SSL key file.
      * @param {string} setup.certSSLPath - The path to the SSL certificate file.
      * @param {number} setup.PORT - The port number on which the server will listen (defaults to 80).
+     * @param {MailService} setup.emailConfig - Configurations for the server emails sent.
      */
     constructor (setup) {
         const {
@@ -52,7 +54,8 @@ class ServerAPI {
             sessionSaveUninitialized,
             keySSLPath,
             certSSLPath,
-            PORT
+            PORT,
+            emailConfig
         } = Object(setup);
 
         this.projectName = projectName;
@@ -69,6 +72,10 @@ class ServerAPI {
         this.certSSLPath = certSSLPath;
         this.listenCallback = listenCallback;
         this.PORT = PORT || 80;
+
+        if (emailConfig) {
+            this.mailService = new MailService(emailConfig);
+        }
 
         this.isSuccess = (customCallback) => {
             try {
@@ -87,10 +94,14 @@ class ServerAPI {
             this.useSSL = true;
         }
 
-        // Standard routes
+        // 4hands-api native endpoints
         this.createEndpoint(require('@controllers/api/health-check'));
         this.createEndpoint(require('@controllers/auth/login'));
         this.createEndpoint(require('@controllers/auth/register'));
+        this.createEndpoint(require('@controllers/auth/signout'));
+        this.createEndpoint(require('@controllers/auth/confirm-email'));
+        this.createEndpoint(require('@controllers/auth/reset-password/send-email'));
+        this.createEndpoint(require('@controllers/auth/reset-password/create-new'));
         this.createEndpoint(require('@controllers/collection/create'));
         this.createEndpoint(require('@controllers/collection/delete'));
         this.createEndpoint(require('@controllers/collection/get/doc'));

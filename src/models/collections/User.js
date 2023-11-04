@@ -1,5 +1,6 @@
 const _Global = require('../maps/_Global');
 const AuthBucket = require('./AuthBucket');
+const AuthService = require('../../services/Auth');
 const CRUD = require('@CRUD');
 const dbHelpers = require('@helpers/database/dbHelpers');
 const FS = require('@services/FS');
@@ -28,7 +29,8 @@ class User extends _Global {
             firstName,
             lastName,
             email,
-            phone
+            phone,
+            isEmailConfirmed
         } = Object(setup);
 
         try {
@@ -48,7 +50,7 @@ class User extends _Global {
              * The display name of the user.
              * @property {string}
              */
-            this.displayName = `${firstName} ${lastName} (${email})`;
+            this.displayName = `${firstName} ${lastName}`;
 
             /**
              * The first name of the user.
@@ -79,6 +81,12 @@ class User extends _Global {
              * @property {string}
              */
             this.frontURL = frontURL;
+
+            /**
+             * Mark if the user's email is confirmed.
+             * @property {string}
+             */
+            this.isEmailConfirmed = isEmailConfirmed;
 
             /**
              * The AuthBucket instance associated with this user.
@@ -181,6 +189,56 @@ class User extends _Global {
     }
 
     /**
+     * To generate a confimation token to be used in a confirmation URL.
+     * @returns {string} - The confirmation token.
+     */
+    generateConfirmationToken() {
+        if (!this.isEmailConfirmed) {
+            this.confirmationToken = this.authService.generateKey(this.authService.secretKey, this.authService.generateRandom(10));
+            return this.confirmationToken.toString('hex');
+        }
+    }
+
+    /**
+     * Send a reset password e-mail to the user's e-mail.
+     * @param {object} req The http request object
+     * @returns {*}
+     */
+    async sendResetPassEmail(req) {
+        try {
+            return await API.mailService.sendResetPassword(this.email, await this.genResetPassLink(req));
+        } catch (err) {
+            throw new Error.Log(err);
+        }
+    }
+
+    /**
+     * Generate a link to build the reset password email.
+     * @param {object} req The http request object
+     * @returns {string} The reset password link.
+     */
+    async genResetPassLink(req) {
+        const { headers, session } = Object(req);
+        const feOrigin = headers.origin;
+        const resetToken = await this.genResetPassToken(session.id, this.email);
+        const url = new URL(feOrigin + '/dashboard/reset-password/create-new');
+
+        url.searchParams.set('useremail', this.email);
+        url.searchParams.set('resettoken', resetToken);
+
+        return url.toString();
+    }
+
+    /**
+     * Generate a reset password token
+     * @param {string} sessionID 
+     * @returns {string} Return the token string.
+     */
+    async genResetPassToken(sessionID) {
+        return await this.authService.createResetToken(sessionID, this.email);
+    }
+
+    /**
      * Converts the user information to a session object.
      * @returns {Object} - The session object representing the user information.
      */
@@ -193,6 +251,7 @@ class User extends _Global {
             fullName: this.fullName,
             email: this.email,
             userToken: this.token,
+            isEmailConfirmed: this.isEmailConfirmed
         };
     }
 
@@ -242,7 +301,7 @@ class User extends _Global {
      */
     static async getUser(filter) {
         try {
-            const userDOC = await CRUD.getDoc({collectionName: 'users', filter}).defaultPopulate();
+            const userDOC = await CRUD.getDoc({ collectionName: 'users', filter }).defaultPopulate();
 
             if (!userDOC) {
                 /**
@@ -252,14 +311,7 @@ class User extends _Global {
                 return new Error.Log('user.not_found', filter);
             }
 
-            const initialized = userDOC.initialize();
-            if (!initialized.gitHub && initialized.auth.gitHubToken) {
-                await initialized.updateDB({data: {
-                    gitHub: await initialized.loadGitHubData()
-                }});
-            } 
-
-            return initialized;
+            return userDOC.initialize();
         } catch (err) {
             /**
              * Thrown if there is an error during user retrieval.
@@ -305,13 +357,14 @@ class User extends _Global {
      * Static method to create a new user.
      * @param {Object} setup - The user setup object containing necessary details.
      * @param {Object} options - Additional options for user creation.
-     * @param {boolean} options.preventSignIn - Indicates whether to prevent automatic sign-in after user creation.
+     * @param {boolean} options.confirmationEmail - Indicates whether to confirm the new user's email or not.
      * @returns {Promise} - A promise resolving to the user creation status.
      * @throws {Error.Log} If there is an error during user creation.
      */
     static async create(setup, options) {
         try {
             const { userName, email } = Object(setup);
+            const { confirmationEmail } = Object(options);
 
             // Check if the userName or email (that can be a username) is already in use
             const isExist = await this.isExist(userName || email);
@@ -325,12 +378,17 @@ class User extends _Global {
                 throw newUser;
             }
 
-            return newUser.toObject();
+            const user = newUser.initialize();
+            if (confirmationEmail && API.mailService) {
+                const confirmationToken = user.generateConfirmationToken();
+                const emailLink = new URL('http://localhost:8080/dashboard/email-confirmation');
+
+                emailLink.searchParams.set('confirmationtoken', confirmationToken.toString('hex'));
+                await API.mailService.sendConfirmation(user.email, emailLink.toString());
+            }
+
+            return user;
         } catch (err) {
-            /**
-             * Thrown if there is an error during user creation.
-             * @throws {Error.Log}
-             */
             throw new Error.Log(err);
         }
     }
@@ -347,10 +405,6 @@ class User extends _Global {
             const userDOC = await CRUD.getDoc({ collectionName: 'users', filter: { userName }}).defaultPopulate();
 
             if (!userDOC) {
-                /**
-                 * Thrown if the user is not found during sign-in.
-                 * @throws {Error.Log}
-                 */
                 return new Error.Log('auth.user_not_found', userName);
             }
 
@@ -360,17 +414,9 @@ class User extends _Global {
             if (signedIn.success) {
                 return user;
             } else {
-                /**
-                 * Thrown if there is an error during sign-in.
-                 * @throws {Error.Log}
-                 */
                 return signedIn;
             }
         } catch (err) {
-            /**
-             * Thrown if there is an error during sign-in.
-             * @throws {Error.Log}
-             */
             throw new Error.Log(err);
         }
     }

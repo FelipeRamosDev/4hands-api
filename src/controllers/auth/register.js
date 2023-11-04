@@ -34,16 +34,21 @@ module.exports = new Endpoint({
     controller: async (req, res) => {
         try {
             const body = req.body;
-            const newUser = await User.create(body);
+            const newUser = await User.create(body, { confirmationEmail: true });
     
             if (newUser instanceof Error.Log) {
                 return res.status(500).send(newUser.response());
             }
 
-            req.session.user = newUser;
-            req.session.isAuthorized = true;
+            const login = await User.signIn(body.email, body.password);
+            const response = await login.toSession(req.session);
     
-            return res.status(200).send({...newUser, sessionID: req.session.id});
+            req.session.user = response;
+            req.session.isAuthorized = true;
+            req.session.isEmailConfirmed = login.isEmailConfirmed;
+            req.session.confirmationToken = newUser.confirmationToken.toString('hex');
+    
+            return res.status(200).send(response);
         } catch(err) {
             return res.status(500).send(new Error.Log(err).response());
         }
