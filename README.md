@@ -1,4 +1,4 @@
-# 4Hands API (v0.2.1 BETA)
+# 4Hands API (v0.2.2 BETA)
 This is a API framework to create a backend for your applications.
 
 ## Instalation
@@ -34,8 +34,8 @@ const { ServerAPI } = require('4hands-api');
 global.API = new ServerAPI({
     projectName: 'project-name',
     API_SECRET: process.env.API_SECRET,
+    redisURL: 'redis://192.168.15.102:6379', // Your Redis host address. Default is 'redis://localhost:6379'
     databaseConfig: {
-        redisURL: 'redis://192.168.15.102:6379', // Your Redis host address. Default is 'redis://localhost:6379'
         HOST: 'mongodb://192.168.15.102:27017/', // Your MongoDB host address. Default is 'mongodb://0.0.0.0:27017/'
         dbName: 'project-name', // Your MongoDB database name.
         collections: [
@@ -77,8 +77,6 @@ Take a look on the example below to see how a **Main Collection File** should lo
 const {Collection} = require('4hands-api');
 const Schema = require('4hands-api/src/models/SchemaDB');
 const {ObjectId} = Schema.mongoSchema.Types;
-const map = require('./map');
-const Limits = map.Limits;
 
 module.exports = new Collection({
     displayName: 'My Collection',
@@ -161,12 +159,25 @@ async function preSave(next){
     next();
 }
 
-async function postUpdate(){
-    // Perfrom actions after the document was updated
+async function preFindOne(next) {
+    // Perfrom actions after the document is found
+    next();
+}
+
+async function preUpdate(next) {
+    // Perfrom actions after the document is updated
+    next();
 }
 
 async function postSave() {
     // Perform actions after the document was saved
+}
+async function postFindOne() {
+    // Perfrom actions after the document was found
+}
+
+async function postUpdate() {
+    // Perfrom actions after the document was updated
 }
 
 module.exports = {
