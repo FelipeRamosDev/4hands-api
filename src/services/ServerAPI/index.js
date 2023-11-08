@@ -8,10 +8,10 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const https = require('https');
-const Database = require('@services/database/DatabaseServer');
-const FS = require('@services/FS');
 const path = require('path');
-const Endpoint = require('@src/models/settings/Endpoint');
+const Database = require('../database/DatabaseServer');
+const FS = require('../FS');
+const Endpoint = require('../../models/settings/Endpoint');
 const MailService = require('../Mail');
 
 /**
@@ -68,10 +68,16 @@ class ServerAPI {
         this.jsonLimit = jsonLimit || '10mb';
         this.sessionResave = (sessionResave !== undefined) ? sessionResave : true;
         this.sessionSaveUninitialized = (sessionSaveUninitialized !== undefined) ? sessionSaveUninitialized : true;
-        this.keySSLPath = keySSLPath;
-        this.certSSLPath = certSSLPath;
         this.listenCallback = listenCallback;
         this.PORT = PORT || 80;
+
+        if (keySSLPath) {
+            this.keySSLPath = path.normalize(this.projectPath + keySSLPath);
+        }
+
+        if (certSSLPath) {
+            this.certSSLPath = path.normalize(this.projectPath + certSSLPath);
+        }
 
         if (emailConfig) {
             this.mailService = new MailService(emailConfig);
@@ -92,6 +98,7 @@ class ServerAPI {
         this.useSSL = false;
         if (this.keySSLPath && this.certSSLPath) {
             this.useSSL = true;
+            this.PORT = PORT || 443;
         }
 
         // 4hands-api native endpoints
@@ -120,6 +127,10 @@ class ServerAPI {
                 throw err;
             });
         }
+    }
+
+    get projectPath() {
+        return path.normalize(__dirname.replace(path.normalize('/node_modules/4hands-api/src/services/ServerAPI'), '/'));
     }
 
     /**
@@ -177,7 +188,7 @@ class ServerAPI {
         }
 
         if (this.useSSL) {
-            this.listenSSL(this.PORT, this.keySSLPath, this.certSSLPath, () => this.isSuccess());
+            this.listenSSL(this.PORT, () => this.isSuccess());
         } else {
             this.app.listen(this.PORT, () => this.isSuccess());
         }
@@ -203,10 +214,10 @@ class ServerAPI {
      * @param {string} certSSLPath - The path to the SSL certificate file.
      * @param {Function} callback - Callback function to be executed when the server starts listening.
      */
-    listenSSL(PORT, keySSLPath, certSSLPath, callback) {
+    listenSSL(PORT, callback) {
         if (this.PORT || PORT) {
-            const SSL_KEY = FS.readFileSync(this.rootPath + keySSLPath);
-            const SSL_CERT = FS.readFileSync(this.rootPath + certSSLPath);
+            const SSL_KEY = FS.readFileSync(this.keySSLPath);
+            const SSL_CERT = FS.readFileSync(this.certSSLPath);
 
             if (!SSL_KEY || !SSL_CERT) {
                 throw new Error.Log({
