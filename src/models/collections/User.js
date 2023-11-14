@@ -180,10 +180,6 @@ class User extends _Global {
             const signedOut = await this.authService.signOut(this.userSession.token);
             return signedOut;
         } catch (err) {
-            /**
-             * Thrown if there is an error during the sign-out process.
-             * @throws {Error.Log}
-             */
             throw new Error.Log(err);
         }
     }
@@ -285,10 +281,6 @@ class User extends _Global {
 
             return userDOC;
         } catch (err) {
-            /**
-             * Thrown if there is an error during user retrieval.
-             * @throws {Error.Log}
-             */
             throw new Error.Log(err);
         }
     }
@@ -313,10 +305,6 @@ class User extends _Global {
 
             return userDOC.initialize();
         } catch (err) {
-            /**
-             * Thrown if there is an error during user retrieval.
-             * @throws {Error.Log}
-             */
             throw new Error.Log(err);
         }
     }
@@ -345,10 +333,28 @@ class User extends _Global {
                 return false;
             }
         } catch (err) {
-            /**
-             * Thrown if there is an error during the existence check.
-             * @throws {Error.Log}
-             */
+            throw new Error.Log(err);
+        }
+    }
+
+    /**
+     * Sends a confirmation e-mail to user's e-mail.
+     * @returns {object}
+     */
+    async sendConfirmationEmail() {
+        try {
+            if (API.FE_ORIGIN && API.mailService) {
+                const confirmationToken = this.generateConfirmationToken();
+                const emailLink = new URL(API.FE_ORIGIN + '/dashboard/email-confirmation');
+                const confirmationTokenString = confirmationToken.toString('hex');
+
+                emailLink.searchParams.set('confirmationtoken', confirmationTokenString);
+
+                const emailSent = await API.mailService.sendConfirmation(this.email, emailLink.toString());
+                emailSent.confirmationToken = confirmationTokenString;
+                return emailSent;
+            }
+        } catch (err) {
             throw new Error.Log(err);
         }
     }
@@ -380,11 +386,7 @@ class User extends _Global {
 
             const user = newUser.initialize();
             if (confirmationEmail && API.mailService) {
-                const confirmationToken = user.generateConfirmationToken();
-                const emailLink = new URL('http://localhost:8080/dashboard/email-confirmation');
-
-                emailLink.searchParams.set('confirmationtoken', confirmationToken.toString('hex'));
-                await API.mailService.sendConfirmation(user.email, emailLink.toString());
+                await user.sendConfirmationEmail();
             }
 
             return user;
