@@ -36,6 +36,7 @@ class ServerAPI {
      * @param {boolean} setup.sessionSaveUninitialized - Flag indicating whether to save uninitialized sessions to the session store (defaults to true).
      * @param {string} setup.keySSLPath - The path to the SSL key file.
      * @param {string} setup.certSSLPath - The path to the SSL certificate file.
+     * @param {string} setup.FE_ORIGIN - The front-end host url.
      * @param {number} setup.PORT - The port number on which the server will listen (defaults to 80).
      * @param {MailService} setup.emailConfig - Configurations for the server emails sent.
      */
@@ -54,6 +55,7 @@ class ServerAPI {
             sessionSaveUninitialized,
             keySSLPath,
             certSSLPath,
+            FE_ORIGIN,
             PORT,
             emailConfig
         } = Object(setup);
@@ -69,6 +71,7 @@ class ServerAPI {
         this.sessionResave = (sessionResave !== undefined) ? sessionResave : true;
         this.sessionSaveUninitialized = (sessionSaveUninitialized !== undefined) ? sessionSaveUninitialized : true;
         this.listenCallback = listenCallback;
+        this.FE_ORIGIN = FE_ORIGIN;
         this.PORT = PORT || 80;
 
         if (keySSLPath) {
@@ -107,6 +110,7 @@ class ServerAPI {
         this.createEndpoint(require('@controllers/auth/register'));
         this.createEndpoint(require('@controllers/auth/signout'));
         this.createEndpoint(require('@controllers/auth/confirm-email'));
+        this.createEndpoint(require('@controllers/auth/send-email-confirm'));
         this.createEndpoint(require('@controllers/auth/reset-password/send-email'));
         this.createEndpoint(require('@controllers/auth/reset-password/create-new'));
         this.createEndpoint(require('@controllers/collection/create'));

@@ -1,7 +1,6 @@
 const ValidateSchema = require('../../validation/validateSchema');
 const CRUD = require('../../services/database/crud');
 const { isObjectID } = require('../../helpers/database/relationalFields');
-const { increaseDocProp } = require('../../helpers/database/dbHelpers');
 
 /**
  * Represents a global map in the application, extending the ValidateSchema class.
@@ -180,7 +179,8 @@ class GlobalMap extends ValidateSchema {
      * @throws {Error} If there is an error during the property increase process.
      */
     async increaseProp(propKey, value) {
-        if (!propKey) throw new Error.Log()
+        if (!propKey) throw new Error.Log();
+        const { increaseDocProp } = require('../../helpers/database/dbHelpers');
         const increaseAmount = value || 1;
         const increaseValue = {[propKey]: increaseAmount};
 
