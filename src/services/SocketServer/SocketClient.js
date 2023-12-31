@@ -7,9 +7,9 @@ class SocketClient {
     /**
      * Create a SocketClient.
      * @param {Object} setup - The setup configuration.
-     * @param {string} setup.url - The setup configuration.
-     * @param {function} setup.connectedCB - The setup configuration.
-     * @param {Object} params - The connection parameters.
+     * @param {string} setup.url - The socket server URL to be connected.
+     * @param {function} setup.connectedCB - The callback executed when the connection is concluded with success.
+     * @param {Object} params - The connection parameters of socket.io-client.
      */
     constructor(setup, params) {
         try {
