@@ -14,14 +14,16 @@ const SocketConnection = require('./SocketConnection');
  * @param {Object} setup - The setup object.
  * @param {string[]} setup.hosts - An array of allowed hosts for CORS configuration.
  * @param {number} setup.port - The port on which the socket server will listen. Defaults to the value specified in the configuration.
+ * @param {function} connectedCB - The callback function to be called when a connection is established.
  */
 class SocketServer {
     /**
      * Creates a new instance of the SocketServer class.
      * @constructor
      * @param {Object} setup - The setup object containing hosts and port information.
+     * @param {function} connectedCB - The callback function to be called when a connection is established.
      */
-    constructor(setup) {
+    constructor(setup, connectedCB) {
         try {
             const { hosts, port } = Object(setup);
 
@@ -51,7 +53,7 @@ class SocketServer {
              */
             this.subscriptions = [];
 
-            this.init();
+            this.init(connectedCB);
         } catch (err) {
             throw new Error.Log(err);
         }
@@ -60,8 +62,9 @@ class SocketServer {
     /**
      * Initializes the socket server by setting up event listeners for incoming connections and disconnections.
      * @private
+     * @param {function} connectedCB - The callback function to be called when a connection is established.
      */
-    init() {
+    init(connectedCB) {
         try {
             this.io.on('connect', (socket) => {
                 const connection = new SocketConnection(socket, this);
@@ -70,6 +73,10 @@ class SocketServer {
                 socket.on('disconnect', () => {
                     this.connections = this.connections.filter(item => item.connected);
                 });
+
+                if (typeof connectedCB === 'function') {
+                    connectedCB(socket);
+                }
             });
 
             this.io.listen(this.port);
