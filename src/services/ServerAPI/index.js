@@ -219,26 +219,30 @@ class ServerAPI {
      * @param {Function} callback - Callback function to be executed when the server starts listening.
      */
     listenSSL(PORT, callback) {
-        if (this.PORT || PORT) {
-            const SSL_KEY = FS.readFileSync(this.keySSLPath);
-            const SSL_CERT = FS.readFileSync(this.certSSLPath);
-
-            if (!SSL_KEY || !SSL_CERT) {
-                throw new Error.Log({
-                    name: 'SSLCertificateNotFound',
-                    message: `The SSL certificate wasn't found on the directory!`
+        try {
+            if (this.PORT || PORT) {
+                const SSL_KEY = FS.readFileSync(this.keySSLPath);
+                const SSL_CERT = FS.readFileSync(this.certSSLPath);
+    
+                if (!SSL_KEY || !SSL_CERT) {
+                    throw new Error.Log({
+                        name: 'SSLCertificateNotFound',
+                        message: `The SSL certificate wasn't found on the directory!`
+                    });
+                }
+    
+                const options = {
+                    key: SSL_KEY,
+                    cert: SSL_CERT
+                };
+    
+                https.createServer(options, this.app).listen(PORT, () => {
+                    this.PORT = PORT;
+                    typeof callback === 'function' && callback();
                 });
             }
-
-            const options = {
-                key: SSL_KEY,
-                cert: SSL_CERT
-            };
-
-            https.createServer(options, this.app).listen(PORT, () => {
-                this.PORT = PORT;
-                typeof callback === 'function' && callback();
-            });
+        } catch (error) {
+            debugger;
         }
     }
 
