@@ -42,16 +42,28 @@ class SocketClient {
      * @return {Object} The socket object.
      */
     addListener(eventName, callback) {
+        if (typeof eventName !== 'string' || eventName?.length < 3) {
+            throw new Error.Log('common.bad_format_param', 'eventName', 'a string with a minimum of 3 characters');
+        }
+
+        if (typeof callback !== 'function') {
+            throw new Error.Log('common.bad_format_param', 'callback', 'a function');
+        }
+        
         return this.io.on(eventName, callback);
     }
 
     /**
      * Trigger a specific event.
-     * @param {string} eventName - The name of the event.
+     * @param {string} eventName - The name of the event, a string with a minimum of 3 characters.
      * @param {Object} data - The data to be sent with the event.
      * @return {Object} The socket object.
      */
     triggerEvent(eventName, data) {
+        if (typeof eventName !== 'string' || eventName?.length < 3) {
+            throw new Error.Log('common.bad_format_param', 'eventName', 'a string with a minimum of 3 characters');
+        }
+
         return this.io.emit(eventName, data);
     }
 
