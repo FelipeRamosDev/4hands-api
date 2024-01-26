@@ -48,6 +48,10 @@ async function preUpdateOne(next) {
     try {
         const collection = this._collection.collectionName;
 
+        if (!this._update) {
+            return next();
+        }
+
         // Updating the modifiedAt timestamp
         this._update.modifiedAt = Date.now();
         this.sessionUser = this._update.sessionUser;
@@ -75,6 +79,10 @@ async function postUpdateOne() {
     try {
         const collection = this.model.modelName;
         const $set = Object(this).getSafe('_update.$set');
+
+        if (!$set) {
+            return;
+        }
 
         if ($set.status) {
             process.emit(`status:transition:${collection}:${$set.status}`, this);

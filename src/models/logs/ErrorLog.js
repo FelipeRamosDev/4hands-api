@@ -41,6 +41,7 @@ class ErrorLog extends LogBase {
 
             if (errorData) {
                 this.name = errorData.name;
+                this.code = args.code;
                 this.message = errorData.message;
             }
         }
@@ -77,6 +78,7 @@ class ErrorLog extends LogBase {
             const newLog = new schemas.logs.DB({
                 type: this.type,
                 name: this.name,
+                code: this.code,
                 message: this.message,
                 resource: this.resource,
                 stack: this.stack,
