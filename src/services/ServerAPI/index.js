@@ -39,6 +39,7 @@ class ServerAPI {
      * @param {string} setup.FE_ORIGIN - The front-end host url.
      * @param {number} setup.PORT - The port number on which the server will listen (defaults to 80).
      * @param {MailService} setup.emailConfig - Configurations for the server emails sent.
+     * @param {string[]} setup.corsOrigin - Array with the allowed domains for cors config.
      */
     constructor (setup) {
         const {
@@ -57,7 +58,8 @@ class ServerAPI {
             certSSLPath,
             FE_ORIGIN,
             PORT,
-            emailConfig
+            emailConfig,
+            corsOrigin
         } = Object(setup);
 
         this.projectName = projectName;
@@ -66,6 +68,7 @@ class ServerAPI {
         this.sessionCookiesMaxAge = sessionCookiesMaxAge || 86400000;
         this.staticPath = staticPath;
         this.redisURL = redisURL;
+        this.corsOrigin = corsOrigin || ['http://localhost', 'https://localhost'];
         this.compileFE = compileFE;
         this.jsonLimit = jsonLimit || '10mb';
         this.sessionResave = (sessionResave !== undefined) ? sessionResave : true;
@@ -165,7 +168,7 @@ class ServerAPI {
 
         // Configuring server
         this.app.use(cors({
-            origin: ['http://localhost:8080', 'http://localhost:3000'],
+            origin: this.corsOrigin,
             credentials: true
         }));
 
