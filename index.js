@@ -4,6 +4,7 @@ const collections = require('@schemas');
 const DatabaseServer = require('./src/services/database/DatabaseServer');
 const ServerAPI = require('./src/services/ServerAPI');
 const SocketServer = require('./src/services/SocketServer');
+const SocketClient = require('4hands-api/src/services/SocketClient');
 const Collection = require('./src/models/settings/Collection');
 const Endpoint = require('./src/models/settings/Endpoint');
 const CRUD = require('./src/services/database/crud');
@@ -33,6 +34,12 @@ exports.ServerAPI = ServerAPI;
  * @name SocketServer
  */
 exports.SocketServer = SocketServer;
+
+/**
+ * @class
+ * @name SocketClient
+ */
+exports.SocketClient = SocketClient;
 
 /**
  * @class
