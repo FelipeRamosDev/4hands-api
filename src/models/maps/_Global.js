@@ -136,7 +136,7 @@ class GlobalMap extends ValidateSchema {
         try {
             if (!collection) throw new Error.Log('database.missing_params', 'collectionName', '_Global.updateDB');
 
-            const loaded = await crud.update({collectionName: collection, filter: filter || this._id, data, options: {returnDocs: true} });
+            const loaded = await crud.update({collectionName: collection, filter: filter || this.UID || this._id, data, options: {returnDocs: true} });
             if (loaded instanceof Error.Log) {
                 throw new Error.Log(loaded);
             }
