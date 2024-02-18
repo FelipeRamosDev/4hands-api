@@ -1,14 +1,12 @@
-const ValidateSchema = require('../../validation/validateSchema');
 const CRUD = require('../../services/database/crud');
 const { isObjectID } = require('../../helpers/database/relationalFields');
 
 /**
  * Represents a global map in the application, extending the ValidateSchema class.
  * @module GlobalMap
- * @extends ValidateSchema
  * @namespace Models
  */
-class GlobalMap extends ValidateSchema {
+class GlobalMap {
     /**
      * Creates a new instance of the GlobalMap class.
      * @param {Object} setup - The setup object.
@@ -17,7 +15,6 @@ class GlobalMap extends ValidateSchema {
      */
     constructor(setup, parent) {
         const { _id, index, author, cod, createdAt, modifiedAt, collectionName} = setup || {};
-        super(setup.validationRules || {});
         if (isObjectID(setup)) return;
 
         const User = require('@models/collections/User');
