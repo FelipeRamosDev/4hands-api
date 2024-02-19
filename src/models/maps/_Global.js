@@ -14,7 +14,7 @@ class GlobalMap {
      * @throws {Error} If the creation of GlobalMap fails.
      */
     constructor(setup, parent) {
-        const { _id, index, author, cod, createdAt, modifiedAt, collectionName} = setup || {};
+        const { _id, index, author, cod, createdAt, modifiedAt, collectionName } = setup || {};
         if (isObjectID(setup)) return;
 
         const User = require('@models/collections/User');
@@ -237,6 +237,42 @@ class GlobalMap {
             } else {
                 return { success: true, message: 'SafeValue updated!', data: updated };
             }
+        }
+    }
+
+    async createCache(data) {
+        try {
+            const created = await API.redisServ.createDoc({ collection: this.collectionName, uid: this.UID, data: data || {...this} });
+            return created;
+        } catch (err) {
+            throw new Error.Log(err);
+        }
+    }
+
+    async updateCache(data) {
+        try {
+            const updated = await API.redisServ.updateDoc({ collection: this.collectionName, uid: this.UID, data: data || {...this} });
+            return updated;
+        } catch (err) {
+            throw new Error.Log(err);
+        }
+    }
+
+    async clearCache() {
+        try {
+            const deleted = await API.redisServ.deleteDoc({ collection: this.collectionName, uid: this.UID });
+            return deleted;
+        } catch (err) {
+            throw new Error.Log(err);
+        }
+    }
+
+    static async getCache(collection, uid) {
+        try {
+            const cacheDoc = await API.redisServ.getDoc({ collection, uid });
+            return cacheDoc;
+        } catch (err) {
+            throw new Error.Log(err);
         }
     }
 }

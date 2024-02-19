@@ -4,6 +4,8 @@ class RedisEventEmitters {
 
         if (typeof collectionEvent === 'function') {
             process.emit(`redis:precreate:${this.collection}`, this, next, reject);
+        } else {
+            next();
         }
     }
 
@@ -16,6 +18,8 @@ class RedisEventEmitters {
 
         if (typeof collectionEvent === 'function') {
             process.emit(`redis:preread:${this.collection}`, this, next, reject);
+        } else {
+            next();
         }
     }
 
@@ -28,6 +32,8 @@ class RedisEventEmitters {
 
         if (typeof collectionEvent === 'function') {
             process.emit(`redis:preupdate:${this.collection}`, this, next, reject);
+        } else {
+            next();
         }
     }
 
@@ -40,6 +46,8 @@ class RedisEventEmitters {
 
         if (typeof collectionEvent === 'function') {
             process.emit(`redis:predelete:${this.collection}`, this, next, reject);
+        } else {
+            next();
         }
     }
 
