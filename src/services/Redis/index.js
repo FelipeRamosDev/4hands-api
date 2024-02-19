@@ -4,10 +4,11 @@ const { buildKey, parseDocToSave, parseDocToRead } = require('./RedisHelpers');
 const RedisEventEmitters = require('./RedisEventEmitters');
 
 class RedisService {
-    constructor(setup) {
+    constructor(setup, apiServer) {
         const { clientOptions, onConnect, onReady, onEnd, onError, onReconnecting } = Object(setup);
 
         try {
+            this.apiServer = apiServer;
             this.client = createClient(clientOptions);
             
             this.addListener('connect', onConnect);
@@ -53,7 +54,7 @@ class RedisService {
 
         try {
             await new Promise((resolve, reject) => {
-                setup.collectionSet = API.getCollectionSet(collection);
+                setup.collectionSet = this.apiServer.getCollectionSet(collection);
                 RedisEventEmitters.preCreate.call(setup, resolve, reject);
             });
 
@@ -70,7 +71,7 @@ class RedisService {
 
         try {
             await new Promise((resolve, reject) => {
-                setup.collectionSet = API.getCollectionSet(collection);
+                setup.collectionSet = this.apiServer.getCollectionSet(collection);
                 RedisEventEmitters.preUpdate.call(setup, resolve, reject);
             });
 
@@ -99,7 +100,7 @@ class RedisService {
                 return;
             }
 
-            const parsedValue = parseDocToSave(API.getCollectionSet(collection), data);
+            const parsedValue = parseDocToSave(this.apiServer.getCollectionSet(collection), data);
             Object.keys(parsedValue).map(key => {
                 setters.push(this.setDocField({collection, uid, field: key, value: parsedValue[key]}));
             });
@@ -116,13 +117,13 @@ class RedisService {
 
         try {
             await new Promise((resolve, reject) => {
-                setup.collectionSet = API.getCollectionSet(collection);
+                setup.collectionSet = this.apiServer.getCollectionSet(collection);
                 RedisEventEmitters.preRead.call(setup, resolve, reject);
             });
 
             const doc = await this.client.hGetAll(buildKey(collection, uid));
             RedisEventEmitters.postRead.call(setup);
-            return parseDocToRead(API.getCollectionSet(collection), doc);
+            return parseDocToRead(this.apiServer.getCollectionSet(collection), doc);
         } catch (err) {
             throw new Error.Log(err);
         }
@@ -163,7 +164,7 @@ class RedisService {
         try {
             const keys = await this.client.hKeys(key);
             await new Promise((resolve, reject) => {
-                setup.collectionSet = API.getCollectionSet(collection);
+                setup.collectionSet = this.apiServer.getCollectionSet(collection);
                 RedisEventEmitters.preDelete.call(setup, resolve, reject);
             });
 

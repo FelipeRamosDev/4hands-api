@@ -13,6 +13,7 @@ const Database = require('../database/DatabaseServer');
 const FS = require('../FS');
 const Endpoint = require('../../models/settings/Endpoint');
 const MailService = require('../Mail');
+const RedisService = require('4hands-api/src/services/Redis');
 
 /**
  * Represents the main server class for the API.
@@ -144,8 +145,6 @@ class ServerAPI {
      * Initializes the server, setting up routes, middleware, and listeners.
      */
     async init() {
-        const redis = require('redis');
-
         this.rootPath = path.normalize(__dirname.replace(path.normalize('/node_modules/4hands-api/src/services'), '/'));
         this.app = express();
         this.serverState = 'loading';
@@ -157,13 +156,14 @@ class ServerAPI {
             console.log(compile.toString());
         }
 
-        this.redisClient = redis.createClient({
-            url: this.redisURL || 'redis://localhost:6379'
-        }).on('error', err => {
-            throw new Error.Log(err);
-        });
+        this.redisServ = new RedisService({
+            url: this.redisURL || 'redis://localhost:6379',
+            onError: (err) => {
+                throw new Error.Log(err);
+            }
+        }, this);
 
-        this.redisDB = await this.redisClient.connect();
+        await this.redisServ.connect();
         const RedisStore = require('connect-redis').default;
 
         // Configuring server
@@ -177,7 +177,7 @@ class ServerAPI {
 
         if (this.API_SECRET) {
             this.app.use(session({
-                store: new RedisStore({ client: this.redisClient }),
+                store: new RedisStore({ client: this.redisServ.client }),
                 secret: this.API_SECRET,
                 resave: this.sessionResave,
                 saveUninitialized: this.sessionSaveUninitialized,
