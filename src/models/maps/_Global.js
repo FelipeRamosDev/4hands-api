@@ -249,6 +249,15 @@ class GlobalMap {
         }
     }
 
+    async getCache() {
+        try {
+            const cache = await API.redisServ.getDoc({ collection: this.collectionName, uid: this.UID });
+            return cache;
+        } catch (err) {
+            throw new Error.Log(err);
+        }
+    }
+
     async updateCache(data) {
         try {
             const updated = await API.redisServ.updateDoc({ collection: this.collectionName, uid: this.UID, data: data || {...this} });

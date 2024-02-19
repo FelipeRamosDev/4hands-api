@@ -122,6 +122,11 @@ class RedisService {
             });
 
             const doc = await this.client.hGetAll(buildKey(collection, uid));
+
+            if (!Object.keys(doc).length) {
+                return;
+            }
+
             RedisEventEmitters.postRead.call(setup);
             return parseDocToRead(this.apiServer.getCollectionSet(collection), doc);
         } catch (err) {
