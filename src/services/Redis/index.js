@@ -1,20 +1,20 @@
 const { createClient } = require('redis');
 const crypto = require('crypto');
 const { buildKey, parseDocToSave, parseDocToRead } = require('./RedisHelpers');
+const RedisEventEmitters = require('./RedisEventEmitters');
 
 class RedisService {
     constructor(setup) {
-        const { clientCB, clientOptions } = Object(setup);
-        const { connect, ready, end, error, reconnecting } = Object(clientCB);
+        const { clientOptions, onConnect, onReady, onEnd, onError, onReconnecting } = Object(setup);
 
         try {
             this.client = createClient(clientOptions);
             
-            this.addListener('connect', connect);
-            this.addListener('ready', ready);
-            this.addListener('end', end);
-            this.addListener('error', error);
-            this.addListener('reconnecting', reconnecting);
+            this.addListener('connect', onConnect);
+            this.addListener('ready', onReady);
+            this.addListener('end', onEnd);
+            this.addListener('error', onError);
+            this.addListener('reconnecting', onReconnecting);
         } catch (err) {
             throw new Error.Log(err);
         }
@@ -52,7 +52,31 @@ class RedisService {
         }
 
         try {
-            return await this.setDoc({ collection, uid, data });
+            await new Promise((resolve, reject) => {
+                setup.collectionSet = API.getCollectionSet(collection);
+                RedisEventEmitters.preCreate.call(setup, resolve, reject);
+            });
+
+            const created = await this.setDoc({ collection, uid, data });
+            RedisEventEmitters.postCreate.call(setup);
+            return created;
+        } catch (err) {
+            throw new Error.Log(err);
+        }
+    }
+
+    async updateDoc(setup) {
+        const { collection } = Object(setup);
+
+        try {
+            await new Promise((resolve, reject) => {
+                setup.collectionSet = API.getCollectionSet(collection);
+                RedisEventEmitters.preUpdate.call(setup, resolve, reject);
+            });
+
+            const updated = await this.setDoc(setup);
+            RedisEventEmitters.postUpdate.call(setup);
+            return updated;
         } catch (err) {
             throw new Error.Log(err);
         }
@@ -87,9 +111,17 @@ class RedisService {
         }
     }
     
-    async getDoc({ collection, uid }) {
+    async getDoc(setup) {
+        const { collection, uid } = Object(setup);
+
         try {
+            await new Promise((resolve, reject) => {
+                setup.collectionSet = API.getCollectionSet(collection);
+                RedisEventEmitters.preRead.call(setup, resolve, reject);
+            });
+
             const doc = await this.client.hGetAll(buildKey(collection, uid));
+            RedisEventEmitters.postRead.call(setup);
             return parseDocToRead(API.getCollectionSet(collection), doc);
         } catch (err) {
             throw new Error.Log(err);
@@ -130,10 +162,15 @@ class RedisService {
 
         try {
             const keys = await this.client.hKeys(key);
+            await new Promise((resolve, reject) => {
+                setup.collectionSet = API.getCollectionSet(collection);
+                RedisEventEmitters.preDelete.call(setup, resolve, reject);
+            });
 
             keys.map(curr => promises.push(this.client.hDel(key, curr)));
 
             const resolve = await Promise.all(promises);
+            RedisEventEmitters.postDelete.call(setup);
             if (resolve.every(success => success)) {
                 return { success: true };
             }
