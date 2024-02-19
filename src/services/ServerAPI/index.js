@@ -311,6 +311,12 @@ class ServerAPI {
             }
         }
     }
+
+    getCollectionSet(collectionName) {
+        if (Array.isArray(this.database?.collections)) {
+            return this.database.collections.find(coll => coll.name === collectionName);
+        }
+    }
 }
 
 module.exports = ServerAPI;
