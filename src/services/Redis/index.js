@@ -1,6 +1,6 @@
 const { createClient } = require('redis');
 const crypto = require('crypto');
-const { buildKey } = require('./RedisHelpers');
+const { buildKey, parseDocToSave, parseDocToRead } = require('./RedisHelpers');
 
 class RedisService {
     constructor(setup) {
@@ -75,15 +75,13 @@ class RedisService {
                 return;
             }
 
-            Object.keys(data).map(key => {
-                setters.push(this.setDocField({collection, uid, field: key, value: data[key]}));
+            const parsedValue = parseDocToSave(API.getCollectionSet(collection), data);
+            Object.keys(parsedValue).map(key => {
+                setters.push(this.setDocField({collection, uid, field: key, value: parsedValue[key]}));
             });
 
-            const saved = await Promise.all(setters);
-
-            if (saved.every(item => item.success)) {
-                return { success: true };
-            }
+            await Promise.all(setters);
+            return { success: true };
         } catch (err) {
             throw new Error.Log(err);
         }
@@ -92,7 +90,7 @@ class RedisService {
     async getDoc({ collection, uid }) {
         try {
             const doc = await this.client.hGetAll(buildKey(collection, uid));
-            return doc;
+            return parseDocToRead(API.getCollectionSet(collection), doc);
         } catch (err) {
             throw new Error.Log(err);
         }
@@ -112,6 +110,10 @@ class RedisService {
 
             if (!field || typeof field !== 'string') {
                 throw new Error.Log('commom.bad_format_param', 'field', 'RedisService.setDocField', 'string', uid);
+            }
+
+            if (!value) {
+                return;
             }
 
             const ready = await this.client.hSet(buildKey(collection, uid), field, value);
