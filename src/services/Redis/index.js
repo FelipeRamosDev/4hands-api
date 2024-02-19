@@ -1,4 +1,5 @@
 const { createClient } = require('redis');
+const crypto = require('crypto');
 
 class RedisService {
     constructor(setup) {
@@ -40,23 +41,32 @@ class RedisService {
         }
     }
 
-    async createDoc(collection, uid, data) {
+    async createDoc(setup) {
+        let { collection, uid, data } = Object(setup);
         const setters = [];
 
-        try {
-            for (const key of Object.keys(data)) {
-                setters.push(this.setDocField(`${collection}:${uid}`, key, data[key]));
-            }
+        if (!uid) {
+            uid = crypto.randomBytes(10).toString('hex');
+        }
 
-            return await Promise.all(setters);
+        try {
+            Object.keys(data).map(key => {
+                setters.push(this.setDocField(`${collection}:${uid}`, key, data[key]));
+            });
+
+            const saved = await Promise.all(setters);
+
+            if (saved.every(item => item.success)) {
+                return { success: true };
+            }
         } catch (err) {
             throw new Error.Log(err);
         }
     }
     
-    async getDoc(uid) {
+    async getDoc({ collection, uid }) {
         try {
-            const doc = await this.client.hGetAll(uid);
+            const doc = await this.client.hGetAll(`${collection}:${uid}`);
             return doc;
         } catch (err) {
             throw new Error.Log(err);
