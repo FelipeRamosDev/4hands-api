@@ -67,7 +67,7 @@ class RedisService {
     }
 
     async updateDoc(setup) {
-        const { collection } = Object(setup);
+        const { collection, uid, data } = Object(setup);
 
         try {
             await new Promise((resolve, reject) => {
@@ -75,7 +75,7 @@ class RedisService {
                 RedisEventEmitters.preUpdate.call(setup, resolve, reject);
             });
 
-            const updated = await this.setDoc(setup);
+            const updated = await this.setDoc({ collection, uid, data });
             RedisEventEmitters.postUpdate.call(setup);
             return updated;
         } catch (err) {
