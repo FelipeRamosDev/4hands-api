@@ -9,7 +9,7 @@ class RedisHelpers {
         const result = {};
 
         if (collectionSet instanceof Collection && typeof value === 'object' && !Array.isArray(value)) {
-            Object.keys(collectionSet?.schema?.obj).map(key => {
+            Object.keys(value).map(key => {
                 const item = collectionSet.schema.obj[key];
                 const { type } = Object(item);
                 const { parseString, parseNum, parseDateToSave, parseArrayToSave, parseObjectToSave, parseDefault } = RedisHelpers;
@@ -49,25 +49,26 @@ class RedisHelpers {
                 const item = collectionSet.schema.obj[key];
                 const { type } = Object(item);
                 const { parseString, parseNum, parseDateToRead, parseArrayToRead, parseObjectToRead, parseDefault } = RedisHelpers;
+                const parsedDefault = parseDefault(item.default);
     
                 if (type?.name === 'String') {
-                    result[key] = parseString(value[key]) || parseDefault(item.default);
+                    result[key] = parseString(value[key]) || parsedDefault;
                 }
 
                 else if (type?.name === 'Number') {
-                    result[key] = parseNum(value[key]) || parseDefault(item.default);
+                    result[key] = parseNum(value[key]) || parsedDefault;
                 }
 
                 else if (type?.name === 'Date') {
-                    result[key] = parseDateToRead(value[key]) || parseDefault(item.default);
+                    result[key] = parseDateToRead(value[key]) || parsedDefault;
                 }
 
                 else if (Array.isArray(type)) {
-                    result[key] = parseArrayToRead(value[key]) || parseDefault(item.default);
+                    result[key] = parseArrayToRead(value[key]) || parsedDefault;
                 }
 
                 else if (typeof type === 'object' && !Array.isArray(type)) {
-                    result[key] = parseObjectToRead(value[key]) || parseDefault(item.default);
+                    result[key] = parseObjectToRead(value[key]) || parsedDefault;
                 }
             });
 
