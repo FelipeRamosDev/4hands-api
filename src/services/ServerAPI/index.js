@@ -41,6 +41,7 @@ class ServerAPI {
      * @param {number} setup.PORT - The port number on which the server will listen (defaults to 80).
      * @param {MailService} setup.emailConfig - Configurations for the server emails sent.
      * @param {string[]} setup.corsOrigin - Array with the allowed domains for cors config.
+     * @param {boolean} setup.noServer - If true, it doesn't start the server.
      */
     constructor (setup) {
         const {
@@ -60,7 +61,8 @@ class ServerAPI {
             FE_ORIGIN,
             PORT,
             emailConfig,
-            corsOrigin
+            corsOrigin,
+            noServer
         } = Object(setup);
 
         this.projectName = projectName;
@@ -77,6 +79,7 @@ class ServerAPI {
         this.listenCallback = listenCallback;
         this.FE_ORIGIN = FE_ORIGIN;
         this.PORT = PORT || 80;
+        this.noServer = noServer;
 
         if (keySSLPath) {
             this.keySSLPath = path.normalize(this.projectPath + keySSLPath);
@@ -164,40 +167,44 @@ class ServerAPI {
         }, this);
 
         await this.redisServ.connect();
-        const RedisStore = require('connect-redis').default;
-
+        
         // Configuring server
-        this.app.use(cors({
-            origin: this.corsOrigin,
-            credentials: true
-        }));
-
-        this.app.use(bodyParser.json({ limit: this.jsonLimit }));
-        this.app.use(express.json());
-
-        if (this.API_SECRET) {
-            this.app.use(session({
-                store: new RedisStore({ client: this.redisServ.client }),
-                secret: this.API_SECRET,
-                resave: this.sessionResave,
-                saveUninitialized: this.sessionSaveUninitialized,
-                cookie: {
-                    secure: this.useSSL, // Set secure to true if using HTTPS
-                    maxAge: this.sessionCookiesMaxAge
-                }
+        if (!this.noServer) {
+            const RedisStore = require('connect-redis').default;
+            this.app.use(cors({
+                origin: this.corsOrigin,
+                credentials: true
             }));
-        } else {
-            throw 'You need to provide a API SECRET to start the server!';
-        }
 
-        if (this.staticPath) {
-            this.app.use(express.static(this.rootPath + this.staticPath));
-        }
+            this.app.use(bodyParser.json({ limit: this.jsonLimit }));
+            this.app.use(express.json());
 
-        if (this.useSSL) {
-            this.listenSSL(this.PORT, () => this.isSuccess());
+            if (this.API_SECRET) {
+                this.app.use(session({
+                    store: new RedisStore({ client: this.redisServ.client }),
+                    secret: this.API_SECRET,
+                    resave: this.sessionResave,
+                    saveUninitialized: this.sessionSaveUninitialized,
+                    cookie: {
+                        secure: this.useSSL, // Set secure to true if using HTTPS
+                        maxAge: this.sessionCookiesMaxAge
+                    }
+                }));
+            } else {
+                throw 'You need to provide a API SECRET to start the server!';
+            }
+
+            if (this.staticPath) {
+                this.app.use(express.static(this.rootPath + this.staticPath));
+            }
+
+            if (this.useSSL) {
+                this.listenSSL(this.PORT, () => this.isSuccess());
+            } else {
+                this.app.listen(this.PORT, () => this.isSuccess());
+            }
         } else {
-            this.app.listen(this.PORT, () => this.isSuccess());
+            this.isSuccess();
         }
     }
 
