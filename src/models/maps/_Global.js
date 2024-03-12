@@ -20,15 +20,17 @@ class GlobalMap {
         const User = require('@models/collections/User');
 
         try {
+            this.getParent = () => parent;
+
             this.collectionName = collectionName;
             this._id = _id && _id.toString();
+            this.UID = this._id || setup.UID?.toString();
             this.index = index;
             this.author = author || User.currentUser();
             this.cod = cod;
             this.createdAt = createdAt && new Date(createdAt).toLocaleString();
             this.modifiedAt = modifiedAt && new Date(modifiedAt).toLocaleString();
-    
-            this.getParent = () => parent;
+            this.isConstructed = true;
         } catch (err) {
             throw new Error.Log(err);
         }
@@ -133,7 +135,7 @@ class GlobalMap {
         try {
             if (!collection) throw new Error.Log('database.missing_params', 'collectionName', '_Global.updateDB');
 
-            const loaded = await crud.update({collectionName: collection, filter: filter || this.UID || this._id, data, options: {returnDocs: true} });
+            const loaded = await crud.update({collectionName: collection, filter: filter || this.UID || this._id, data: data || {...this}, options: {returnDocs: true} });
             if (loaded instanceof Error.Log) {
                 throw new Error.Log(loaded);
             }
@@ -260,7 +262,7 @@ class GlobalMap {
 
     async updateCache(data) {
         try {
-            const updated = await API.redisServ.updateDoc({ collection: this.collectionName, uid: this.UID, data: data || {...this} });
+            const updated = await API.redisServ.updateDoc({ collection: this.collectionName, uid: this.UID || this._id, data: data || {...this} });
             return updated;
         } catch (err) {
             throw new Error.Log(err);
@@ -271,6 +273,27 @@ class GlobalMap {
         try {
             const deleted = await API.redisServ.deleteDoc({ collection: this.collectionName, uid: this.UID });
             return deleted;
+        } catch (err) {
+            throw new Error.Log(err);
+        }
+    }
+
+    static async createDocCache(collection, uid) {
+        const { CRUD } = require('4hands-api');
+
+        try {
+            const docQuery = CRUD.getDoc({ collectionName: collection, filter: uid });
+            let docResult;
+
+            if (docQuery.defaultPopulate) {
+                docResult = await docQuery.defaultPopulate();
+            } else {
+                docResult = await docQuery.exec();
+            }
+
+            const doc = docResult.initialize();
+            const cached = await doc.createCache();
+            return cached;
         } catch (err) {
             throw new Error.Log(err);
         }
