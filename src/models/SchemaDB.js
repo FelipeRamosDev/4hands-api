@@ -27,13 +27,15 @@ class SchemaDB {
         excludeGlobals: [],
         links: Object(),
         queries: Object(),
-        events: Object()
+        events: Object(),
+        redisEvents: Object()
     }) {
         try {
             this.name = setup.name;
             this.projectPath = path.normalize(__dirname.replace(path.normalize('/node_modules/4hands-api/src/models'), '/'));
             this.projectQueriesPath = path.normalize(`${this.projectPath}src/collections/queries/${this.name}.query.js`);
             this.projectEventsPath = path.normalize(`${this.projectPath}src/collections/events/${this.name}.event.js`);
+            this.projectRedisEventsPath = path.normalize(`${this.projectPath}src/collections/redisEvents/${this.name}.event.js`);
             this.projectClassesPath = path.normalize(`${this.projectPath}src/collections/Class/${this.name}.class.js`);
             this.symbol = setup.symbol;
             this.DB = null;
@@ -65,9 +67,18 @@ class SchemaDB {
                 this.events = Object(customEvents[this.name]);
             }
 
+            if (setup.redisEvents) {
+                this.redisEvents = setup.redisEvents;
+            } else if (FS.isExist(this.projectRedisEventsPath)) {
+                this.redisEvents = require(this.projectRedisEventsPath);
+            } else {
+                this.redisEvents = Object(customEvents[this.name]);
+            }
+
             // Initializing queries, events and classes
             this.initQueries();
             this.initEvents();
+            this.initRedisEvents();
             this.initClasses();
 
             // Initializing the collection
@@ -145,6 +156,51 @@ class SchemaDB {
             if (this.events.postFindOne) this.schema.post('findOne', this.events.postFindOne);
             if (this.events.preUpdate) this.schema.pre(['updateOne', 'findOneAndUpdate'], this.events.preUpdate);
             if (this.events.postUpdate) this.schema.post(['updateOne', 'findOneAndUpdate'], this.events.postUpdate);
+        } catch(err) {
+            throw new Error.Log(err).append('database.init_events');
+        }
+    }
+
+    /**
+     * Initializes redis events for the schema.
+     * @private
+     * @throws {Error} If event initialization fails.
+     */
+    initRedisEvents() {
+        const { preCreate, postCreate, preRead, postRead, preUpdate, postUpdate, preDelete, postDelete } = Object(this.redisEvents);
+
+        try {
+            if (preCreate) {
+                process.on('redis:precreate:' + this.name, preCreate);
+            }
+
+            if (postCreate) {
+                process.on('redis:postcreate:' + this.name, postCreate);
+            }
+
+            if (preRead) {
+                process.on('redis:preread:' + this.name, preRead);
+            }
+
+            if (postRead) {
+                process.on('redis:postread:' + this.name, postRead);
+            }
+
+            if (preUpdate) {
+                process.on('redis:preupdate:' + this.name, preUpdate);
+            }
+
+            if (postUpdate) {
+                process.on('redis:postupdate:' + this.name, postUpdate);
+            }
+
+            if (preDelete) {
+                process.on('redis:predelete:' + this.name, preDelete);
+            }
+
+            if (postDelete) {
+                process.on('redis:postdelete:' + this.name, postDelete);
+            }
         } catch(err) {
             throw new Error.Log(err).append('database.init_events');
         }

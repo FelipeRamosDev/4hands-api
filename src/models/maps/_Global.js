@@ -1,14 +1,12 @@
-const ValidateSchema = require('../../validation/validateSchema');
 const CRUD = require('../../services/database/crud');
 const { isObjectID } = require('../../helpers/database/relationalFields');
 
 /**
  * Represents a global map in the application, extending the ValidateSchema class.
  * @module GlobalMap
- * @extends ValidateSchema
  * @namespace Models
  */
-class GlobalMap extends ValidateSchema {
+class GlobalMap {
     /**
      * Creates a new instance of the GlobalMap class.
      * @param {Object} setup - The setup object.
@@ -16,22 +14,23 @@ class GlobalMap extends ValidateSchema {
      * @throws {Error} If the creation of GlobalMap fails.
      */
     constructor(setup, parent) {
-        const { _id, index, author, cod, createdAt, modifiedAt, collectionName} = setup || {};
-        super(setup.validationRules || {});
+        const { _id, index, author, cod, createdAt, modifiedAt, collectionName } = setup || {};
         if (isObjectID(setup)) return;
 
         const User = require('@models/collections/User');
 
         try {
+            this.getParent = () => parent;
+
             this.collectionName = collectionName;
             this._id = _id && _id.toString();
+            this.UID = this._id || setup.UID?.toString();
             this.index = index;
             this.author = author || User.currentUser();
             this.cod = cod;
             this.createdAt = createdAt && new Date(createdAt).toLocaleString();
             this.modifiedAt = modifiedAt && new Date(modifiedAt).toLocaleString();
-    
-            this.getParent = () => parent;
+            this.isConstructed = true;
         } catch (err) {
             throw new Error.Log(err);
         }
@@ -136,7 +135,7 @@ class GlobalMap extends ValidateSchema {
         try {
             if (!collection) throw new Error.Log('database.missing_params', 'collectionName', '_Global.updateDB');
 
-            const loaded = await crud.update({collectionName: collection, filter: filter || this.UID || this._id, data, options: {returnDocs: true} });
+            const loaded = await crud.update({collectionName: collection, filter: filter || this.UID || this._id, data: data || {...this}, options: {returnDocs: true} });
             if (loaded instanceof Error.Log) {
                 throw new Error.Log(loaded);
             }
@@ -240,6 +239,72 @@ class GlobalMap extends ValidateSchema {
             } else {
                 return { success: true, message: 'SafeValue updated!', data: updated };
             }
+        }
+    }
+
+    async createCache(data) {
+        try {
+            const created = await API.redisServ.createDoc({ collection: this.collectionName, uid: this.UID, data: data || {...this} });
+            return created;
+        } catch (err) {
+            throw new Error.Log(err);
+        }
+    }
+
+    async getCache() {
+        try {
+            const cache = await API.redisServ.getDoc({ collection: this.collectionName, uid: this.UID });
+            return cache;
+        } catch (err) {
+            throw new Error.Log(err);
+        }
+    }
+
+    async updateCache(data) {
+        try {
+            const updated = await API.redisServ.updateDoc({ collection: this.collectionName, uid: this.UID || this._id, data: data || {...this} });
+            return updated;
+        } catch (err) {
+            throw new Error.Log(err);
+        }
+    }
+
+    async clearCache() {
+        try {
+            const deleted = await API.redisServ.deleteDoc({ collection: this.collectionName, uid: this.UID });
+            return deleted;
+        } catch (err) {
+            throw new Error.Log(err);
+        }
+    }
+
+    static async createDocCache(collection, uid) {
+        const { CRUD } = require('4hands-api');
+
+        try {
+            const docQuery = CRUD.getDoc({ collectionName: collection, filter: uid });
+            let docResult;
+
+            if (docQuery.defaultPopulate) {
+                docResult = await docQuery.defaultPopulate();
+            } else {
+                docResult = await docQuery.exec();
+            }
+
+            const doc = docResult.initialize();
+            const cached = await doc.createCache();
+            return cached;
+        } catch (err) {
+            throw new Error.Log(err);
+        }
+    }
+
+    static async getCache(collection, uid) {
+        try {
+            const cacheDoc = await API.redisServ.getDoc({ collection, uid });
+            return cacheDoc;
+        } catch (err) {
+            throw new Error.Log(err);
         }
     }
 }
