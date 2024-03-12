@@ -10,28 +10,37 @@ class RedisHelpers {
 
         if (collectionSet instanceof Collection && typeof value === 'object' && !Array.isArray(value)) {
             Object.keys(value).map(key => {
-                const item = collectionSet.schema.obj[key];
+                const item = collectionSet.schema.tree[key];
+                if (!item) {
+                    return;
+                }
+
                 const { type } = Object(item);
-                const { parseString, parseNum, parseDateToSave, parseArrayToSave, parseObjectToSave, parseDefault } = RedisHelpers;
-    
+                const { parseString, parseNum, parseDateToSave, parseArrayToSave, parseObjectToSave, parseDefault, parseObjectId } = RedisHelpers;
+                const parsedDefault = parseDefault(item.default);
+
+                if (type === 'ObjectId' || type?.name === 'ObjectId') {
+                    result[key] = parseObjectId(value[key], true) || parsedDefault;
+                }
+
                 if (type?.name === 'String') {
-                    result[key] = parseString(value[key]) || parseDefault(item.default);
+                    result[key] = parseString(value[key]) || parsedDefault;
                 }
 
                 else if (type?.name === 'Number') {
-                    result[key] = parseNum(value[key]) || parseDefault(item.default);
+                    result[key] = parseNum(value[key]) || parsedDefault;
                 }
 
                 else if (type?.name === 'Date') {
-                    result[key] = parseDateToSave(value[key]) || parseDefault(item.default);
+                    result[key] = parseDateToSave(value[key]) || parsedDefault;
                 }
 
                 else if (Array.isArray(type)) {
-                    result[key] = parseArrayToSave(value[key]) || parseDefault(item.default);
+                    result[key] = parseArrayToSave(value[key]) || parsedDefault;
                 }
 
                 else if (typeof type === 'object' && !Array.isArray(type)) {
-                    result[key] = parseObjectToSave(value[key]) || parseDefault(item.default);
+                    result[key] = parseObjectToSave(value[key]) || parsedDefault;
                 }
             });
 
@@ -45,14 +54,22 @@ class RedisHelpers {
         const result = {};
 
         if (collectionSet instanceof Collection && typeof value === 'object' && !Array.isArray(value)) {
-            Object.keys(collectionSet?.schema?.obj).map(key => {
-                const item = collectionSet.schema.obj[key];
+            Object.keys(collectionSet?.schema?.tree).map(key => {
+                const item = collectionSet.schema.tree[key];
                 const { type } = Object(item);
-                const { parseString, parseNum, parseDateToRead, parseArrayToRead, parseObjectToRead, parseDefault } = RedisHelpers;
+                const { parseString, parseNum, parseDateToRead, parseArrayToRead, parseObjectToRead, parseDefault, parseObjectId, isValidJSON } = RedisHelpers;
                 const parsedDefault = parseDefault(item.default);
-    
-                if (type?.name === 'String') {
-                    result[key] = parseString(value[key]) || parsedDefault;
+
+                if (type === 'ObjectId' || type?.name === 'ObjectId') {
+                    result[key] = parseObjectId(value[key]) || parsedDefault;
+                }
+
+                else if (type?.name === 'String') {
+                    if (isValidJSON(value[key])) {
+                        result[key] = JSON.parse(value[key]);
+                    } else {
+                        result[key] = parseString(value[key]) || parsedDefault;
+                    }
                 }
 
                 else if (type?.name === 'Number') {
@@ -181,6 +198,37 @@ class RedisHelpers {
             return defaultValue();
         } else {
             return defaultValue;
+        }
+    }
+
+    static parseObjectId(value, toSave) {
+        if (!value) {
+            return;
+        }
+
+        if (value.isComplete || value.isConstructed) {
+            return toSave ? JSON.stringify(value) : JSON.parse(value);
+        }
+
+        if (typeof value === 'string') {
+            try {
+                return JSON.parse(value);
+            } catch (err) {
+                return value;
+            }
+        }
+
+        return value.toString && toSave ? value.toString() : value;
+    }
+
+    static isValidJSON(value) {
+        if (typeof value === 'string') {
+            try {
+                JSON.parse(value);
+                return true;
+            } catch (err) {
+                return false;
+            }
         }
     }
 }
