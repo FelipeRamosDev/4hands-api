@@ -1,6 +1,6 @@
 const dbHelpers = require('./dbHelpers');
 const relationalHelper = require('./relationalFields');
-const config = require('@config');
+const config = require('4hands-api/configs/project');
 
 /**
  * Middleware function executed before saving a document.
