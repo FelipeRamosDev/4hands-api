@@ -1,4 +1,4 @@
-const collections = require('./src/schemas');
+const collections = require('./src/collections');
 const DatabaseServer = require('./src/services/database/DatabaseServer');
 const ServerAPI = require('./src/services/ServerAPI');
 const SocketServer = require('./src/services/SocketServer');
@@ -11,7 +11,6 @@ const interface = require('./src/interface');
 const middlewares = require('./src/middlewares');
 const models = require('./src/models');
 const resources = require('./src/resources');
-const schemas = require('./src/schemas');
 const services = require('./src/services');
 const validation = require('./src/validation');
 
@@ -62,6 +61,5 @@ exports.interface = interface;
 exports.middlewares = middlewares;
 exports.models = models;
 exports.resources = resources;
-exports.schemas = schemas;
 exports.services = services;
 exports.validation = validation;
