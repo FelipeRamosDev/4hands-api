@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const { getGlobalSchema } = require('4hands-api/src/collections/_globals');
 const RefConfig = require('./settings/SchemaRefConfig');
-const { database: { dbHelpers, queries, events }} = require('4hands-api/src/helpers');
+const { database: { dbHelpers }} = require('4hands-api/src/helpers');
 const configs = require('4hands-api/configs/project');
 const GlobalClass = require('4hands-api/src/collections/Class/_globals.class');
 const FS = require('4hands-api/src/services/FS');
@@ -18,7 +18,9 @@ class SchemaDB {
     static RefConfig = RefConfig;
 
     constructor(setup) {
-        const { name, symbol, excludeGlobals, queries, events, redisEvents, fieldsSet } = Object(setup);
+        const { name, symbol, excludeGlobals, redisEvents, fieldsSet } = Object(setup);
+        const globalQueries = require('4hands-api/src/collections/queries/_globals.query');
+        const globalEvents = require('4hands-api/src/collections/events/_globals.event');
         let { schema } = Object(setup);
 
         try {
@@ -27,12 +29,15 @@ class SchemaDB {
             this.projectQueriesPath = path.normalize(`${this.projectPath}src/collections/queries/${this.name}.query.js`);
             this.projectEventsPath = path.normalize(`${this.projectPath}src/collections/events/${this.name}.event.js`);
             this.projectRedisEventsPath = path.normalize(`${this.projectPath}src/collections/redisEvents/${this.name}.event.js`);
-            this.nativeQueriesPath = path.normalize(`../collections/queries/${this.name}.query.js`);
-            this.nativeEventsPath = path.normalize(`../collections/events/${this.name}.event.js`);
-            this.nativeClassesPath = path.normalize(`../collections/Class/${this.name}.class.js`);
+            this.nativeQueriesPath = path.normalize(`${__dirname.replace(path.normalize('/models'), '/collections')}/queries/${this.name}.query.js`);
+            this.nativeEventsPath = path.normalize(`${__dirname.replace(path.normalize('/models'), '/collections')}/events/${this.name}.event.js`);
+            this.nativeClassesPath = path.normalize(`${__dirname.replace(path.normalize('/models'), '/collections')}/Class/${this.name}.class.js`);
             this.projectClassesPath = path.normalize(`${this.projectPath}src/collections/Class/${this.name}.class.js`);
             this.symbol = symbol;
             this.DB = null;
+            this.globalEvents = globalEvents;
+            this.nativeQueries = {...globalQueries};
+            this.nativeEvents = {};
             this.queries = {};
             this.events = {};
             this.redisEvents = {};
@@ -47,25 +52,6 @@ class SchemaDB {
             }
 
             this.schema = new mongoose.Schema({...getGlobalSchema(excludeGlobals), ...schema});
-
-            if (queries) {
-                this.queries = queries;
-            } else if (FS.isExist(this.projectQueriesPath)) {
-                this.queries = require(this.projectQueriesPath);
-            } else if (FS.isExist(this.nativeQueriesPath)) {
-                const nativeQueries = require(this.nativeQueriesPath);
-                this.queries = Object(nativeQueries);
-            }
-
-            if (events) {
-                this.events = events;
-            } else if (FS.isExist(this.projectEventsPath)) {
-                this.events = require(this.projectEventsPath);
-            } else if (FS.isExist(this.nativeEventsPath)) {
-                const nativeEvents = require(this.nativeEventsPath);
-                this.events = Object(nativeEvents);
-            }
-
             if (redisEvents) {
                 this.redisEvents = redisEvents;
             } else if (FS.isExist(this.projectRedisEventsPath)) {
@@ -125,7 +111,20 @@ class SchemaDB {
     initQueries() {
         try {
             // Adding global and custom queries
-            this.schema.query = {...this.schema.query, ...queries, ...this.queries};
+            if (FS.isExist(this.nativeQueriesPath)) {
+                const nativeQueries = require(this.nativeQueriesPath);
+                this.nativeQueries = { ...this.nativeQueries, ...nativeQueries };
+            }
+
+            if (FS.isExist(this.projectQueriesPath)) {
+                const projectQueries = require(this.projectQueriesPath);
+
+                if (projectQueries) {
+                    this.queries = { ...this.nativeQueries, ...require(this.projectQueriesPath) };
+                }
+            }
+
+            this.schema.query = this.queries;
         } catch(err) {
             throw new Error.Log(err).append('database.init_queries');
         }
@@ -138,21 +137,56 @@ class SchemaDB {
      */
     initEvents() {
         try {
-            // Adding global event
-            this.schema.pre('save', events.preSave);
-            this.schema.post('save', events.postSave);
-            this.schema.pre(['updateOne', 'findOneAndUpdate'], events.preUpdateOne);
-            this.schema.post(['updateOne', 'findOneAndUpdate'], events.postUpdateOne);
-            this.schema.pre(['deleteOne', 'deleteMany'], events.preDelete);
-            this.schema.post(['deleteOne', 'deleteMany'], events.postDelete);
+            // Loading the native events
+            if (FS.isExist(this.nativeEventsPath)) {
+                const nativeEvents = require(this.nativeEventsPath);
+                this.nativeEvents = { ...this.nativeEvents, ...nativeEvents };
+            }
+
+            // Loading the project events
+            if (FS.isExist(this.projectEventsPath)) {
+                const projectEvents = require(this.projectEventsPath);
+
+                if (projectEvents) {
+                    this.events = require(this.projectEventsPath);
+                }
+            }
+
+            // Adding global events
+            if (this.globalEvents) {
+                const { preSave, postSave, preUpdateOne, postUpdateOne, preDelete, postDelete } = this.globalEvents;
+
+                if (preSave) this.schema.pre('save', preSave);
+                if (postSave) this.schema.post('save', postSave);
+                if (preUpdateOne) this.schema.pre(['updateOne', 'findOneAndUpdate'], preUpdateOne);
+                if (postUpdateOne) this.schema.post(['updateOne', 'findOneAndUpdate'], postUpdateOne);
+                if (preDelete) this.schema.pre(['deleteOne', 'deleteMany'], preDelete);
+                if (postDelete) this.schema.post(['deleteOne', 'deleteMany'], postDelete);
+            }
+
+            // Adding native events
+            if (this.nativeEvents) {
+                const { preSave, postSave, preUpdateOne, postUpdateOne, preDelete, postDelete } = this.nativeEvents;
+
+                if (preSave) this.schema.pre('save', preSave);
+                if (postSave) this.schema.post('save', postSave);
+                if (preUpdateOne) this.schema.pre(['updateOne', 'findOneAndUpdate'], preUpdateOne);
+                if (postUpdateOne) this.schema.post(['updateOne', 'findOneAndUpdate'], postUpdateOne);
+                if (preDelete) this.schema.pre(['deleteOne', 'deleteMany'], preDelete);
+                if (postDelete) this.schema.post(['deleteOne', 'deleteMany'], postDelete);
+            }
 
             // Adding custom events for the schema
-            if (this.events.preSave) this.schema.pre('save', this.events.preSave);
-            if (this.events.postSave) this.schema.post('save', this.events.postSave);
-            if (this.events.preFindOne) this.schema.pre('findOne', this.events.preFindOne);
-            if (this.events.postFindOne) this.schema.post('findOne', this.events.postFindOne);
-            if (this.events.preUpdate) this.schema.pre(['updateOne', 'findOneAndUpdate'], this.events.preUpdate);
-            if (this.events.postUpdate) this.schema.post(['updateOne', 'findOneAndUpdate'], this.events.postUpdate);
+            if (this.events) {
+                const { preSave, postSave, preUpdateOne, postUpdateOne, preDelete, postDelete } = this.events;
+                
+                if (preSave) this.schema.pre('save', preSave);
+                if (postSave) this.schema.post('save', postSave);
+                if (preUpdateOne) this.schema.pre('findOne', preUpdateOne);
+                if (postUpdateOne) this.schema.post('findOne', postUpdateOne);
+                if (preDelete) this.schema.pre(['updateOne', 'findOneAndUpdate'], preDelete);
+                if (postDelete) this.schema.post(['updateOne', 'findOneAndUpdate'], postDelete);
+            }
         } catch(err) {
             throw new Error.Log(err).append('database.init_events');
         }

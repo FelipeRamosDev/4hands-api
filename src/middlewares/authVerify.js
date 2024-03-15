@@ -42,14 +42,8 @@ module.exports = async (req, res, next) => {
                 if (typeof body.confirmationtoken !== 'string') {
                     return res.status(401).send(notConfirmedEmail);
                 }
-
-                if (body.confirmationtoken === data.confirmationToken) {
-                    session.confirmationToken = data.confirmationToken;
-                    session.isEmailConfirmed = true;
-                } else {
-                    session.isEmailConfirmed = data.isEmailConfirmed;
-                    return res.status(401).send(badConfirmationToken);
-                }
+                
+                session.confirmationToken = data.confirmationToken;
             }
 
             session.user = data.user;

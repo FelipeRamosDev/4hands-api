@@ -401,10 +401,18 @@ class User extends _Global {
      */
     static async signIn(userName, password) {
         try {
-            const userDOC = await CRUD.getDoc({ collectionName: 'users', filter: { userName }}).defaultPopulate();
+            const userDOC = await CRUD.getDoc({ collectionName: 'users', filter: { email: userName }}).defaultPopulate();
 
             if (!userDOC) {
                 return new Error.Log('auth.user_not_found', userName);
+            }
+
+            if (!userDOC.isEmailConfirmed) {
+                return new Error.Log({
+                    code: 401,
+                    name: 'USER_EMAIL_NOT_CONFIRMED',
+                    message: `The user needs to confirm his email before login!`
+                });
             }
 
             const user = userDOC.initialize();
