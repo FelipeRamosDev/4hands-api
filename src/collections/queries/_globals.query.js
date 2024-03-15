@@ -1,4 +1,4 @@
-const dbHelpers = require('./dbHelpers');
+const dbHelpers = require('4hands-api/src/helpers/database/dbHelpers');
 
 /**
  * A function to make query results readable by converting MongoDB documents to plain JavaScript objects.
