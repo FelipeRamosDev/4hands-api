@@ -40,14 +40,12 @@ module.exports = new Endpoint({
                 return res.status(500).send(newUser.response());
             }
 
-            const login = await User.signIn(body.email, body.password);
-            const response = await login.toSession(req.session);
-    
-            req.session.user = response;
-            req.session.isAuthorized = true;
-            req.session.isEmailConfirmed = login.isEmailConfirmed;
+            req.session.user = newUser.toPublic();
             req.session.confirmationToken = newUser.confirmationToken.toString('hex');
-    
+            req.session.isAuthorized = true;
+            req.session.isEmailConfirmed = false;
+
+            const response = await newUser.toSession(req.session);
             return res.status(200).send(response);
         } catch(err) {
             return res.status(500).send(new Error.Log(err).response());
