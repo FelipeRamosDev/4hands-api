@@ -17,18 +17,12 @@ const path = require('path');
 class SchemaDB {
     static RefConfig = RefConfig;
 
-    constructor(setup = {
-        name: String(),
-        symbol: String(),
-        schema: mongoose.SchemaTypeOptions.prototype,
-        excludeGlobals: [],
-        links: Object(),
-        queries: Object(),
-        events: Object(),
-        redisEvents: Object()
-    }) {
+    constructor(setup) {
+        const { name, symbol, excludeGlobals, queries, events, redisEvents, fieldsSet } = Object(setup);
+        let { schema } = Object(setup);
+
         try {
-            this.name = setup.name;
+            this.name = name;
             this.projectPath = path.normalize(__dirname.replace(path.normalize('/node_modules/4hands-api/src/models'), '/'));
             this.projectQueriesPath = path.normalize(`${this.projectPath}src/collections/queries/${this.name}.query.js`);
             this.projectEventsPath = path.normalize(`${this.projectPath}src/collections/events/${this.name}.event.js`);
@@ -37,25 +31,25 @@ class SchemaDB {
             this.nativeEventsPath = path.normalize(`../collections/events/${this.name}.event.js`);
             this.nativeClassesPath = path.normalize(`../collections/Class/${this.name}.class.js`);
             this.projectClassesPath = path.normalize(`${this.projectPath}src/collections/Class/${this.name}.class.js`);
-            this.symbol = setup.symbol;
+            this.symbol = symbol;
             this.DB = null;
             this.queries = {};
             this.events = {};
             this.redisEvents = {};
 
-            if (Array.isArray(setup.fieldsSet)) {
-                if (!setup.schema) setup.schema = {};
-                this.fieldsSet = setup.fieldsSet;
+            if (Array.isArray(fieldsSet)) {
+                if (!schema) schema = {};
+                this.fieldsSet = fieldsSet;
 
-                setup.fieldsSet.map(item => {
-                    setup.schema[item.fieldName] = item;
+                fieldsSet.map(item => {
+                    schema[item.fieldName] = item;
                 });
             }
 
-            this.schema = new mongoose.Schema({...getGlobalSchema(setup.excludeGlobals), ...setup.schema});
+            this.schema = new mongoose.Schema({...getGlobalSchema(excludeGlobals), ...schema});
 
-            if (setup.queries) {
-                this.queries = setup.queries;
+            if (queries) {
+                this.queries = queries;
             } else if (FS.isExist(this.projectQueriesPath)) {
                 this.queries = require(this.projectQueriesPath);
             } else if (FS.isExist(this.nativeQueriesPath)) {
@@ -63,8 +57,8 @@ class SchemaDB {
                 this.queries = Object(nativeQueries);
             }
 
-            if (setup.events) {
-                this.events = setup.events;
+            if (events) {
+                this.events = events;
             } else if (FS.isExist(this.projectEventsPath)) {
                 this.events = require(this.projectEventsPath);
             } else if (FS.isExist(this.nativeEventsPath)) {
@@ -72,8 +66,8 @@ class SchemaDB {
                 this.events = Object(nativeEvents);
             }
 
-            if (setup.redisEvents) {
-                this.redisEvents = setup.redisEvents;
+            if (redisEvents) {
+                this.redisEvents = redisEvents;
             } else if (FS.isExist(this.projectRedisEventsPath)) {
                 this.redisEvents = require(this.projectRedisEventsPath);
             }
