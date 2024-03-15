@@ -1,6 +1,6 @@
-const FS = require('@services/FS');
-const config = require('@config');
-const sessionCLI = FS.isExist(config.sessionPath) && require('@SESSION_CLI') || {};
+const FS = require('4hands-api/src/services/FS');
+const config = require('4hands-api/configs/project');
+const sessionCLI = FS.isExist(config.sessionPath) && require('4hands-api/sessionCLI.jsonessionCLI.json') || {};
 
 /**
  * Checks if the provided token corresponds to an active authenticated session.
@@ -17,7 +17,7 @@ async function isAuthenticated(token) {
             return false;
         }
 
-        const session = require('@SESSION_CLI');
+        const session = require('4hands-api/sessionCLI.json');
         const sessionObj = Object.entries(session).find(([key, value]) => session[key] && value.token === token);
 
         if (!sessionObj) {
@@ -48,7 +48,7 @@ async function createUserCLISession(user) {
         const sessionPath = config.sessionPath;
 
         if (FS.isExist(sessionPath)) {
-            session = require('@SESSION_CLI');
+            session = require('4hands-api/sessionCLI.json');
         }
 
         const token = user.token;

@@ -1,5 +1,5 @@
-const User = require('@models/collections/User');
-const AuthBucket = require('@models/collections/AuthBucket');
+const User = require('4hands-api/src/models/collections/User');
+const AuthBucket = require('4hands-api/src/models/collections/AuthBucket');
 
 class UsersClass {
     static Model = User;

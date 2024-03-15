@@ -1,11 +1,11 @@
 const _Global = require('../maps/_Global');
 const AuthBucket = require('./AuthBucket');
 const AuthService = require('../../services/Auth');
-const CRUD = require('@CRUD');
-const dbHelpers = require('@helpers/database/dbHelpers');
-const FS = require('@services/FS');
-const config = require('@config');
-const sessionCLI = FS.isExist(config.sessionPath) && require('@SESSION_CLI') || {};
+const CRUD = require('4hands-api/src/services/database/crud');
+const dbHelpers = require('4hands-api/src/helpers/database/dbHelpers');
+const FS = require('4hands-api/src/services/FS');
+const config = require('4hands-api/configs/project');
+const sessionCLI = FS.isExist(config.sessionPath) && require('4hands-api/sessionCLI.json') || {};
 
 /**
  * Represents a user in the application.

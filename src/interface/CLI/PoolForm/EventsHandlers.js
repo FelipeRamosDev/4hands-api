@@ -1,4 +1,4 @@
-const ToolsCLI = require('@CLI/ToolsCLI');
+const ToolsCLI = require('4hands-api/src/interface/CLI/ToolsCLI');
 const QuestionModel = require('./QuestionModel');
 
 /**

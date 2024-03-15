@@ -1,5 +1,5 @@
 const _Global = require('../maps/_Global');
-const AuthService = require('@services/Auth');
+const AuthService = require('4hands-api/src/services/Auth');
 
 /**
  * Represents a SafeValue object used for encrypting and decrypting sensitive data.
@@ -61,7 +61,7 @@ class SafeValue extends _Global {
      * @static
      */
     static async createEncrypt(rawValue) {
-        const CRUD = require('@CRUD');
+        const CRUD = require('4hands-api/src/services/database/crud');
 
         return await CRUD.create('safe_values', {
             type: 'encrypt',
@@ -77,7 +77,7 @@ class SafeValue extends _Global {
      * @async
      */
     async setEncrypted(newValue) {
-        const CRUD = require('@CRUD');
+        const CRUD = require('4hands-api/src/services/database/crud');
 
         if (this.isEmpty) {
             return await SafeValue.createEncrypt(newValue);

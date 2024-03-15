@@ -1,13 +1,13 @@
 const mongoose = require('mongoose');
-const {getGlobalSchema} = require('@schemas/_globals');
-const schemasClass = require('@schemas/class');
+const { getGlobalSchema } = require('4hands-api/src/schemas/_globals');
+const schemasClass = require('4hands-api/src/schemas/class');
 const RefConfig = require('./settings/SchemaRefConfig');
-const {database: {dbHelpers, queries, events}} = require('@helpers');
-const configs = require('@config');
+const { database: { dbHelpers, queries, events }} = require('4hands-api/src/helpers');
+const configs = require('4hands-api/configs/project');
 const GlobalClass = schemasClass.GlobalClass;
-const customQueries = require('@schemas/queries');
-const customEvents = require('@schemas/events');
-const FS = require('@src/services/FS');
+const customQueries = require('4hands-api/src/schemas/queries');
+const customEvents = require('4hands-api/src/schemas/events');
+const FS = require('4hands-api/src/services/FS');
 const path = require('path');
 
 /**

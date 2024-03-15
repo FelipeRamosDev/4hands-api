@@ -1,4 +1,4 @@
-const Component = require('@interface/Component');
+const Component = require('4hands-api/src/interface/Component');
 
 class ImageTemplate extends Component {
     get SOURCE_PATH() {

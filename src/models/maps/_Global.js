@@ -56,7 +56,7 @@ class GlobalMap {
      * @throws {Error} If there is an error during the retrieval process.
      */
     async getCurrentUser() {
-        const User = require('@models/collections/User');
+        const User = require('4hands-api/src/models/collections/User');
         const UID = User.currentUser();
         const user = await CRUD.getDoc({
             collectionName: 'users',
@@ -73,7 +73,7 @@ class GlobalMap {
      * @throws {Error} If there is an error during the saving process.
      */
     async saveDB(collectionName) {
-        const CRUDDB = require('@CRUD');
+        const CRUDDB = require('4hands-api/src/services/database/crud');
 
         try {
             const created = await CRUDDB.create(collectionName || this.collectionName, {...this});

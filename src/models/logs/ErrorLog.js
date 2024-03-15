@@ -1,7 +1,7 @@
 const LogBase = require('../maps/LogMap');
 const ValidationError = require('mongoose/lib/error/validation');
 const CastError = require('mongoose/lib/error/cast');
-const config = require('@config');
+const config = require('4hands-api/configs/project');
 
 /**
  * Represents an error log entry in the application.

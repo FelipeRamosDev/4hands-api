@@ -1,4 +1,4 @@
-const AuthService = require('@services/Auth');
+const AuthService = require('4hands-api/src/services/Auth');
 
 module.exports = {
     /**

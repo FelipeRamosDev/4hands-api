@@ -1,7 +1,7 @@
 const ValidateSchema = require('../validation/validateSchema');
 const FS = require('../services/FS');
 const ToolsCLI = require('./CLI/ToolsCLI');
-const DataDependency = require('@models/DataDependency');
+const DataDependency = require('4hands-api/src/models/DataDependency');
 
 /**
  * Default validation rules for the Component class.
