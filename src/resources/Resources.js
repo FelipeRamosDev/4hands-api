@@ -13,7 +13,7 @@ class Resources {
      * @param {string} [language='en_US'] - The language code for the desired language. Defaults to 'en_US'.
      */
     constructor(language) {
-        this.projectPath = path.normalize(__dirname.replace(path.normalize('/node_modules/4hands-api/src/models'), '/'));
+        this.projectPath = path.normalize(__dirname.replace(path.normalize('/node_modules/4hands-api/src/resources'), '/'));
         this.language = language || 'en_US';
         this.base = source[this.language];
 
