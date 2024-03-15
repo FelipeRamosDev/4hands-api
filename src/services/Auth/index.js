@@ -1,10 +1,10 @@
-const Success = require('@SUCCESS');
+const Success = require('4hands-api/src/models/Success');
 const bcrypt = require('bcrypt');
 const JWT = require('jsonwebtoken');
 const crypto = require('crypto');
-const FS = require('@services/FS');
-const config = require('@config');
-const sessionCLI = FS.isExist(config.sessionPath) && require('@SESSION_CLI') || {};
+const FS = require('4hands-api/src/services/FS');
+const config = require('4hands-api/configs/project');
+const sessionCLI = FS.isExist(config.sessionPath) && require('4hands-api/sessionCLI.json') || {};
 
 /**
  * Class representing an authentication service for handling user authentication and authorization.

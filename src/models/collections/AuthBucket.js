@@ -1,6 +1,6 @@
-const _Global = require('@models/maps/_Global');
-const AuthService = require('@services/Auth');
-const CRUD = require('@CRUD');
+const _Global = require('4hands-api/src/models/maps/_Global');
+const AuthService = require('4hands-api/src/services/Auth');
+const CRUD = require('4hands-api/src/services/database/crud');
 
 /**
  * Represents an authentication bucket associated with a user.

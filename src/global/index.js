@@ -2,11 +2,11 @@ const ajax = require('./ajax');
 const Resource = require('../resources/Resources');
 const validation = require('../validation');
 const ErrorLog = require('../models/logs/ErrorLog');
-const configs = require('@config');
+const configs = require('4hands-api/configs/project');
 const ToolsCLI = require('../interface/CLI/ToolsCLI');
 const toolsCLI = new ToolsCLI();
-const Success = require('@SUCCESS');
-const utils = require('@UTILS');
+const Success = require('4hands-api/src/models/Success');
+const utils = require('4hands-api/src/global/utils');
 
 /**
  * @global

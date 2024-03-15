@@ -112,19 +112,19 @@ class ServerAPI {
         }
 
         // 4hands-api native endpoints
-        this.createEndpoint(require('@controllers/api/health-check'));
-        this.createEndpoint(require('@controllers/auth/login'));
-        this.createEndpoint(require('@controllers/auth/register'));
-        this.createEndpoint(require('@controllers/auth/signout'));
-        this.createEndpoint(require('@controllers/auth/confirm-email'));
-        this.createEndpoint(require('@controllers/auth/send-email-confirm'));
-        this.createEndpoint(require('@controllers/auth/reset-password/send-email'));
-        this.createEndpoint(require('@controllers/auth/reset-password/create-new'));
-        this.createEndpoint(require('@controllers/collection/create'));
-        this.createEndpoint(require('@controllers/collection/delete'));
-        this.createEndpoint(require('@controllers/collection/get/doc'));
-        this.createEndpoint(require('@controllers/collection/get/query'));
-        this.createEndpoint(require('@controllers/collection/update/document'));
+        this.createEndpoint(require('4hands-api/src/controllers/api/health-check'));
+        this.createEndpoint(require('4hands-api/src/controllers/auth/login'));
+        this.createEndpoint(require('4hands-api/src/controllers/auth/register'));
+        this.createEndpoint(require('4hands-api/src/controllers/auth/signout'));
+        this.createEndpoint(require('4hands-api/src/controllers/auth/confirm-email'));
+        this.createEndpoint(require('4hands-api/src/controllers/auth/send-email-confirm'));
+        this.createEndpoint(require('4hands-api/src/controllers/auth/reset-password/send-email'));
+        this.createEndpoint(require('4hands-api/src/controllers/auth/reset-password/create-new'));
+        this.createEndpoint(require('4hands-api/src/controllers/collection/create'));
+        this.createEndpoint(require('4hands-api/src/controllers/collection/delete'));
+        this.createEndpoint(require('4hands-api/src/controllers/collection/get/doc'));
+        this.createEndpoint(require('4hands-api/src/controllers/collection/get/query'));
+        this.createEndpoint(require('4hands-api/src/controllers/collection/update/document'));
 
         if (databaseConfig) {
             this.database = new Database({ ...databaseConfig }).init({

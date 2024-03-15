@@ -14,19 +14,17 @@ class GlobalMap {
      * @throws {Error} If the creation of GlobalMap fails.
      */
     constructor(setup, parent) {
-        const { _id, index, author, cod, createdAt, modifiedAt, collectionName } = setup || {};
+        const { _id, UID, index, author, cod, createdAt, modifiedAt, collectionName } = Object(setup);
         if (isObjectID(setup)) return;
-
-        const User = require('@models/collections/User');
 
         try {
             this.getParent = () => parent;
 
             this.collectionName = collectionName;
             this._id = _id && _id.toString();
-            this.UID = this._id || setup.UID?.toString();
+            this.UID = this._id || UID?.toString();
             this.index = index;
-            this.author = author || User.currentUser();
+            this.author = author;
             this.cod = cod;
             this.createdAt = createdAt && new Date(createdAt).toLocaleString();
             this.modifiedAt = modifiedAt && new Date(modifiedAt).toLocaleString();
@@ -58,7 +56,7 @@ class GlobalMap {
      * @throws {Error} If there is an error during the retrieval process.
      */
     async getCurrentUser() {
-        const User = require('@models/collections/User');
+        const User = require('4hands-api/src/models/collections/User');
         const UID = User.currentUser();
         const user = await CRUD.getDoc({
             collectionName: 'users',
@@ -75,7 +73,7 @@ class GlobalMap {
      * @throws {Error} If there is an error during the saving process.
      */
     async saveDB(collectionName) {
-        const CRUDDB = require('@CRUD');
+        const CRUDDB = require('4hands-api/src/services/database/crud');
 
         try {
             const created = await CRUDDB.create(collectionName || this.collectionName, {...this});

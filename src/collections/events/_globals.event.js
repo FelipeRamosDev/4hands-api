@@ -1,5 +1,5 @@
-const dbHelpers = require('./dbHelpers');
-const relationalHelper = require('./relationalFields');
+const dbHelpers = require('4hands-api/src/helpers/database/dbHelpers');
+const relationalHelper = require('4hands-api/src/helpers/database/relationalFields');
 const config = require('4hands-api/configs/project');
 
 /**

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
-const models = require('@models');
-const Endpoint = require('@src/models/settings/Endpoint');
-const CRUD = require('@CRUD');
+const models = require('4hands-api/src/models');
+const Endpoint = require('4hands-api/src/models/settings/Endpoint');
+const CRUD = require('4hands-api/src/services/database/crud');
 const UpdateDocument = models.routes.collection.UpdateDocument;
 const Response = UpdateDocument.response;
 

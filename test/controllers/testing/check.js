@@ -1,4 +1,4 @@
-const Endpoint = require('@models/settings/Endpoint');
+const Endpoint = require('4hands-api/src/models/settings/Endpoint');
 
 module.exports = new Endpoint({
     method: 'POST',

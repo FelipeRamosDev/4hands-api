@@ -1,6 +1,6 @@
 const source = require('.');
 const ErrorLog = require('../models/logs/ErrorLog');
-const FS = require('@services/FS');
+const FS = require('4hands-api/src/services/FS');
 const path = require('path');
 
 /**

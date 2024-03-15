@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
-const models = require('@models');
+const models = require('4hands-api/src/models');
 const GetDoc = models.routes.collection.GetDoc;
 const Response = GetDoc.response;
-const CRUD = require('@services/database/crud');
-const Endpoint = require('@src/models/settings/Endpoint');
+const CRUD = require('4hands-api/src/services/database/crud');
+const Endpoint = require('4hands-api/src/models/settings/Endpoint');
 
 /**
  * Represents a controller endpoint for getting a document in a collection.

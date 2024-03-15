@@ -1,4 +1,4 @@
-const Endpoint = require("@src/models/settings/Endpoint");
+const Endpoint = require("4hands-api/src/models/settings/Endpoint");
 
 /**
  * Represents a controller endpoint for to check if the API is connected and working properly.

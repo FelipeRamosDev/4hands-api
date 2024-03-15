@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
-const models = require('@models');
-const CRUD = require('@services/database/crud');
+const models = require('4hands-api/src/models');
+const CRUD = require('4hands-api/src/services/database/crud');
 const GetQueryCollection = models.routes.collection.GetQueryCollection;
-const Endpoint = require('@src/models/settings/Endpoint');
+const Endpoint = require('4hands-api/src/models/settings/Endpoint');
 const Response = GetQueryCollection.response;
 
 /**

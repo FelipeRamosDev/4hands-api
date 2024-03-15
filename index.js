@@ -1,10 +1,8 @@
-require('module-alias/register');
-
-const collections = require('@schemas');
+const collections = require('./src/collections');
 const DatabaseServer = require('./src/services/database/DatabaseServer');
 const ServerAPI = require('./src/services/ServerAPI');
 const SocketServer = require('./src/services/SocketServer');
-const SocketClient = require('4hands-api/src/services/SocketClient');
+const SocketClient = require('./src/services/SocketClient');
 const Collection = require('./src/models/settings/Collection');
 const Endpoint = require('./src/models/settings/Endpoint');
 const CRUD = require('./src/services/database/crud');
@@ -13,7 +11,6 @@ const interface = require('./src/interface');
 const middlewares = require('./src/middlewares');
 const models = require('./src/models');
 const resources = require('./src/resources');
-const schemas = require('./src/schemas');
 const services = require('./src/services');
 const validation = require('./src/validation');
 
@@ -64,6 +61,5 @@ exports.interface = interface;
 exports.middlewares = middlewares;
 exports.models = models;
 exports.resources = resources;
-exports.schemas = schemas;
 exports.services = services;
 exports.validation = validation;

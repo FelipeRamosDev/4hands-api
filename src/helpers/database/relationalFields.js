@@ -207,10 +207,10 @@ async function onDelete() {
  * @returns {boolean} - True if the value is an ObjectId or an array of ObjectIds, false otherwise.
  */
 function isObjectID(value) {
-    if (Array.isArray(value)) {
-        return Boolean(value[0]._bsontype === 'ObjectId');
+    if (Array.isArray(value) && value.lengths) {
+        return (value[0]._bsontype === 'ObjectId');
     } else {
-        return Boolean(value._bsontype === 'ObjectId');
+        return (value?._bsontype === 'ObjectId');
     }
 }
 

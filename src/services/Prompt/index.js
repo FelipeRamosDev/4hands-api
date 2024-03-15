@@ -1,7 +1,7 @@
 const { execSync, exec } = require('child_process');
 const readline = require('readline');
-const ToolsCLI = require('@CLI/ToolsCLI');
-const StringTemplate = require('@interface/StringTemplateBuilder');
+const ToolsCLI = require('4hands-api/src/interface/CLI/ToolsCLI');
+const StringTemplate = require('4hands-api/src/interface/StringTemplateBuilder');
 const toolsCLI = new ToolsCLI();
 
 /**

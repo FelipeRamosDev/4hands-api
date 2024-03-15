@@ -4,7 +4,7 @@
  * @namespace Services
  */
 
-const Config = require('@config');
+const Config = require('4hands-api/configs/project');
 const Server = require('socket.io').Server;
 const SocketConnection = require('./SocketConnection');
 
