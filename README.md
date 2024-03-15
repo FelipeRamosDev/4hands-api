@@ -20,8 +20,6 @@ Proceed with the following steps to install the framework.
 With the database running, follow the next steps:
 
 1. Run the command `npm install 4hands-api`
-2. Enter on the terminal `cd node_modules/4hands-api`
-3. Run the command `npm install`
 
 ## Getting Started
 - [Create Server 🔗](https://github.com/FelipeRamosDev/4hands-api#create-server)
