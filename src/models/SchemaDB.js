@@ -1,12 +1,9 @@
 const mongoose = require('mongoose');
-const { getGlobalSchema } = require('4hands-api/src/schemas/_globals');
-const schemasClass = require('4hands-api/src/schemas/class');
+const { getGlobalSchema } = require('4hands-api/src/collections/_globals');
 const RefConfig = require('./settings/SchemaRefConfig');
 const { database: { dbHelpers, queries, events }} = require('4hands-api/src/helpers');
 const configs = require('4hands-api/configs/project');
-const GlobalClass = schemasClass.GlobalClass;
-const customQueries = require('4hands-api/src/schemas/queries');
-const customEvents = require('4hands-api/src/schemas/events');
+const GlobalClass = require('4hands-api/src/collections/Class/_globals.class');
 const FS = require('4hands-api/src/services/FS');
 const path = require('path');
 
@@ -36,9 +33,15 @@ class SchemaDB {
             this.projectQueriesPath = path.normalize(`${this.projectPath}src/collections/queries/${this.name}.query.js`);
             this.projectEventsPath = path.normalize(`${this.projectPath}src/collections/events/${this.name}.event.js`);
             this.projectRedisEventsPath = path.normalize(`${this.projectPath}src/collections/redisEvents/${this.name}.event.js`);
+            this.nativeQueriesPath = path.normalize(`../collections/queries/${this.name}.query.js`);
+            this.nativeEventsPath = path.normalize(`../collections/events/${this.name}.event.js`);
+            this.nativeClassesPath = path.normalize(`../collections/Class/${this.name}.class.js`);
             this.projectClassesPath = path.normalize(`${this.projectPath}src/collections/Class/${this.name}.class.js`);
             this.symbol = setup.symbol;
             this.DB = null;
+            this.queries = {};
+            this.events = {};
+            this.redisEvents = {};
 
             if (Array.isArray(setup.fieldsSet)) {
                 if (!setup.schema) setup.schema = {};
@@ -55,24 +58,24 @@ class SchemaDB {
                 this.queries = setup.queries;
             } else if (FS.isExist(this.projectQueriesPath)) {
                 this.queries = require(this.projectQueriesPath);
-            } else {
-                this.queries = Object(customQueries[this.name]);
+            } else if (FS.isExist(this.nativeQueriesPath)) {
+                const nativeQueries = require(this.nativeQueriesPath);
+                this.queries = Object(nativeQueries);
             }
 
             if (setup.events) {
                 this.events = setup.events;
             } else if (FS.isExist(this.projectEventsPath)) {
                 this.events = require(this.projectEventsPath);
-            } else {
-                this.events = Object(customEvents[this.name]);
+            } else if (FS.isExist(this.nativeEventsPath)) {
+                const nativeEvents = require(this.nativeEventsPath);
+                this.events = Object(nativeEvents);
             }
 
             if (setup.redisEvents) {
                 this.redisEvents = setup.redisEvents;
             } else if (FS.isExist(this.projectRedisEventsPath)) {
                 this.redisEvents = require(this.projectRedisEventsPath);
-            } else {
-                this.redisEvents = Object(customEvents[this.name]);
             }
 
             // Initializing queries, events and classes
@@ -213,8 +216,6 @@ class SchemaDB {
      */
     initClasses() {
         try {
-            const Custom = schemasClass[this.name];
-
             // Loading global class
             this.schema.loadClass(GlobalClass);
 
@@ -222,8 +223,9 @@ class SchemaDB {
             if (FS.isExist(this.projectClassesPath)) {
                 const ProjectClass = require(this.projectClassesPath);
                 this.schema.loadClass(ProjectClass);
-            } else if (Custom) {
-                this.schema.loadClass(Custom);
+            } else if (FS.isExist(this.nativeClassesPath)) {
+                const NativeClass = require(this.nativeClassesPath);
+                this.schema.loadClass(NativeClass);
             }
 
             this.schema.set('toObject', {virtuals: true});
