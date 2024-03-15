@@ -1,5 +1,3 @@
-const {Schema, model} = require('mongoose');
-
 /**
  * Utility class for validating and handling MongoDB schemas in the application.
  */
@@ -11,6 +9,7 @@ class ValidateSchema {
      * @throws {Error} - Throws an error if the provided rules are invalid or the collection name is not found.
      */
     constructor(rules) {
+        const {Schema} = require('mongoose');
         const schemas = API.database.collections;
 
         // Initializing the schema
@@ -53,6 +52,7 @@ class ValidateSchema {
      * Otherwise, returns the validation error object.
      */
     validate(data, returnValidObj) {
+        const { model } = require('mongoose');
         if (!this._schema) return;
 
         if (this.ModelDB) {

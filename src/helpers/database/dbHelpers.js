@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
-const configs = require('@config');
-const SafeValue = require('@models/collections/SafeValue');
+const configs = require('4hands-api/configs/project');
 
 /**
  * Checks if a collection exists in the MongoDB database.

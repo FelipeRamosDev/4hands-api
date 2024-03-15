@@ -94,8 +94,6 @@ class User extends _Global {
              * @property {AuthBucket}
              */
             this._auth = () => new AuthBucket(Object(auth), this);
-
-            this.placeDefault();
         } catch(err) {
             /**
              * Thrown if there is an error during the User object construction.

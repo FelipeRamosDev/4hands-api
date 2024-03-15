@@ -1,5 +1,12 @@
-# 4Hands API (v0.3.2 BETA)
+# 4Hands API (v0.4.0 BETA)
 This is a API framework to create a backend for your applications.
+
+### New Features
+1. Redis service (Manage Redis database)
+
+### Bugs fixed
+1. Fixed the memory heap issue on larger apps
+2. Smaller bugs
 
 ## Instalation
 Proceed with the following steps to install the framework.
@@ -367,13 +374,3 @@ global.API = new ServerAPI({
     // ...
 });
 ```
-
-## Current Release (v0.2.1 BETA) - Notes
-### New Features
-1. Send E-mails (MailService)
-2. Sign-up user e-mail confirm
-3. Password recovery
-
-### Bugs fixed
-1. User wasn’t login after sign-up
-2. Errors when initializing virtual models

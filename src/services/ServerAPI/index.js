@@ -13,6 +13,7 @@ const Database = require('../database/DatabaseServer');
 const FS = require('../FS');
 const Endpoint = require('../../models/settings/Endpoint');
 const MailService = require('../Mail');
+const RedisService = require('4hands-api/src/services/Redis');
 
 /**
  * Represents the main server class for the API.
@@ -40,6 +41,7 @@ class ServerAPI {
      * @param {number} setup.PORT - The port number on which the server will listen (defaults to 80).
      * @param {MailService} setup.emailConfig - Configurations for the server emails sent.
      * @param {string[]} setup.corsOrigin - Array with the allowed domains for cors config.
+     * @param {boolean} setup.noServer - If true, it doesn't start the server.
      */
     constructor (setup) {
         const {
@@ -59,7 +61,8 @@ class ServerAPI {
             FE_ORIGIN,
             PORT,
             emailConfig,
-            corsOrigin
+            corsOrigin,
+            noServer
         } = Object(setup);
 
         this.projectName = projectName;
@@ -76,6 +79,7 @@ class ServerAPI {
         this.listenCallback = listenCallback;
         this.FE_ORIGIN = FE_ORIGIN;
         this.PORT = PORT || 80;
+        this.noServer = noServer;
 
         if (keySSLPath) {
             this.keySSLPath = path.normalize(this.projectPath + keySSLPath);
@@ -144,8 +148,6 @@ class ServerAPI {
      * Initializes the server, setting up routes, middleware, and listeners.
      */
     async init() {
-        const redis = require('redis');
-
         this.rootPath = path.normalize(__dirname.replace(path.normalize('/node_modules/4hands-api/src/services'), '/'));
         this.app = express();
         this.serverState = 'loading';
@@ -157,47 +159,52 @@ class ServerAPI {
             console.log(compile.toString());
         }
 
-        this.redisClient = redis.createClient({
-            url: this.redisURL || 'redis://localhost:6379'
-        }).on('error', err => {
-            throw new Error.Log(err);
-        });
+        this.redisServ = new RedisService({
+            url: this.redisURL || 'redis://localhost:6379',
+            onError: (err) => {
+                throw new Error.Log(err);
+            }
+        }, this);
 
-        this.redisDB = await this.redisClient.connect();
-        const RedisStore = require('connect-redis').default;
-
+        await this.redisServ.connect();
+        
         // Configuring server
-        this.app.use(cors({
-            origin: this.corsOrigin,
-            credentials: true
-        }));
-
-        this.app.use(bodyParser.json({ limit: this.jsonLimit }));
-        this.app.use(express.json());
-
-        if (this.API_SECRET) {
-            this.app.use(session({
-                store: new RedisStore({ client: this.redisClient }),
-                secret: this.API_SECRET,
-                resave: this.sessionResave,
-                saveUninitialized: this.sessionSaveUninitialized,
-                cookie: {
-                    secure: this.useSSL, // Set secure to true if using HTTPS
-                    maxAge: this.sessionCookiesMaxAge
-                }
+        if (!this.noServer) {
+            const RedisStore = require('connect-redis').default;
+            this.app.use(cors({
+                origin: this.corsOrigin,
+                credentials: true
             }));
-        } else {
-            throw 'You need to provide a API SECRET to start the server!';
-        }
 
-        if (this.staticPath) {
-            this.app.use(express.static(this.rootPath + this.staticPath));
-        }
+            this.app.use(bodyParser.json({ limit: this.jsonLimit }));
+            this.app.use(express.json());
 
-        if (this.useSSL) {
-            this.listenSSL(this.PORT, () => this.isSuccess());
+            if (this.API_SECRET) {
+                this.app.use(session({
+                    store: new RedisStore({ client: this.redisServ.client }),
+                    secret: this.API_SECRET,
+                    resave: this.sessionResave,
+                    saveUninitialized: this.sessionSaveUninitialized,
+                    cookie: {
+                        secure: this.useSSL, // Set secure to true if using HTTPS
+                        maxAge: this.sessionCookiesMaxAge
+                    }
+                }));
+            } else {
+                throw 'You need to provide a API SECRET to start the server!';
+            }
+
+            if (this.staticPath) {
+                this.app.use(express.static(this.rootPath + this.staticPath));
+            }
+
+            if (this.useSSL) {
+                this.listenSSL(this.PORT, () => this.isSuccess());
+            } else {
+                this.app.listen(this.PORT, () => this.isSuccess());
+            }
         } else {
-            this.app.listen(this.PORT, () => this.isSuccess());
+            this.isSuccess();
         }
     }
 
@@ -309,6 +316,12 @@ class ServerAPI {
 
                 return;
             }
+        }
+    }
+
+    getCollectionSet(collectionName) {
+        if (Array.isArray(this.database?.collections)) {
+            return this.database.collections.find(coll => coll.name === collectionName);
         }
     }
 }
