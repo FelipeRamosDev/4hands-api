@@ -17,10 +17,9 @@ class SafeValue extends _Global {
      */
     constructor(setup) {
         super(Object(setup));
+        const { encrypted, type, algorithm, iv, salt, derivatedKey, displayValue } = Object(setup);
 
         try {
-            const { encrypted, type, algorithm, iv, salt, derivatedKey, displayValue } = Object(setup);
-
             if (!setup) {
                 this.isEmpty = true;
             }

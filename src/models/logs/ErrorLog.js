@@ -16,10 +16,8 @@ class ErrorLog extends LogBase {
      * @param {...string} stringArgsParams - Additional string parameters.
      * @throws {Error} If the creation of error log fails.
      */
-    constructor({
-        stack,
-        errorList
-    }, ...stringArgsParams) {
+    constructor(setup, ...stringArgsParams) {
+        const { stack, errorList } = Object(setup);
         let args = arguments[0] || {};
         let stringArgs;
 

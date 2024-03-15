@@ -13,9 +13,9 @@ class DataDependency {
      * @throws {Error} - Throws an error if the setup object is not valid.
      */
     constructor(setup, parent) {
-        try {
-            const { name, type, collectionName, filter } = Object(setup);
+        const { name, type, collectionName, filter } = Object(setup);
 
+        try {
             this.name = name;
             this.type = type;
             this.collectionName = collectionName;
