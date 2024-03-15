@@ -1,4 +1,4 @@
-const CRUD = require('@CRUD');
+const CRUD = require('4hands-api/src/services/database/crud');
 
 /**
  * Represents a data dependency used to manage real-time data updates and rendering in a parent component.
@@ -13,9 +13,9 @@ class DataDependency {
      * @throws {Error} - Throws an error if the setup object is not valid.
      */
     constructor(setup, parent) {
-        try {
-            const { name, type, collectionName, filter } = Object(setup);
+        const { name, type, collectionName, filter } = Object(setup);
 
+        try {
             this.name = name;
             this.type = type;
             this.collectionName = collectionName;

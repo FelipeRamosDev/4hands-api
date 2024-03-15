@@ -1,5 +1,5 @@
-const Collection = require('@Collection');
-const Config = require('@config');
+const Collection = require('4hands-api/src/models/settings/Collection');
+const Config = require('4hands-api/configs/project');
 const collectionName = Config.database.counterCollection;
 
 module.exports = new Collection({

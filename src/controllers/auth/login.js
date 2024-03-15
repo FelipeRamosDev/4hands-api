@@ -1,6 +1,5 @@
-const Endpoint = require('@models/settings/Endpoint');
-const User = require('@models/collections/User');
-const Configs = require('@config');
+const Endpoint = require('4hands-api/src/models/settings/Endpoint');
+const User = require('4hands-api/src/models/collections/User');
 
 /**
  * Represents a controller endpoint to authenticate an user.

@@ -1,6 +1,6 @@
 {
   "name": "4hands-api",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "4Hands API is an backend framework to build applications.",
   "main": "index.js",
   "scripts": {
@@ -31,7 +31,6 @@
     "file-loader": "^6.2.0",
     "html-loader": "^4.2.0",
     "jsonwebtoken": "^9.0.2",
-    "module-alias": "^2.2.3",
     "mongoose": "^7.5.2",
     "nodemailer": "^6.9.7",
     "path-browserify": "^1.0.1",
@@ -47,30 +46,6 @@
     "webpack-dev-server": "^4.15.1",
     "xml-loader": "^1.2.1",
     "xml2js": "^0.6.2"
-  },
-  "_moduleAliases": {
-    "@config": "configs/project",
-    "@CONFIGS": "configs",
-    "@CRUD": "src/services/database/crud",
-    "@STRING": "src/interface/StringTemplateBuilder",
-    "@SUCCESS": "src/models/Success",
-    "@UTILS": "src/global/utils",
-    "@SESSION_CLI": "sessionCLI.json",
-    "@Collection": "src/models/settings/Collection",
-    "@src": "src",
-    "@scripts": "scripts",
-    "@controllers": "src/controllers",
-    "@global": "src/global",
-    "@helpers": "src/helpers",
-    "@interface": "src/interface",
-    "@models": "src/models",
-    "@resources": "src/resources/en_US",
-    "@routes": "src/routes",
-    "@middlewares": "src/middlewares",
-    "@schemas": "src/schemas",
-    "@services": "src/services",
-    "@validation": "src/validation",
-    "@CLI": "src/interface/CLI"
   },
   "devDependencies": {
     "jsdoc": "^4.0.2",

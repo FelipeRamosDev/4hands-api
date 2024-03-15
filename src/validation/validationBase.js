@@ -187,7 +187,7 @@ class ValidationBase {
                 return isObjectID(obj[0]);
             }
 
-            return Boolean(Object(obj)._bsontype === 'ObjectID');
+            return Boolean(obj?._bsontype === 'ObjectId');
         }
     
         return false

@@ -1,4 +1,4 @@
-const Prompt = require('@src/services/Prompt');
+const Prompt = require('4hands-api/src/services/Prompt');
 const PoolForm = require('./index');
 
 /**

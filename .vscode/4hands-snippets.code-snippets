@@ -2,7 +2,7 @@
 	"Create Template Class": {
 		"prefix": "CreateTemplate",
 		"body": [
-			"const Component = require('@interface/Component');",
+			"const Component = require('4hands-api/src/interface/Component');",
 			"",
 			"class ${1:TemplateName} extends Component {",
 			"\tget SOURCE_PATH() {",
@@ -26,8 +26,8 @@
 	"Create View CLI": {
 		"prefix": "CreateViewCLI",
 		"body": [
-			"const ViewCLI = require('@CLI/ViewCLI');",
-			"const PoolForm = require('@CLI/PoolForm');",
+			"const ViewCLI = require('4hands-api/src/interface/CLI/ViewCLI');",
+			"const PoolForm = require('4hands-api/src/interface/CLI/PoolForm');",
 			"",
 			"async function ${1:ViewName}View({ viewParams, defaultData, dataDoc }) {",
 			"\treturn new ViewCLI({",
@@ -105,14 +105,14 @@
 	"Import CRUD": {
 		"prefix": "CRUD",
 		"body": [
-			"const CRUD = require('@CRUD');"
+			"const CRUD = require('4hands-api/src/services/database/crud');"
 		],
 		"description": "Import database CRUD."
 	},
 	"Create Collection": {
 		"prefix": "CreateCollection",
 		"body": [
-			"const Collection = require('@Collection');",
+			"const Collection = require('4hands-api/src/models/settings/Collection');",
 			"const { ObjectId } = Collection.Types;",
 			"",
 			"module.exports = new Collection({",

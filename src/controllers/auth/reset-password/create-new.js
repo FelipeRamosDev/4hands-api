@@ -1,6 +1,6 @@
-const Endpoint = require('@models/settings/Endpoint');
-const User = require('@models/collections/User');
-const AuthService = require('@services/Auth');
+const Endpoint = require('4hands-api/src/models/settings/Endpoint');
+const User = require('4hands-api/src/models/collections/User');
+const AuthService = require('4hands-api/src/services/Auth');
 
 /**
  * Represents a controller endpoint to reset the user's password

@@ -1,11 +1,11 @@
 const _Global = require('../maps/_Global');
 const AuthBucket = require('./AuthBucket');
 const AuthService = require('../../services/Auth');
-const CRUD = require('@CRUD');
-const dbHelpers = require('@helpers/database/dbHelpers');
-const FS = require('@services/FS');
-const config = require('@config');
-const sessionCLI = FS.isExist(config.sessionPath) && require('@SESSION_CLI') || {};
+const CRUD = require('4hands-api/src/services/database/crud');
+const dbHelpers = require('4hands-api/src/helpers/database/dbHelpers');
+const FS = require('4hands-api/src/services/FS');
+const config = require('4hands-api/configs/project');
+const sessionCLI = FS.isExist(config.sessionPath) && require('4hands-api/sessionCLI.json') || {};
 
 /**
  * Represents a user in the application.
@@ -19,8 +19,8 @@ class User extends _Global {
      * @param {Object} setup - The setup object containing user details.
      * @throws {Error.Log} If setup parameters are missing or invalid.
      */
-    constructor(setup) {
-        super({...setup, validationRules: 'users'}, () => this);
+    constructor(setup, parent) {
+        super(setup, parent);
         if (!setup || setup.oid()) return;
 
         const {
@@ -30,10 +30,18 @@ class User extends _Global {
             lastName,
             email,
             phone,
-            isEmailConfirmed
+            isEmailConfirmed,
+            frontURL
         } = Object(setup);
 
         try {
+            /**
+             * The AuthBucket instance associated with this user.
+             * @private
+             * @property {AuthBucket}
+             */
+            this._auth = () => new AuthBucket(Object(auth), this);
+
             /**
              * The collection name for this user.
              * @property {string}
@@ -45,12 +53,6 @@ class User extends _Global {
              * @property {string}
              */
             this.userName = userName;
-
-            /**
-             * The display name of the user.
-             * @property {string}
-             */
-            this.displayName = `${firstName} ${lastName}`;
 
             /**
              * The first name of the user.
@@ -87,13 +89,6 @@ class User extends _Global {
              * @property {string}
              */
             this.isEmailConfirmed = isEmailConfirmed;
-
-            /**
-             * The AuthBucket instance associated with this user.
-             * @private
-             * @property {AuthBucket}
-             */
-            this._auth = () => new AuthBucket(Object(auth), this);
         } catch(err) {
             /**
              * Thrown if there is an error during the User object construction.
@@ -101,6 +96,10 @@ class User extends _Global {
              */
             new Error.Log(err).append('common.model_construction', 'User');
         }
+    }
+
+    get displayName() {
+        return `${this.firstName} ${this.lastName} (${this.email})`;
     }
 
     /**
