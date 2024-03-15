@@ -1,4 +1,4 @@
-const Request = require('@models/RequestAPI');
+const Request = require('4hands-api/src/models/RequestAPI');
 
 module.exports = (req, res, next, bodySchema) => {
     try {

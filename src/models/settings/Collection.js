@@ -1,6 +1,6 @@
 const CollectionField = require('./CollectionField');
 const CollectionEncrypt = require('./CollectionEncrypt');
-const SchemaDB = require('@models/SchemaDB');
+const SchemaDB = require('4hands-api/src/models/SchemaDB');
 
 /**
  * Represents a collection in the database.

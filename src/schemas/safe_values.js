@@ -4,7 +4,7 @@
  *
  * @module SafeValuesCollection
  */
-const Collection = require('@models/settings/Collection');
+const Collection = require('4hands-api/src/models/settings/Collection');
 
 module.exports = new Collection({
     name: 'safe_values',

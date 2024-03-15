@@ -1,4 +1,4 @@
-const Prompt = require('@services/Prompt');
+const Prompt = require('4hands-api/src/services/Prompt');
 const prompt = new Prompt({
     rootPath: process.cwd('dir').replace(new RegExp(/\\/, 'g'), '/')
 });

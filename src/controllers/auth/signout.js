@@ -1,5 +1,5 @@
-const User = require('@models/collections/User');
-const Endpoint = require('@src/models/settings/Endpoint');
+const User = require('4hands-api/src/models/collections/User');
+const Endpoint = require('4hands-api/src/models/settings/Endpoint');
 
 /**
  * Represents a controller endpoint for register an user.

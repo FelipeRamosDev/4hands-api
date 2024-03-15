@@ -1,5 +1,5 @@
-const authVerify = require('@middlewares/authVerify');
-const bodyValidation = require('@middlewares/bodyValidation');
+const authVerify = require('4hands-api/src/middlewares/authVerify');
+const bodyValidation = require('4hands-api/src/middlewares/bodyValidation');
 
 /**
  * Represents an API endpoint configuration.

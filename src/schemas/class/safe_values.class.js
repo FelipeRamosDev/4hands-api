@@ -1,5 +1,5 @@
-const SafeValue = require('@models/collections/SafeValue');
-const AuthService = require('@services/Auth');
+const SafeValue = require('4hands-api/src/models/collections/SafeValue');
+const AuthService = require('4hands-api/src/services/Auth');
 
 /**
  * Represents a utility class providing encryption and decryption methods for sensitive data.

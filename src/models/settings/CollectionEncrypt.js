@@ -1,4 +1,4 @@
-const CollectionField = require('@models/settings/CollectionField');
+const CollectionField = require('4hands-api/src/models/settings/CollectionField');
 
 /**
  * Represents a collection field that references encrypted data stored in the 'safe_values' collection.
@@ -21,7 +21,7 @@ class CollectionEncrypt extends CollectionField {
         super(setup);
 
         try {
-            const Collection = require('@models/settings/Collection');
+            const Collection = require('4hands-api/src/models/settings/Collection');
             const { ObjectId } = Collection.Types;
 
             this.type = ObjectId;

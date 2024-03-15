@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 const models = require('../../models');
-const CRUD = require('@CRUD');
+const CRUD = require('4hands-api/src/services/database/crud');
 const Delete = models.routes.collection.Delete;
-const Endpoint = require('@src/models/settings/Endpoint');
+const Endpoint = require('4hands-api/src/models/settings/Endpoint');
 const Response = Delete.response;
 
 /**

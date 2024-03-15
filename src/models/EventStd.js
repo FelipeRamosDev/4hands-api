@@ -1,4 +1,4 @@
-const CRUD = require('@CRUD');
+const CRUD = require('4hands-api/src/services/database/crud');
 
 /**
  * Model to set the events that will trigger actions throughout the app.
@@ -49,7 +49,7 @@ class EventStd {
      * @throws {Error} - Throws an error if event triggering fails.
      */
     trigger(target) {
-        const Status = require('@models/settings/Status');
+        const Status = require('4hands-api/src/models/settings/Status');
 
         try {
             if (target instanceof Status) {
@@ -69,7 +69,7 @@ class EventStd {
      * @throws {Error} - Throws an error if event listener addition fails.
      */
     add(context) {
-        const Status = require('@models/settings/Status');
+        const Status = require('4hands-api/src/models/settings/Status');
         const self = this;
 
         try {

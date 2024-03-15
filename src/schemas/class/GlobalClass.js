@@ -1,4 +1,4 @@
-const CRUD = require('@CRUD');
+const CRUD = require('4hands-api/src/services/database/crud');
 
 class GlobalClass {
     initialize() {

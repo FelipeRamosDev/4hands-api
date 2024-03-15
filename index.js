@@ -1,10 +1,8 @@
-require('module-alias/register');
-
-const collections = require('@schemas');
+const collections = require('./src/schemas');
 const DatabaseServer = require('./src/services/database/DatabaseServer');
 const ServerAPI = require('./src/services/ServerAPI');
 const SocketServer = require('./src/services/SocketServer');
-const SocketClient = require('4hands-api/src/services/SocketClient');
+const SocketClient = require('./src/services/SocketClient');
 const Collection = require('./src/models/settings/Collection');
 const Endpoint = require('./src/models/settings/Endpoint');
 const CRUD = require('./src/services/database/crud');

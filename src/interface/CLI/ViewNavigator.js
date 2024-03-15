@@ -1,7 +1,7 @@
 const ToolsCLI = require('./ToolsCLI');
 const NavigatorOption = require('./NavigatorOption');
-const ListTiles = require('@CLI/templates/ListTiles');
-const Prompt = require('@services/Prompt');
+const ListTiles = require('4hands-api/src/interface/CLI/templates/ListTiles');
+const Prompt = require('4hands-api/src/services/Prompt');
 const { QuestionModel } = require('./PoolForm');
 
 /**

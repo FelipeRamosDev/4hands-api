@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
-const counters = require('@schemas/counters');
-const logs = require('@schemas/logs');
-const safe_values = require('@schemas/safe_values');
+const counters = require('4hands-api/src/schemas/counters');
+const logs = require('4hands-api/src/schemas/logs');
+const safe_values = require('4hands-api/src/schemas/safe_values');
 
 /**
  * Represents a database server with specified configurations and collections.

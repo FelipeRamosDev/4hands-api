@@ -1,4 +1,4 @@
-const Component = require('@interface/Component');
+const Component = require('4hands-api/src/interface/Component');
 const ImageTemplate = require('4hands-api/src/templates/Image');
 
 /**

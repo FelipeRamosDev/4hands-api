@@ -1,4 +1,4 @@
-const Collection = require('@Collection');
+const Collection = require('4hands-api/src/models/settings/Collection');
 const Testing = require('./models/Testing');
 
 module.exports = new Collection({

@@ -1,4 +1,4 @@
-const StringTemplateBuilder = require('@STRING');
+const StringTemplateBuilder = require('4hands-api/src/interface/StringTemplateBuilder');
 
 /**
  * Class representing a set of utility tools for the command-line interface.

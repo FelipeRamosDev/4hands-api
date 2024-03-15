@@ -1,7 +1,7 @@
-const models = require('@models');
-const CRUD = require('@CRUD');
+const models = require('4hands-api/src/models');
+const CRUD = require('4hands-api/src/services/database/crud');
 const routeModels = models.routes.collection.Create;
-const Endpoint = require('@src/models/settings/Endpoint');
+const Endpoint = require('4hands-api/src/models/settings/Endpoint');
 const Response = routeModels.response;
 
 /**

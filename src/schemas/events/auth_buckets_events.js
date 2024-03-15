@@ -1,4 +1,4 @@
-const AuthService = require('@services/Auth');
+const AuthService = require('4hands-api/src/services/Auth');
 
 async function preSave(next) {
     try {

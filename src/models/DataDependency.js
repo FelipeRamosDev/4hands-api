@@ -1,4 +1,4 @@
-const CRUD = require('@CRUD');
+const CRUD = require('4hands-api/src/services/database/crud');
 
 /**
  * Represents a data dependency used to manage real-time data updates and rendering in a parent component.
