@@ -1,4 +1,3 @@
-require('module-alias/register');
 // Declaring globals
 require('../../global');
 
