@@ -157,8 +157,8 @@ async function postDelete() {
 
 module.exports = {
     preSave,
-    preUpdateOne,
-    postUpdateOne,
+    preUpdate: preUpdateOne,
+    postUpdate: postUpdateOne,
     postSave,
     preDelete,
     postDelete

@@ -120,7 +120,7 @@ class SchemaDB {
                 const projectQueries = require(this.projectQueriesPath);
 
                 if (projectQueries) {
-                    this.queries = { ...this.nativeQueries, ...require(this.projectQueriesPath) };
+                    this.queries = { ...this.nativeQueries, ...projectQueries };
                 }
             }
 
@@ -153,40 +153,11 @@ class SchemaDB {
             }
 
             // Adding global events
-            if (this.globalEvents) {
-                const { preSave, postSave, preUpdateOne, postUpdateOne, preDelete, postDelete } = this.globalEvents;
-
-                if (preSave) this.schema.pre('save', preSave);
-                if (postSave) this.schema.post('save', postSave);
-                if (preUpdateOne) this.schema.pre(['updateOne', 'findOneAndUpdate'], preUpdateOne);
-                if (postUpdateOne) this.schema.post(['updateOne', 'findOneAndUpdate'], postUpdateOne);
-                if (preDelete) this.schema.pre(['deleteOne', 'deleteMany'], preDelete);
-                if (postDelete) this.schema.post(['deleteOne', 'deleteMany'], postDelete);
-            }
-
+            this.addEventsToSchema(this.globalEvents);
             // Adding native events
-            if (this.nativeEvents) {
-                const { preSave, postSave, preUpdateOne, postUpdateOne, preDelete, postDelete } = this.nativeEvents;
-
-                if (preSave) this.schema.pre('save', preSave);
-                if (postSave) this.schema.post('save', postSave);
-                if (preUpdateOne) this.schema.pre(['updateOne', 'findOneAndUpdate'], preUpdateOne);
-                if (postUpdateOne) this.schema.post(['updateOne', 'findOneAndUpdate'], postUpdateOne);
-                if (preDelete) this.schema.pre(['deleteOne', 'deleteMany'], preDelete);
-                if (postDelete) this.schema.post(['deleteOne', 'deleteMany'], postDelete);
-            }
-
+            this.addEventsToSchema(this.nativeEvents);
             // Adding custom events for the schema
-            if (this.events) {
-                const { preSave, postSave, preUpdateOne, postUpdateOne, preDelete, postDelete } = this.events;
-                
-                if (preSave) this.schema.pre('save', preSave);
-                if (postSave) this.schema.post('save', postSave);
-                if (preUpdateOne) this.schema.pre('findOne', preUpdateOne);
-                if (postUpdateOne) this.schema.post('findOne', postUpdateOne);
-                if (preDelete) this.schema.pre(['updateOne', 'findOneAndUpdate'], preDelete);
-                if (postDelete) this.schema.post(['updateOne', 'findOneAndUpdate'], postDelete);
-            }
+            this.addEventsToSchema(this.events);
         } catch(err) {
             throw new Error.Log(err).append('database.init_events');
         }
@@ -260,6 +231,19 @@ class SchemaDB {
         } catch(err) {
             throw new Error.Log(err).append('database.init_classes');
         }
+    }
+
+    addEventsToSchema(events) {
+        const { preRead, postRead, preSave, postSave, preUpdate, postUpdate, preDelete, postDelete } = Object(events);
+
+        if (preRead) this.schema.pre(['find', 'findOne'], preRead);
+        if (postRead) this.schema.pre(['find', 'findOne'], postRead);
+        if (preSave) this.schema.pre('save', preSave);
+        if (postSave) this.schema.post('save', postSave);
+        if (preUpdate) this.schema.pre(['updateOne', 'findOneAndUpdate'], preUpdate);
+        if (postUpdate) this.schema.post(['updateOne', 'findOneAndUpdate'], postUpdate);
+        if (preDelete) this.schema.pre(['deleteOne', 'deleteMany'], preDelete);
+        if (postDelete) this.schema.post(['deleteOne', 'deleteMany'], postDelete);
     }
 
     /**
