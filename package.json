@@ -1,6 +1,6 @@
 {
   "name": "4hands-api",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "4Hands API is an backend framework to build applications.",
   "main": "index.js",
   "scripts": {
