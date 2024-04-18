@@ -1,3 +1,4 @@
+const { dbHelpers } = require('4hands-api/src/helpers/database');
 const helpersModule = require('../../helpers');
 const helpers = helpersModule.database.dbHelpers;
 
@@ -191,6 +192,7 @@ async function del(setup) {
  * @namespace Services
  */
 module.exports = {
+    helpers: dbHelpers,
     create,
     query,
     getDoc,

@@ -58,10 +58,10 @@ async function preUpdateOne(next) {
         delete this._update.sessionUser;
 
         if (!this._update.onlyAct && collection !== config.database.counterCollection) {
-            await relationalHelper.onUpdate.call(this);
+            relationalHelper.onUpdate.call(this);
         }
 
-        await dbHelpers.updateEncryptFields(this);
+        dbHelpers.updateEncryptFields(this);
         next();
     } catch(err) {
         throw new Error.Log(err).append('database.events.post_save');
