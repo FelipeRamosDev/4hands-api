@@ -84,11 +84,12 @@ class RedisService {
     }
 
     async setDoc(setup) {
-        const { collection, uid, data } = Object(setup);
+        const { prefixName, uid, data } = Object(setup);
+        let { collection } = Object(setup)
         const setters = [];
 
         try {
-            if (!collection || typeof collection !== 'string') {
+            if (collection && typeof collection !== 'string') {
                 throw new Error.Log('commom.bad_format_param', 'collection', 'RedisService.setDoc', 'string', collection);
             }
 
@@ -100,7 +101,14 @@ class RedisService {
                 return;
             }
 
-            const parsedValue = parseDocToSave(this.apiServer.getCollectionSet(collection), data);
+            let parsedValue;
+            if (!collection) {
+                collection = prefixName || '';
+                parsedValue = parseDocToSave(null, data);
+            } else {
+                parsedValue = parseDocToSave(this.apiServer.getCollectionSet(collection), data);
+            }
+
             Object.keys(parsedValue).map(key => {
                 setters.push(this.setDocField({collection, uid, field: key, value: parsedValue[key]}));
             });
@@ -135,7 +143,8 @@ class RedisService {
     }
 
     async setDocField(setup) {
-        const { collection, uid, field, value } = Object(setup);
+        const { collection, uid, field } = Object(setup);
+        let { value } = Object(setup);
 
         try {
             if (!collection || typeof collection !== 'string') {

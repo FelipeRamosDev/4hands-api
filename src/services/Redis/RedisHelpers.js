@@ -6,11 +6,40 @@ class RedisHelpers {
     }
 
     static parseDocToSave(collectionSet, value) {
+        const { parseString, parseNum, parseArrayToSave, parseObjectToSave } = RedisHelpers;
+        const isValueObj = (typeof value === 'object' && !Array.isArray(value));
         const result = {};
 
-        if (collectionSet instanceof Collection && typeof value === 'object' && !Array.isArray(value)) {
+        if (!collectionSet && isValueObj) {
             Object.keys(value).map(key => {
-                const item = collectionSet.schema.tree[key];
+                const currentValue = value[key];
+
+                if (typeof currentValue === 'string') {
+                    result[key] = parseString(currentValue);
+                }
+
+                else if (typeof currentValue === 'number') {
+                    result[key] = parseNum(currentValue);
+                }
+
+                else if (Array.isArray(currentValue)) {
+                    result[key] = parseArrayToSave(currentValue);
+                }
+
+                else if (typeof currentValue === 'object' && !Array.isArray(currentValue)) {
+                    result[key] = parseObjectToSave(currentValue);
+                }
+
+                return;
+            });
+
+            return result;
+        }
+
+        if (collectionSet instanceof Collection && isValueObj) {
+            Object.keys(value).map(key => {
+                const item = collectionSet?.schema?.tree[key];
+
                 if (!item) {
                     return;
                 }
