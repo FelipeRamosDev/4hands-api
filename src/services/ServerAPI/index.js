@@ -97,8 +97,8 @@ class ServerAPI {
                 this.runAppQueue();
                 this.isListen = true;
                 this.serverState = 'online';
-                typeof listenCallback === 'function' && listenCallback();
-                typeof customCallback === 'function' && customCallback();
+                typeof listenCallback === 'function' && listenCallback.call(this);
+                typeof customCallback === 'function' && customCallback.call(this);
             } catch (err) {
                 throw err;
             }
