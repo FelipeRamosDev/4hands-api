@@ -15,70 +15,81 @@ const MailService = require('../Mail');
 const RedisService = require('4hands-api/src/services/Redis');
 
 /**
- * Represents the main server class for the API.
+ * @class ServerAPI
  * @module ServerAPI
  * @namespace Services
+ * @description Represents the main server class for the API.
  */
 class ServerAPI {
     /**
-     * Creates an instance of ServerAPI.
+     * @constructor
+     * @description Creates an instance of ServerAPI.
      * @param {Object} setup - Configuration options for the server.
      * @param {string} setup.projectName - The name of the project.
      * @param {Database} setup.databaseConfig - Configuration options for the database.
      * @param {string} setup.API_SECRET - The API secret key for session encryption.
-     * @param {number} setup.sessionCookiesMaxAge - Maximum age of session cookies (in milliseconds).
+     * @param {number} setup.sessionCookiesMaxAge - Maximum age of session cookies in milliseconds. Default is 86400000.
      * @param {string} setup.staticPath - The path to static files.
-     * @param {string} setup.redisURL - The redis database url to use. Default is "redis://localhost:6379"
+     * @param {string} setup.redisURL - The Redis database URL. Default is "redis://localhost:6379".
      * @param {Function} setup.listenCallback - Callback function to be executed when the server starts listening.
-     * @param {boolean} setup.compileFE - Flag indicating whether to compile frontend code (defaults to false).
-     * @param {string} setup.jsonLimit - Limit of JSON requests (defaults to '10mb').
-     * @param {boolean} setup.sessionResave - Flag indicating whether to save session data back to the session store (defaults to true).
-     * @param {boolean} setup.sessionSaveUninitialized - Flag indicating whether to save uninitialized sessions to the session store (defaults to true).
+     * @param {boolean} setup.compileFE - Flag indicating whether to compile frontend code. Default is false.
+     * @param {string} setup.jsonLimit - Limit of JSON requests. Default is '10mb'.
+     * @param {boolean} setup.sessionResave - Flag indicating whether to save session data back to the session store. Default is true.
+     * @param {boolean} setup.sessionSaveUninitialized - Flag indicating whether to save uninitialized sessions to the session store. Default is true.
      * @param {string} setup.keySSLPath - The path to the SSL key file.
      * @param {string} setup.certSSLPath - The path to the SSL certificate file.
-     * @param {string} setup.FE_ORIGIN - The front-end host url.
-     * @param {number} setup.PORT - The port number on which the server will listen (defaults to 80).
+     * @param {string} setup.FE_ORIGIN - The front-end host URL.
+     * @param {number} setup.PORT - The port number on which the server will listen. Default is 80.
      * @param {MailService} setup.emailConfig - Configurations for the server emails sent.
-     * @param {string[]} setup.corsOrigin - Array with the allowed domains for cors config.
-     * @param {boolean} setup.noServer - If true, it doesn't start the server.
+     * @param {string[]} setup.corsOrigin - Array with the allowed domains for CORS configuration. Default is ['http://localhost', 'https://localhost'].
+     * @param {boolean} setup.noServer - If true, it doesn't start the server. Default is false.
      */
     constructor (setup) {
         const {
             projectName,
             databaseConfig,
             API_SECRET,
-            sessionCookiesMaxAge,
-            redisURL,
             staticPath,
             listenCallback,
             compileFE,
-            jsonLimit,
             sessionResave,
             sessionSaveUninitialized,
             keySSLPath,
             certSSLPath,
             FE_ORIGIN,
-            PORT,
             emailConfig,
-            corsOrigin,
-            noServer
+            noServer,
+            PORT,
+
+            // Defaults
+            jsonLimit = '10mb',
+            defaultMaxListeners = 20,
+            sessionCookiesMaxAge = 86400000,
+            redisURL = 'redis://localhost:6379',
+            corsOrigin = ['http://localhost', 'https://localhost']
         } = Object(setup);
 
         this.projectName = projectName;
         this.app_queue = [];
         this.API_SECRET = API_SECRET;
-        this.sessionCookiesMaxAge = sessionCookiesMaxAge || 86400000;
+        this.sessionCookiesMaxAge = sessionCookiesMaxAge;
         this.staticPath = staticPath;
         this.redisURL = redisURL;
-        this.corsOrigin = corsOrigin || ['http://localhost', 'https://localhost'];
+        this.corsOrigin = corsOrigin;
         this.compileFE = compileFE;
-        this.jsonLimit = jsonLimit || '10mb';
+        this.jsonLimit = jsonLimit;
         this.sessionResave = (sessionResave !== undefined) ? sessionResave : true;
         this.sessionSaveUninitialized = (sessionSaveUninitialized !== undefined) ? sessionSaveUninitialized : true;
         this.listenCallback = listenCallback;
         this.FE_ORIGIN = FE_ORIGIN;
         this.PORT = PORT || 80;
         this.noServer = noServer;
+        this.defaultMaxListeners = defaultMaxListeners;
+        
+        console.log(`[${this.projectName || '4hands-api'}] Starting Server API:`)
+        if (this.defaultMaxListeners) {
+            require('events').EventEmitter.defaultMaxListeners = this.defaultMaxListeners;
+        }
 
         if (keySSLPath) {
             this.keySSLPath = path.normalize(this.projectPath + keySSLPath);
@@ -110,20 +121,22 @@ class ServerAPI {
             this.PORT = PORT || 443;
         }
 
-        // 4hands-api native endpoints
-        this.createEndpoint(require('4hands-api/src/controllers/api/health-check'));
-        this.createEndpoint(require('4hands-api/src/controllers/auth/login'));
-        this.createEndpoint(require('4hands-api/src/controllers/auth/register'));
-        this.createEndpoint(require('4hands-api/src/controllers/auth/signout'));
-        this.createEndpoint(require('4hands-api/src/controllers/auth/confirm-email'));
-        this.createEndpoint(require('4hands-api/src/controllers/auth/send-email-confirm'));
-        this.createEndpoint(require('4hands-api/src/controllers/auth/reset-password/send-email'));
-        this.createEndpoint(require('4hands-api/src/controllers/auth/reset-password/create-new'));
-        this.createEndpoint(require('4hands-api/src/controllers/collection/create'));
-        this.createEndpoint(require('4hands-api/src/controllers/collection/delete'));
-        this.createEndpoint(require('4hands-api/src/controllers/collection/get/doc'));
-        this.createEndpoint(require('4hands-api/src/controllers/collection/get/query'));
-        this.createEndpoint(require('4hands-api/src/controllers/collection/update/document'));
+        if (!this.noServer) {
+            // 4hands-api native endpoints
+            this.createEndpoint(require('4hands-api/src/controllers/api/health-check'));
+            this.createEndpoint(require('4hands-api/src/controllers/auth/login'));
+            this.createEndpoint(require('4hands-api/src/controllers/auth/register'));
+            this.createEndpoint(require('4hands-api/src/controllers/auth/signout'));
+            this.createEndpoint(require('4hands-api/src/controllers/auth/confirm-email'));
+            this.createEndpoint(require('4hands-api/src/controllers/auth/send-email-confirm'));
+            this.createEndpoint(require('4hands-api/src/controllers/auth/reset-password/send-email'));
+            this.createEndpoint(require('4hands-api/src/controllers/auth/reset-password/create-new'));
+            this.createEndpoint(require('4hands-api/src/controllers/collection/create'));
+            this.createEndpoint(require('4hands-api/src/controllers/collection/delete'));
+            this.createEndpoint(require('4hands-api/src/controllers/collection/get/doc'));
+            this.createEndpoint(require('4hands-api/src/controllers/collection/get/query'));
+            this.createEndpoint(require('4hands-api/src/controllers/collection/update/document'));
+        }
 
         if (databaseConfig) {
             this.database = new Database({ ...databaseConfig }).init({
@@ -159,7 +172,7 @@ class ServerAPI {
         }
 
         this.redisServ = new RedisService({
-            url: this.redisURL || 'redis://localhost:6379',
+            url: this.redisURL,
             onError: (err) => {
                 throw new Error.Log(err);
             }
