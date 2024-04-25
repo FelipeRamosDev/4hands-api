@@ -3,7 +3,17 @@ const crypto = require('crypto');
 const { buildKey, parseDocToSave, parseDocToRead } = require('./RedisHelpers');
 const RedisEventEmitters = require('./RedisEventEmitters');
 
+/**
+ * A class representing a Redis service for handling data operations.
+ */
 class RedisService {
+    /**
+     * Creates an instance of RedisService.
+     * 
+     * @constructor
+     * @param {Object} setup - Configuration options for the Redis service.
+     * @param {Object} apiServer - An API server object.
+     */
     constructor(setup, apiServer) {
         const { clientOptions, onConnect, onReady, onEnd, onError, onReconnecting } = Object(setup);
 
@@ -21,6 +31,14 @@ class RedisService {
         }
     }
 
+    /**
+     * Asynchronously connects to the Redis server.
+     * 
+     * @async
+     * @function connect
+     * @returns {Promise<Object>} A promise that resolves to the RedisService instance.
+     * @throws {Error} Will throw an error if connection fails.
+     */
     async connect() {
         try {
             this.connection = await this.client.connect();
@@ -30,6 +48,14 @@ class RedisService {
         }
     }
 
+    /**
+     * Asynchronously disconnects from the Redis server.
+     * 
+     * @async
+     * @function disconnect
+     * @returns {Promise<any>} A promise that resolves when disconnection is successful.
+     * @throws {Error} Will throw an error if disconnection fails.
+     */
     async disconnect() {
         try {
             delete this.connection;
@@ -39,6 +65,13 @@ class RedisService {
         }
     }
 
+    /**
+     * Adds an event listener to the Redis client.
+     * 
+     * @function addListener
+     * @param {string} evName - The name of the event to listen for.
+     * @param {Function} callback - The callback function to execute when the event occurs.
+     */
     addListener(evName, callback) {
         if (typeof callback === 'function') {
             this.client.on(evName, callback);
@@ -46,16 +79,16 @@ class RedisService {
     }
 
     /**
-     * Asynchronously sets an item in the client with a unique identifier (uid) and a single value, different from setDoc.
+     * Asynchronously sets an item in the Redis client with a unique identifier.
      * 
      * @async
      * @function setItem
      * @param {Object} params - An object containing the parameters.
-     * @param {string} params.uid - The unique identifier for the item. If not a string, a new uid will be generated.
+     * @param {string} params.uid - The unique identifier for the item. If not provided, a new uid will be generated.
      * @param {any} params.value - The value to be set for the item.
      * @param {string} params.prefix - The prefix to be used when building the key.
      * @returns {Promise<Object>} A promise that resolves to an object with a success property.
-     * @throws {Error} Will throw an error if an error occurs.
+     * @throws {Error} Will throw an error if setting the item fails.
      */
     async setItem(params) {
         const { uid, value, prefix } = Object(params);
@@ -79,6 +112,41 @@ class RedisService {
         }
     }
 
+    async getItem(params) {
+        const { key, prefix } = Object(params);
+
+        try {
+            if (typeof key !== 'string') {
+                return;
+            }
+
+            const keyName = buildKey(prefix, key);
+            const value = await this.client.get(keyName);
+
+            if (!isNaN(value)) {
+                return Number(value);
+            }
+            
+            try {
+                const parsed = JSON.parse(value);
+                return parsed;
+            } catch (error) {
+                return value;
+            }
+        } catch (err) {
+            throw new Error.Log(err);
+        }
+    }
+
+    /**
+     * Asynchronously creates a document in the Redis client.
+     * 
+     * @async
+     * @function createDoc
+     * @param {Object} setup - Configuration options for creating the document.
+     * @returns {Promise<Object>} A promise that resolves to an object with a success property.
+     * @throws {Error} Will throw an error if document creation fails.
+     */
     async createDoc(setup) {
         let { collection, uid, data } = Object(setup);
 
@@ -100,6 +168,15 @@ class RedisService {
         }
     }
 
+    /**
+     * Asynchronously updates a document in the Redis client.
+     * 
+     * @async
+     * @function updateDoc
+     * @param {Object} setup - Configuration options for updating the document.
+     * @returns {Promise<Object>} A promise that resolves to an object with a success property.
+     * @throws {Error} Will throw an error if document update fails.
+     */
     async updateDoc(setup) {
         const { collection, uid, data } = Object(setup);
 
@@ -117,6 +194,15 @@ class RedisService {
         }
     }
 
+    /**
+     * Asynchronously sets a document in the Redis client.
+     * 
+     * @async
+     * @function setDoc
+     * @param {Object} setup - Configuration options for setting the document.
+     * @returns {Promise<Object>} A promise that resolves to an object with a success property.
+     * @throws {Error} Will throw an error if setting the document fails.
+     */
     async setDoc(setup) {
         const { prefixName, uid, data } = Object(setup);
         let { collection } = Object(setup)
@@ -153,7 +239,16 @@ class RedisService {
             throw new Error.Log(err);
         }
     }
-    
+
+    /**
+     * Asynchronously retrieves a document from the Redis client.
+     * 
+     * @async
+     * @function getDoc
+     * @param {Object} setup - Configuration options for retrieving the document.
+     * @returns {Promise<any>} A promise that resolves to the retrieved document.
+     * @throws {Error} Will throw an error if retrieval fails.
+     */
     async getDoc(setup) {
         const { collection, uid } = Object(setup);
 
@@ -176,6 +271,15 @@ class RedisService {
         }
     }
 
+    /**
+     * Asynchronously sets a field in a document in the Redis client.
+     * 
+     * @async
+     * @function setDocField
+     * @param {Object} setup - Configuration options for setting the field.
+     * @returns {Promise<Object>} A promise that resolves to an object with a success property.
+     * @throws {Error} Will throw an error if setting the field fails.
+     */
     async setDocField(setup) {
         const { collection, uid, field } = Object(setup);
         let { value } = Object(setup);
@@ -204,6 +308,15 @@ class RedisService {
         }
     }
 
+    /**
+     * Asynchronously deletes a document from the Redis client.
+     * 
+     * @async
+     * @function deleteDoc
+     * @param {Object} setup - Configuration options for deleting the document.
+     * @returns {Promise<Object>} A promise that resolves to an object with a success property.
+     * @throws {Error} Will throw an error if deletion fails.
+     */
     async deleteDoc(setup) {
         const { collection, uid } = Object(setup);
         const key = buildKey(collection, uid);
