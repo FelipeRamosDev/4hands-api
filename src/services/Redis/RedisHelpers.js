@@ -2,7 +2,11 @@ const Collection = require('4hands-api/src/models/settings/Collection');
 
 class RedisHelpers {
     static buildKey(collection, uid) {
-        return `${collection}:${uid}`;
+        if (collection) {
+            return `${collection}:${uid}`;
+        }
+
+        return uid;
     }
 
     static parseDocToSave(collectionSet, value) {
