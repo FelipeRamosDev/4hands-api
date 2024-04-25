@@ -45,6 +45,40 @@ class RedisService {
         }
     }
 
+    /**
+     * Asynchronously sets an item in the client with a unique identifier (uid) and a single value, different from setDoc.
+     * 
+     * @async
+     * @function setItem
+     * @param {Object} params - An object containing the parameters.
+     * @param {string} params.uid - The unique identifier for the item. If not a string, a new uid will be generated.
+     * @param {any} params.value - The value to be set for the item.
+     * @param {string} params.prefix - The prefix to be used when building the key.
+     * @returns {Promise<Object>} A promise that resolves to an object with a success property.
+     * @throws {Error} Will throw an error if an error occurs.
+     */
+    async setItem(params) {
+        const { uid, value, prefix } = Object(params);
+
+        try {
+            if (typeof uid !== 'string') {
+                uid = crypto.randomBytes(10).toString('hex');
+            }
+
+            const keyName = buildKey(prefix, uid);
+            let parsedValue = value;
+
+            if (typeof value === 'object') {
+                parsedValue = JSON.stringify(parsedValue);
+            }
+
+            await this.client.set(keyName, parsedValue);
+            return { success: true, keyName, value };
+        } catch (err) {
+            throw new Error.Log(err);
+        }
+    }
+
     async createDoc(setup) {
         let { collection, uid, data } = Object(setup);
 
