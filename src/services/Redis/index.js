@@ -112,6 +112,17 @@ class RedisService {
         }
     }
 
+    /**
+     * Asynchronously retrieves an item from the Redis client.
+     * 
+     * @async
+     * @function getItem
+     * @param {Object} params - An object containing the parameters.
+     * @param {string} params.key - The key of the item to retrieve.
+     * @param {string} params.prefix - The prefix used when building the key.
+     * @returns {Promise<any>} A promise that resolves to the retrieved item.
+     * @throws {Error} Will throw an error if retrieval fails.
+     */
     async getItem(params) {
         const { key, prefix } = Object(params);
 
@@ -133,6 +144,32 @@ class RedisService {
             } catch (error) {
                 return value;
             }
+        } catch (err) {
+            throw new Error.Log(err);
+        }
+    }
+
+    /**
+     * Asynchronously deletes an item.
+     * 
+     * @param {Object} params - The parameters for the item to be deleted.
+     * @param {string} params.key - The key of the item.
+     * @param {string} params.prefix - The prefix of the key.
+     * 
+     * @returns {Promise} A promise that resolves when the item is deleted.
+     * 
+     * @throws {Error} If an error occurs during deletion.
+     */
+    async deleteItem(params) {
+        try {
+            const { key, prefix } = Object(params);
+
+            if (typeof key !== 'string') {
+                return;
+            }
+
+            const keyName = buildKey(prefix, key);
+            return await this.client.del(keyName);
         } catch (err) {
             throw new Error.Log(err);
         }
