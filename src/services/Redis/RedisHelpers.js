@@ -84,13 +84,13 @@ class RedisHelpers {
     }
 
     static parseDocToRead(collectionSet, value) {
+        const { parseString, parseNum, parseDateToRead, parseArrayToRead, parseObjectToRead, parseDefault, parseObjectId, isValidJSON } = RedisHelpers;
         const result = {};
 
         if (collectionSet instanceof Collection && typeof value === 'object' && !Array.isArray(value)) {
             Object.keys(collectionSet?.schema?.tree).map(key => {
                 const item = collectionSet.schema.tree[key];
                 const { type } = Object(item);
-                const { parseString, parseNum, parseDateToRead, parseArrayToRead, parseObjectToRead, parseDefault, parseObjectId, isValidJSON } = RedisHelpers;
                 const parsedDefault = parseDefault(item.default);
 
                 if (type === 'ObjectId' || type?.name === 'ObjectId') {
@@ -121,11 +121,40 @@ class RedisHelpers {
                     result[key] = parseObjectToRead(value[key]) || parsedDefault;
                 }
             });
-
-            return result;
         } else {
-            return value;
+            Object.keys(value).map(key => {
+                let current = value[key];
+
+                switch (typeof current) {
+                    case 'string': {
+                        let isDate;
+
+                        try {
+                            new Date(current);
+                            isDate = true;
+                        } catch (error) {
+                            isDate = false;
+                        }
+
+                        if (isValidJSON(current)) {
+                            result[key] = JSON.parse(current);
+                        } else if (!isNaN(current)) {
+                            result[key] = parseNum(current);
+                        } else {
+                            result[key] = parseString(current);
+                        }
+
+                        break;
+                    }
+                    case 'number': {
+                        result[key] = parseNum(current);
+                        break;
+                    }
+                }
+            });
         }
+
+        return result;
     }
 
     static parseString(value) {
