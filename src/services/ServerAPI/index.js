@@ -86,7 +86,7 @@ class ServerAPI {
         this.noServer = noServer;
         this.defaultMaxListeners = defaultMaxListeners;
         
-        console.log(`[${this.projectName || '4hands-api'}] Starting Server API:`)
+        console.log(`[${this.projectName || '4hands-api'}] Starting Server API...`)
         if (this.defaultMaxListeners) {
             require('events').EventEmitter.defaultMaxListeners = this.defaultMaxListeners;
         }

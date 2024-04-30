@@ -322,7 +322,7 @@ class RedisService {
         let { value } = Object(setup);
 
         try {
-            if (!collection || typeof collection !== 'string') {
+            if (collection && typeof collection !== 'string') {
                 throw new Error.Log('commom.bad_format_param', 'collection', 'RedisService.setDocField', 'string', collection);
             }
 
