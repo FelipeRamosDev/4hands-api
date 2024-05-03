@@ -277,7 +277,7 @@ class GlobalMap {
     }
 
     static async createDocCache(collection, uid) {
-        const { CRUD } = require('4hands-api');
+        const CRUD = require('4hands-api/src/services/database/crud');;
 
         try {
             const docQuery = CRUD.getDoc({ collectionName: collection, filter: uid });

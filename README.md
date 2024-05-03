@@ -241,7 +241,8 @@ In your project create your controller files under `src > controllers`, you can 
 On the example below I created a new controller under `src > controllers > transfer > deposit.js`. Check the cde example below:
 
 ```javascript
-const { Endpoint, CRUD } = require('4hands-api');
+const Endpoint = require('4hands-api/src/models/settings/Endpoint');
+const CRUD = require('4hands-api/src/services/database/crud');
 
 module.exports = new Endpoint({
     method: 'PUT',                                    // Choose the method of the endpoint
