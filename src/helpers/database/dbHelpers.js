@@ -262,7 +262,7 @@ async function createEncryptFields(context) {
  */
 async function updateEncryptFields(context) {
     try {
-        const { CRUD } = require('4hands-api');
+        const CRUD = require('4hands-api/src/services/database/crud');;
         const schemaObj = Object(context?.schema?.obj);
         const encryptFields = [];
 
