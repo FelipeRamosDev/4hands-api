@@ -18,7 +18,7 @@ class RedisService {
         const { clientOptions, onConnect, onReady, onEnd, onError, onReconnecting } = Object(setup);
 
         try {
-            this.apiServer = apiServer;
+            this._apiServer = () => apiServer;
             this.client = createClient(clientOptions);
             
             this.addListener('connect', onConnect);
@@ -31,6 +31,10 @@ class RedisService {
         }
     }
 
+    get apiServer() {
+        return this._apiServer();
+    }
+
     /**
      * Asynchronously connects to the Redis server.
      * 
@@ -41,7 +45,7 @@ class RedisService {
      */
     async connect() {
         try {
-            this.connection = await this.client.connect();
+            await this.client.connect();
             return this;
         } catch (err) {
             throw new Error.Log(err);
