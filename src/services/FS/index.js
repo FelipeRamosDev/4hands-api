@@ -33,7 +33,7 @@ class FileSystemService {
     static async readFile(path) {
         return new Promise((resolve, reject) => {
             fs.readFile(path, (err, dataBuff) => {
-                if (err) throw reject(new Error.Log(err));
+                if (err) throw reject(logError(err));
                 
                 return resolve(dataBuff);
             });
@@ -67,7 +67,7 @@ class FileSystemService {
         try {
             return await this.writeFile(path, JSON.stringify(jsObject, null, 4) + '\n');
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -81,7 +81,7 @@ class FileSystemService {
      */
     static async copyFiles(filesToCopy, sourceDir, destDir) {
         if (!Array.isArray(filesToCopy)) {
-            throw new Error.Log({
+            throw logError({
                 name: 'ServicesFSCopyFilesInvalidParam',
                 message: `The param "filesToCopy" should be an array but received ${filesToCopy}`
             });
@@ -112,7 +112,7 @@ class FileSystemService {
 
                     if (fs.existsSync(sourcePath)) {
                         fs.copyFile(sourcePath, destPath, (err) => {
-                            if (err) throw reject(new Error.Log(err));
+                            if (err) throw reject(logError(err));
             
                             console.log(`${file} was copied to ${destPath}`);
                             return resolve(file.filename);
@@ -126,7 +126,7 @@ class FileSystemService {
             const solved = await Promise.all(promises);
             return solved;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 }

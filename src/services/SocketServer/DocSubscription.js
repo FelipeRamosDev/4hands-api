@@ -41,7 +41,7 @@ class DocSubscription extends SocketSubscription {
              */
             this.filter = filter;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -54,7 +54,7 @@ class DocSubscription extends SocketSubscription {
             const doc = await this.handler();
 
             if (!doc) {
-                this.socket.emit('subscribe:doc:null', new Error.Log({
+                this.socket.emit('subscribe:doc:null', logError({
                     name: 'NOT_FOUND',
                     message: `The document requested wasn't found!`
                 }));
@@ -63,7 +63,7 @@ class DocSubscription extends SocketSubscription {
             this.socket.emit('subscribe:doc:data', doc);
             return doc.toSuccess();
         } catch (err) {
-            this.socket.emit('subscribe:doc:error', new Error.Log(err));
+            this.socket.emit('subscribe:doc:error', logError(err));
         }
     }
 
@@ -87,7 +87,7 @@ class DocSubscription extends SocketSubscription {
 
             return doc;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 }

@@ -55,7 +55,7 @@ class SocketServer {
 
             this.init(connectedCB);
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -81,7 +81,7 @@ class SocketServer {
 
             this.io.listen(this.port);
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -94,7 +94,7 @@ class SocketServer {
         try {
             return this.connections.find(item => item.socket.id === connectionID);
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 }

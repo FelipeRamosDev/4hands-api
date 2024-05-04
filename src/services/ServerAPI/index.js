@@ -175,7 +175,7 @@ class ServerAPI {
         this.redisServ = new RedisService({
             url: this.redisURL,
             onError: (err) => {
-                throw new Error.Log(err);
+                throw logError(err);
             }
         }, this);
 
@@ -248,7 +248,7 @@ class ServerAPI {
                 const SSL_CERT = FS.readFileSync(this.certSSLPath);
     
                 if (!SSL_KEY || !SSL_CERT) {
-                    throw new Error.Log({
+                    throw logError({
                         name: 'SSLCertificateNotFound',
                         message: `The SSL certificate wasn't found on the directory!`
                     });
@@ -284,7 +284,7 @@ class ServerAPI {
      */
     createEndpoint(endpoint) {
         if (!endpoint instanceof Endpoint) {
-            throw new Error.Log({
+            throw logError({
                 name: 'INVALID_ENDPOINT',
                 message: 'The "endpoint" param is not an Endpoint type!'
             });

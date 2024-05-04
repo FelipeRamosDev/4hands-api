@@ -190,7 +190,7 @@ class ViewNavigator extends ToolsCLI {
                 return '';
             }
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -206,13 +206,13 @@ class ViewNavigator extends ToolsCLI {
             const questionText = this.question && this.question.text || '';
 
             const fired = await this.prompt.question(questionText);
-            if (fired instanceof Error.Log) {
+            if (fired.error) {
                 throw fired;
             }
 
             return await this.navTo(fired);
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 }

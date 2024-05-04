@@ -80,7 +80,7 @@ class StringTemplateBuilder {
      */
     var(name, type) {
         if (!name || !type) {
-            throw new Error.Log('common.missing_params', ['name', 'type']);
+            throw logError('common.missing_params', ['name', 'type']);
         }
 
         this.result += `%{{${name}:${type}}}%`;

@@ -17,7 +17,7 @@ async function readable(options) {
         const result = await this.exec();
         return result.map(doc => doc.toObject());
     } catch(err) {
-        return new Error.Log(err).append('')
+        return logError(err)
     }
 
 };
@@ -60,7 +60,7 @@ function paginate(options) {
 
         return this;
     } catch(err) {
-        throw new Error.Log(err).append('database.paginate_query');
+        throw logError(err);
     }
 }
 
@@ -88,7 +88,7 @@ function populateAll(options) {
     
         return populated;
     } catch(err) {
-        return new Error.Log(err).append('database.populating_document', this._collection.collectionName);
+        return logError(err);
     }
 }
 
@@ -121,7 +121,7 @@ async function initialize(populate){
             result = docs.initialize();
         }
     } catch(err) {
-        throw new Error.Log(err);
+        throw logError(err);
     }
 
     return result;

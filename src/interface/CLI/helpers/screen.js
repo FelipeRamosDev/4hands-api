@@ -20,7 +20,7 @@ class ScreenHelperCLI {
         const command = `powershell -Command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Screen]::PrimaryScreen.Bounds.Width"`;
         const width = prompt.cmd(command);
 
-        if (width instanceof Error.Log) {
+        if (width.error) {
             throw width;
         }
 

@@ -17,7 +17,7 @@ module.exports = new Endpoint({
         const user = await User.getUser({ email });
 
         if (!user) {
-            return res.status(404).send(new Error.Log({
+            return res.status(404).send(logError({
                 name: 'USER_DOES_NOT_EXIST',
                 message: `The user e-mail doesn't exist!`
             }));

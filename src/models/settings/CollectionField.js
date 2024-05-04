@@ -102,7 +102,7 @@ class CollectionField {
              */
             if (setup.default) this.default = setup.default;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError;
         }
     }
 

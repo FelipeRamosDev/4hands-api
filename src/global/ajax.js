@@ -22,7 +22,7 @@ module.exports = (url, data) => {
             } catch(err) {
                 const errorResponse =   err.response;
                 const errorData = errorResponse && errorResponse.data;
-                throw new Error.Log(errorData);
+                throw logError(errorData);
             }
         }, 
         post: async (config, getAxiosResponse) => {
@@ -40,7 +40,7 @@ module.exports = (url, data) => {
             } catch(err) {
                 const errorResponse = err.response;
                 const errorData = errorResponse && errorResponse.data;
-                throw new Error.Log({
+                throw logError({
                     status: errorResponse.status,
                     name: errorResponse.statusText,
                     message: errorData.errorMessages && errorData.errorMessages.join('\n')
@@ -62,7 +62,7 @@ module.exports = (url, data) => {
             } catch(err) {
                 const errorResponse = err.response;
                 const errorData = errorResponse && errorResponse.data;
-                throw new Error.Log({
+                throw logError({
                     status: errorResponse.status,
                     name: errorResponse.statusText,
                     message: errorData.errorMessages.join('\n')
@@ -81,11 +81,11 @@ module.exports = (url, data) => {
                     return response.data;
                 }
 
-                return new Error.Log(response);
+                return logError(response);
             } catch(err) {
                 const errorResponse = err.response;
                 const errorData = errorResponse && errorResponse.data;
-                throw new Error.Log({
+                throw logError({
                     status: errorResponse.status,
                     name: errorResponse.statusText,
                     message: errorData.errorMessages.join('\n')

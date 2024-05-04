@@ -10,7 +10,7 @@ class MemoryAnalyser {
             this.sizeUnit = sizeUnit;
             this.monitors = [];
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 

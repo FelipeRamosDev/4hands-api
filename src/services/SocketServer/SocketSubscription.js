@@ -24,13 +24,13 @@ class SocketSubscription {
                 this.connection = connection;
                 this.connection.subscriptions.push(this.connection);
             } else {
-                throw new Error.Log({
+                throw logError({
                     name: 'NO_SOCKET_CONNECTION',
                     message: `A socket connection is required to instantiate a subscription!`
                 });
             }
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 

@@ -130,7 +130,7 @@ class PoolForm extends FormCtrlCLI {
             await this.end(this);
             return this.formData;
         } catch(err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -178,7 +178,7 @@ class PoolForm extends FormCtrlCLI {
         const firstQuestion = this.questions.length && this.getFirstQuestion();
 
         if (!firstQuestion) {
-            return new Error.Log({
+            return logError({
                 name: 'QUESTION-REQUIRED',
                 message: `Any question was provided! It's required to have at least one question to run the method PoolForm.start().`
             })

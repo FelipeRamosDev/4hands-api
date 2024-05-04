@@ -59,13 +59,13 @@ class MailService {
                 }
 
                 default: {
-                    throw new Error.Log('common.bad_format_param', 'type', 'MailService.constructor', 'smpt | gmail', type);
+                    throw logError('common.bad_format_param', 'type', 'MailService.constructor', 'smpt | gmail', type);
                 }
             }
 
             this.transporter = nodemailer.createTransport(this.options);
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -116,7 +116,7 @@ class MailService {
         const { customSubject } = Object(options);
 
         if (!this.signUpConfirmationEmail) {
-            return new Error.Log({
+            return logError({
                 name: 'DONT_SEND_CONFIRMATION',
                 message: `API configured to don't send a confirmation email.`
             });
@@ -131,7 +131,7 @@ class MailService {
 
             return await this.send(userEmail, customSubject || 'Confirmation Email', body);
         } catch (err) {
-            return new Error.Log(err);
+            return logError(err);
         }
     }
 
@@ -165,7 +165,7 @@ class MailService {
 
             return await this.send(userEmail, customSubject || body.title, body.renderToString());
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 }

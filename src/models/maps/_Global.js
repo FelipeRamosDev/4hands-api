@@ -30,7 +30,7 @@ class GlobalMap {
             this.modifiedAt = modifiedAt && new Date(modifiedAt).toLocaleString();
             this.isConstructed = true;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -78,8 +78,8 @@ class GlobalMap {
         try {
             const created = await CRUDDB.create(collectionName || this.collectionName, {...this});
 
-            if (created instanceof Error.Log) {
-                return new Error.Log(created);
+            if (created.error) {
+                return logError(created);
             }
 
             if (created) {
@@ -90,9 +90,9 @@ class GlobalMap {
                 return this;
             }
 
-            throw new Error.Log(created);
+            throw logError(created);
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -110,13 +110,13 @@ class GlobalMap {
         try {
             const loaded = await CRUD.getDoc({collectionName, filter: this._id}).defaultPopulate();
             
-            if (loaded instanceof Error.Log) {
-                throw new Error.Log(loaded);
+            if (loaded.error) {
+                throw logError(loaded);
             }
 
             return loaded.initialize();
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -131,16 +131,16 @@ class GlobalMap {
         const collection = collectionName || this.collectionName;
 
         try {
-            if (!collection) throw new Error.Log('database.missing_params', 'collectionName', '_Global.updateDB');
+            if (!collection) throw logError('database.missing_params', 'collectionName', '_Global.updateDB');
 
             const loaded = await crud.update({collectionName: collection, filter: filter || this.UID || this._id, data: data || {...this}, options: {returnDocs: true} });
-            if (loaded instanceof Error.Log) {
-                throw new Error.Log(loaded);
+            if (loaded.error) {
+                throw logError(loaded);
             }
 
             return loaded.initialize();
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -158,13 +158,13 @@ class GlobalMap {
                 filter: filter || this._id
             });
 
-            if (deleted instanceof Error.Log) {
+            if (deleted.error) {
                 throw deleted;
             }
 
             return deleted;
         } catch (err) { 
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -176,25 +176,25 @@ class GlobalMap {
      * @throws {Error} If there is an error during the property increase process.
      */
     async increaseProp(propKey, value) {
-        if (!propKey) throw new Error.Log();
+        if (!propKey) throw logError();
         const { increaseDocProp } = require('../../helpers/database/dbHelpers');
         const increaseAmount = value || 1;
         const increaseValue = {[propKey]: increaseAmount};
 
         try {
             if (!this.collectionName || !propKey) {
-                return new Error.Log('database.missing_params', ['this.collectionName', 'propKey'], '_Global.updateDB')
+                return logError('database.missing_params', ['this.collectionName', 'propKey'], '_Global.updateDB')
             }
 
             const increased = await increaseDocProp(this.collectionName, {_id: this._id}, increaseValue);
-            if (increased instanceof Error.Log) {
+            if (increased.error) {
                 return increased;
             }
 
             increased[propKey] = increased[propKey] + increaseAmount;
             return increased;
         } catch (err) {
-            throw new Error.Log('helpers.increase_doc_prop', this.collectionName, this._id, increaseValue);
+            throw logError('helpers.increase_doc_prop', this.collectionName, this._id, increaseValue);
         }
     }
 
@@ -214,7 +214,7 @@ class GlobalMap {
         const currValue = this[fieldName];
 
         if (!value) {
-            throw new Error.Log({ name: `It's required to have a value to proceed on setting a safe value!`});
+            throw logError({ name: `It's required to have a value to proceed on setting a safe value!`});
         }
 
         if (!currValue || currValue.isEmpty) {
@@ -224,16 +224,16 @@ class GlobalMap {
                 data: { [fieldName]: newSafeValue.id }
             });
 
-            if (!updated || updated instanceof Error.Log) {
-                throw new Error.Log(updated);
+            if (!updated || updated.error) {
+                throw logError(updated);
             } else {
                 return { success: true, message: 'New safe value created!', data: newSafeValue };
             }
         } else {
             const updated = await currValue.setEncrypted(value);
 
-            if (!updated || updated instanceof Error.Log) {
-                throw new Error.Log(updated);
+            if (!updated || updated.error) {
+                throw logError(updated);
             } else {
                 return { success: true, message: 'SafeValue updated!', data: updated };
             }
@@ -245,7 +245,7 @@ class GlobalMap {
             const created = await API.redisServ.createDoc({ collection: this.collectionName, uid: this.UID, data: data || {...this} });
             return created;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -254,7 +254,7 @@ class GlobalMap {
             const cache = await API.redisServ.getDoc({ collection: this.collectionName, uid: this.UID });
             return cache;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -263,7 +263,7 @@ class GlobalMap {
             const updated = await API.redisServ.updateDoc({ collection: this.collectionName, uid: this.UID || this._id, data: data || {...this} });
             return updated;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -272,7 +272,7 @@ class GlobalMap {
             const deleted = await API.redisServ.deleteDoc({ collection: this.collectionName, uid: this.UID });
             return deleted;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -293,7 +293,7 @@ class GlobalMap {
             const cached = await doc.createCache();
             return cached;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -302,7 +302,7 @@ class GlobalMap {
             const cacheDoc = await API.redisServ.getDoc({ collection, uid });
             return cacheDoc;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 }

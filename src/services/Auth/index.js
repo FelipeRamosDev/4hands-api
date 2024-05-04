@@ -54,12 +54,12 @@ class AuthService {
             const isValid = await this.validateCredentials(password);
 
             if(!isValid) {
-                return new Error.Log('auth.invalid_credentials');
+                return logError('auth.invalid_credentials');
             }
 
             return isValid.toSuccess('User is valid!');
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -120,7 +120,7 @@ class AuthService {
             const salt = await bcrypt.genSalt(length || 8);
             return salt;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -137,7 +137,7 @@ class AuthService {
             const hash = await bcrypt.hash(password, salt);
             return hash;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -155,7 +155,7 @@ class AuthService {
 
             return token;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -171,7 +171,7 @@ class AuthService {
             session.sessionSalt = sessionSalt;
             return token;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -184,7 +184,7 @@ class AuthService {
             const token = JWT.sign({ sessionID, userEmail }, this.secretKey, { expiresIn: expiresIn || (Date.now() + 80000000)});
             return token;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -198,7 +198,7 @@ class AuthService {
             const token = JWT.sign(data, this.secretKey);
             return token;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -221,7 +221,7 @@ class AuthService {
                 return data;
             }
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -236,7 +236,7 @@ class AuthService {
             const isMatch = await bcrypt.compare(password, this.parentBucket.password.toString());
             return isMatch;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -251,7 +251,7 @@ class AuthService {
         try {
             const userData = this.validateToken(token);
 
-            if (userData instanceof Error.Log) {
+            if (userData.error) {
                 throw userData;
             }
 
@@ -261,7 +261,7 @@ class AuthService {
             const sessionUpdated = await FS.writeJSON(config.sessionPath, sessionCLI);
             return sessionUpdated;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 }

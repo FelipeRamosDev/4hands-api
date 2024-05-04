@@ -30,7 +30,7 @@ function buildPromise(docsToUpdate, currFieldSchema, relatedUID, arrayAction, on
                 { _id: { $in: docsToUpdate } },
                 { [arrayAction]: { [relatedField]: relatedUID }, onlyAct },
                 (err, result) => {
-                    if (err) throw reject(new Error.Log(err));
+                    if (err) throw reject(logError(err));
                     return resolve(result);
                 }
             ];
@@ -113,7 +113,7 @@ async function onCreate() {
         const updated = await Promise.all(promises);
         return updated;
     } catch(err) {
-        throw new Error.Log(err);
+        throw logError(err);
     }
 }
 
@@ -158,7 +158,7 @@ async function onUpdate() {
         const updated = await Promise.all(promises);
         return updated;
     } catch(err) {
-        throw new Error.Log(err);
+        throw logError(err);
     }
 }
 
@@ -196,7 +196,7 @@ async function onDelete() {
         const updated = await Promise.all(promises);
         return updated;
     } catch(err) {
-        throw new Error.Log(err);
+        throw logError(err);
     }
 }
 

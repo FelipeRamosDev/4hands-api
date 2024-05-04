@@ -31,7 +31,7 @@ class ComponentSubscription extends SocketSubscription {
             this.setClientChangeListener();
             this.appendComponent();
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -46,7 +46,7 @@ class ComponentSubscription extends SocketSubscription {
 
             this.socket.emit('subscribe:component:data:' + this.subscriptionUID, this.component.renderToString().toSuccess());
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -60,10 +60,10 @@ class ComponentSubscription extends SocketSubscription {
                 return;
             }
 
-            const err = new Error.Log(error);
+            const err = logError(error);
             this.socket.emit('subscribe:component:error:' + this.subscriptionUID, err.response());
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -75,7 +75,7 @@ class ComponentSubscription extends SocketSubscription {
         try {
             this.connection.updateComponent(this.subscriptionUID, mergeData);
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -88,7 +88,7 @@ class ComponentSubscription extends SocketSubscription {
                 this.connection.updateComponent(this.subscriptionUID, mergeData);
             });
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -99,7 +99,7 @@ class ComponentSubscription extends SocketSubscription {
         try {
             this.connection.appendComponent(this);
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 }
