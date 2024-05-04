@@ -19,7 +19,7 @@ class UsersClass {
                 }
             }
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 }

@@ -262,7 +262,7 @@ module.exports = new Endpoint({
             response.success = true;
             return res.status(201).send(response);
         } catch(err) {
-            const error = new Error.Log(err).append('apiResponse.transfer.deposit_withdraw', req.body.type, req.body.value);
+            const error = logError(err);
             return res.status(500).json(error.response());
         }
     }

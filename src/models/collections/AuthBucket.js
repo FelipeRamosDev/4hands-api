@@ -73,7 +73,7 @@ class AuthBucket extends _Global {
 
             return { success: true };
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -103,7 +103,7 @@ class AuthBucket extends _Global {
              * Thrown if there is an error during the AuthBucket creation process.
              * @throws {Error.Log}
              */
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 }

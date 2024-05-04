@@ -171,7 +171,7 @@ class EventsHandlers {
     async answer (ev) {
         try {
             if (!ev.answer && ev.required) {
-                const error = new Error.Log({
+                const error = logError({
                     name: 'AnswerRequired',
                     message: `The answer for this question is required!`
                 });
@@ -201,10 +201,10 @@ class EventsHandlers {
      */
     async error (ev, err) {
         try {
-            await this.triggerEvent('onError', ev, this.tools, new Error.Log(err));
+            await this.triggerEvent('onError', ev, this.tools, logError(err));
             return ev;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
     /**
@@ -223,7 +223,7 @@ class EventsHandlers {
 
             await this.triggerEvent('onEnd', ev, this.tools);
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 }

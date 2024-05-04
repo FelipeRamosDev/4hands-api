@@ -12,7 +12,7 @@ async function preSave(next) {
         this.password = hash;
         next();
     } catch (err) {
-        throw new Error.Log(err);
+        throw logError(err);
     }
 }
 
@@ -31,7 +31,7 @@ async function preUpdate(next) {
 
         next();
     } catch (err) {
-        throw new Error.Log(err);
+        throw logError(err);
     }
 }
 

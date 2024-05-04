@@ -69,7 +69,7 @@ class ToolsCLI {
         if (a.toLowerCase() === 'n') return false;
 
         if (strict) {
-            throw new Error.Log({
+            throw logError({
                 name: 'BoolAnswerError',
                 message: `When the tool boolAnswer is configured to strict mode, it requires a strict answer, "y" or "n"! But received "${a}".`
             });

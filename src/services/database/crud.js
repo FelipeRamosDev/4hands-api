@@ -26,7 +26,7 @@ async function create(collectionName, data, options) {
         const savedDoc = await newDoc.save(options);
         return savedDoc;
     } catch(err) {
-        throw new Error.Log(err).append('database.creating_document', collectionName);
+        throw logError(err);
     }
 }
 
@@ -55,10 +55,10 @@ function query(setup) {
                 return Collection.find(filterObj).sort(sort);
             }
         } else {
-            throw new Error.Log('database.schema_not_found', collectionName);
+            throw logError('database.schema_not_found', collectionName);
         }
     } catch(err) {
-        throw new Error.Log(err).append('database.querying_collection', setup.collectionName);
+        throw logError(err);
     }
 }
 
@@ -83,10 +83,10 @@ function getDoc(setup) {
             const Doc = Collection.findOne(filterObj);
             return Doc;
         } else {
-            throw new Error.Log('database.getting_schema', collectionName);
+            throw logError('database.getting_schema', collectionName);
         }
     } catch(err) {
-        throw new Error.Log(err).append('database.getting_document', setup.collection, JSON.stringify(helpers.treatFilter(filter) || {}));
+        throw logError(err);
     }
 }
 
@@ -121,11 +121,11 @@ async function update(setup) {
                 try {
                     const updated = await Collection.findOneAndUpdate(query, data, mongooseOpt);
 
-                    if (!updated) throw new Error.Log('database.updating_document', query)
+                    if (!updated) throw logError('database.updating_document', query)
                     if (returnDocs) return updated;
                     return { success: true };
                 } catch(err) {
-                    throw new Error.Log(err);
+                    throw logError(err);
                 }
             }
             case 'many': {
@@ -136,12 +136,12 @@ async function update(setup) {
                     if (returnDocs) return docs;
                     return updated;
                 } catch(err) {
-                    throw new Error.Log(err).append('database.updating_document', query);
+                    throw logError(err);
                 }
             }
         }
     } catch(err) {
-        throw new Error.Log(err).append('database.updating_document', helpers.treatFilter(filter));
+        throw logError(err);
     }
 }
 
@@ -182,7 +182,7 @@ async function del(setup) {
 
         return deleted;
     } catch(err) {
-        throw new Error.Log(err).append('database.deleting_document', collectionName, JSON.stringify(filter));
+        throw logError(err);
     }
 }
 

@@ -56,7 +56,7 @@ module.exports = new Endpoint({
     
             return res.status(200).json(new Response(result, body));
         } catch(err) {
-            const error = new Error.Log(err).append('apiResponse.collection.get.query_collection');
+            const error = logError(err);
             res.status(500).json(error.response());
         }
     }

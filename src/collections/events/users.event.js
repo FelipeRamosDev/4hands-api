@@ -13,7 +13,7 @@ async function preSave(next) {
         this.auth = signedUp._id;
         next();
     } catch (err) {
-        throw new Error.Log(err);
+        throw logError(err);
     }
 }
 

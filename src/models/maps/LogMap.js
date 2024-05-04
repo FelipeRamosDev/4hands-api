@@ -36,7 +36,7 @@ class LogBase {
         try {
             return JSON.stringify({...this});
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 

@@ -94,7 +94,7 @@ class User extends _Global {
              * Thrown if there is an error during the User object construction.
              * @throws {Error.Log}
              */
-            new Error.Log(err).append('common.model_construction', 'User');
+            logError(err);
         }
     }
 
@@ -177,7 +177,7 @@ class User extends _Global {
             const signedOut = await this.authService.signOut(this.userSession.token);
             return signedOut;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -201,7 +201,7 @@ class User extends _Global {
         try {
             return await API.mailService.sendResetPassword(this.email, await this.genResetPassLink(req));
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -278,7 +278,7 @@ class User extends _Global {
 
             return userDOC;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -297,12 +297,12 @@ class User extends _Global {
                  * Thrown if the user is not found.
                  * @throws {Error.Log}
                  */
-                return new Error.Log('user.not_found', filter);
+                return logError('user.not_found', filter);
             }
 
             return userDOC.initialize();
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -330,7 +330,7 @@ class User extends _Global {
                 return false;
             }
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -352,7 +352,7 @@ class User extends _Global {
                 return emailSent;
             }
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -373,7 +373,7 @@ class User extends _Global {
             const isExist = await this.isExist(userName || email);
             // If the user is already in use, throw an error
             if (isExist) {
-                return new Error.Log('auth.user_in_use');
+                return logError('auth.user_in_use');
             }
 
             const newUser = await CRUD.create('users', setup);
@@ -388,7 +388,7 @@ class User extends _Global {
 
             return user;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -404,11 +404,11 @@ class User extends _Global {
             const userDOC = await CRUD.getDoc({ collectionName: 'users', filter: { email: userName }}).defaultPopulate();
 
             if (!userDOC) {
-                return new Error.Log('auth.user_not_found', userName);
+                return logError('auth.user_not_found', userName);
             }
 
             if (!userDOC.isEmailConfirmed) {
-                return new Error.Log({
+                return logError({
                     code: 401,
                     name: 'USER_EMAIL_NOT_CONFIRMED',
                     message: `The user needs to confirm his email before login!`
@@ -424,7 +424,7 @@ class User extends _Global {
                 return signedIn;
             }
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 }

@@ -27,7 +27,7 @@ class CollectionEncrypt extends CollectionField {
             this.type = ObjectId;
             this.ref = 'safe_values';
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError;
         }
     }
 }

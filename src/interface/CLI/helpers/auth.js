@@ -30,7 +30,7 @@ async function isAuthenticated(token) {
 
         return true;
     } catch (err) {
-        throw new Error.Log(err);
+        throw logError(err);
     }
 }
 
@@ -70,7 +70,7 @@ async function createUserCLISession(user) {
             throw sessionCreated;
         }
     } catch (err) {
-        throw new Error.Log(err);
+        throw logError(err);
     }
 }
 
@@ -84,7 +84,7 @@ function getSessionCurrentUser() {
     try {
         return sessionCLI && sessionCLI.currentUser;
     } catch (err) {
-        throw new Error.Log(err);
+        throw logError(err);
     }
 }
 

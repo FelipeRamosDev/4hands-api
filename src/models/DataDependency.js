@@ -28,7 +28,7 @@ class DataDependency {
              */
             this._parent = () => parent;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -65,7 +65,7 @@ class DataDependency {
             const htmlString = this.parent.renderToString();
             socketConnection.socket.emit('subscribe:component:data:' + subsUID, htmlString.toSuccess());
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -98,7 +98,7 @@ class DataDependency {
                 return this.value;
             }
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 }

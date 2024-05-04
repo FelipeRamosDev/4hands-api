@@ -67,7 +67,7 @@ class Resources {
             const current = this.getPath('errors.' + path);
             return Boolean.isValid(current).function().eval() && current(...params);
         } catch(err) {
-            return new Error.Log(err).consolePrint();
+            return logError(err).consolePrint();
         }
     }
 

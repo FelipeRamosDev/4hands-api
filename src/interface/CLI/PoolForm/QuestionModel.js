@@ -78,7 +78,7 @@ class QuestionModel {
                 }, timeout || 2000);
             });
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 

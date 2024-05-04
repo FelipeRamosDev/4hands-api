@@ -52,7 +52,7 @@ class XMLManager {
 
             return parsedXML;
         } catch(err) {
-            return new Error.Log(err).append('services.XMLManager.loading_file').append('services.XMLManager.parsing_xml');
+            return logError(err);
         }
     }
 
@@ -65,7 +65,7 @@ class XMLManager {
         return await new Promise((resolve, reject) => {
             fs.readFile((filePath || this.fullPath), 'utf-8', (err, data) => {
                 if (err) {
-                    const error = new Error.Log(err).append('services.XMLManager.loading_file');
+                    const error = logError(err);
                     return resolve(error);
                 }
               
@@ -83,7 +83,7 @@ class XMLManager {
         return await new Promise((resolve, reject) => {
             xml2js.parseString(stringData, (err, result) => {
                 if (err) {
-                    const error = new Error.Log(err).append('services.XMLManager.parsing_xml')
+                    const error = logError(err);
                     return resolve(error);
                 }
                 
@@ -113,7 +113,7 @@ class XMLManager {
             const xml = builder.buildObject(obj);
             fs.writeFile(path || this.fullPath, xml, (err) => {
                 if (err) {
-                    const error = new Error.Log(err).append('services.XMLManager.saving_file');
+                    const error = logError(err);
                     return resolve(error);
                 }
               

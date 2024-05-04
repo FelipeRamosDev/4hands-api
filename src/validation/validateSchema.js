@@ -20,7 +20,7 @@ class ValidateSchema {
                 this.ModelDB = collection.DB
                 this._schema = collection.schema;
             } else {
-                throw new Error.Log('common.request_model_schema_not_found', rules);
+                throw logError('common.request_model_schema_not_found', rules);
             }
         }
         
@@ -39,7 +39,7 @@ class ValidateSchema {
 
                 this._schema = new Schema(rules, {autoCreate: false, autoIndex: false});
             } catch(err) {
-                throw new Error.Log(err).append('common.request_creating_custom_schema');
+                throw logError(err);
             }
         }
     }

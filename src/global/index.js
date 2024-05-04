@@ -1,7 +1,7 @@
 const ajax = require('./ajax');
 const Resource = require('../resources/Resources');
 const validation = require('../validation');
-const ErrorLog = require('../models/logs/ErrorLog');
+const ErrorLog = require('../models/ErrorLog');
 const configs = require('4hands-api/configs/project');
 const ToolsCLI = require('../interface/CLI/ToolsCLI');
 const toolsCLI = new ToolsCLI();
@@ -30,7 +30,8 @@ global.toolsCLI = toolsCLI;
  * @global
  * @name Error.Log - To log errors and any other log.
  */
-global.Error.Log = ErrorLog;
+global.logError = ErrorLog.logError;
+
 // Utils
 Boolean.isValid = validation.base.build;
 

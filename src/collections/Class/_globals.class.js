@@ -12,7 +12,7 @@ class GlobalClass {
                 return this;
             }
         } catch(err) {
-            throw new Error.Log(err).append('database.init_document', this.collection.collectionName, this.id);
+            throw logError(err);
         }
     }
 
@@ -32,13 +32,13 @@ class GlobalClass {
                     return null;
                 }
             } else {
-                return new Error.Log({
+                return logError({
                     name: 'MONGOOSE-QUERY-NOT-FOUND',
                     message: `The mongoose custom query "defaultPopulate" don't exist!`
                 });
             }
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 

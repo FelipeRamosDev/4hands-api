@@ -190,7 +190,7 @@ class ViewNavigator extends ToolsCLI {
                 return '';
             }
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -212,7 +212,7 @@ class ViewNavigator extends ToolsCLI {
 
             return await this.navTo(fired);
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 }

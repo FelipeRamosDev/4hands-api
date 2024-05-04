@@ -163,7 +163,7 @@ class RedisHelpers {
         }
 
         if (typeof value === 'object') {
-            return new Error.Log('common.bad_format_param', 'value', 'RedisHelpers.parseString', 'string', 'object/array');
+            return logError('common.bad_format_param', 'value', 'RedisHelpers.parseString', 'string', 'object/array');
         }
 
         return String(value);
@@ -175,7 +175,7 @@ class RedisHelpers {
         }
 
         if (isNaN(value)) {
-            return new Error.Log('common.bad_format_param', 'value', 'RedisHelpers.parseString', 'number', 'NaN');
+            return logError('common.bad_format_param', 'value', 'RedisHelpers.parseString', 'number', 'NaN');
         }
 
         return Number(value);

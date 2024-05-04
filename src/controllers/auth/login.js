@@ -37,7 +37,7 @@ module.exports = new Endpoint({
                 req.session.isEmailConfirmed = user.isEmailConfirmed;
                 return next();
             } catch(err) {
-                return res.status(500).send(new Error.Log(err).response());
+                return res.status(500).send(logError(err).response());
             }
         }
     ],
