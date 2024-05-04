@@ -1,5 +1,4 @@
 const source = require('.');
-const ErrorLog = require('../models/logs/ErrorLog');
 const FS = require('4hands-api/src/services/FS');
 const path = require('path');
 
@@ -67,7 +66,7 @@ class Resources {
             const current = this.getPath('errors.' + path);
             return Boolean.isValid(current).function().eval() && current(...params);
         } catch(err) {
-            return logError(err).consolePrint();
+            return;
         }
     }
 
@@ -75,14 +74,13 @@ class Resources {
      * Retrieves a resource at the specified path.
      * @param {string} pathString - The path to the desired resource.
      * @returns {Function|undefined} The resource function or undefined if the path is not found.
-     * @throws {ErrorLog} If the specified path is not found in the resource data.
      */
     getPath(pathString) {
         const parsedPath = Boolean.isValid(pathString).filled().string().eval() && pathString.split('.');
         let result = this.base;
 
         for (let path of parsedPath) {
-            if (!result[path]) throw new ErrorLog(this.error('resources.path_string_not_found', pathString));
+            if (!result[path]) return;
             result = result[path];
         }
 

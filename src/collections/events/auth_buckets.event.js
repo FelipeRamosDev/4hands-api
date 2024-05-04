@@ -22,7 +22,7 @@ async function preUpdate(next) {
             const auth = new AuthService();
             const hash = await auth.createHash(this._update.password);
     
-            if (hash.error
+            if (!hash || hash.error) {
                 throw hash;
             }
     

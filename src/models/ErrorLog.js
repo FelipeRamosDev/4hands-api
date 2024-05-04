@@ -1,13 +1,24 @@
-
 const fs = require('fs');
 const path = require('path');
 
 class ErrorLog {
-    constructor (err) {
+    constructor (err, merge = {}) {
         this.error = true;
 
+        if (!err) {
+            this.name = 'UNKNOW_ERROR';
+            this.message = 'An unknow error was caught!'
+        }
+
         if (typeof err === 'string') {
-            this.message = err;
+            const rsc = Resource.error(err);
+
+            if (rsc) {
+                this.name = rsc.name;
+                this.message = rsc.message;
+            } else {
+                this.message = err;
+            }
         }
 
 
@@ -16,14 +27,19 @@ class ErrorLog {
 
             if (code) this.code = code;
             if (name) this.name = name;
-            if (message) this.message = message;
-            if (msg) this.msg = msg;
+            if (message || msg) this.message = message || msg;
             if (type) this.type = type;
             if (stack) this.stack = stack;
         }
 
         if (!this.stack) {
             this.stack = new Error().stack
+        }
+
+        if (!Array.isArray(merge) && typeof merge === 'object') {
+            Object.keys(merge).map(key => {
+                this[key] = merge[key];
+            });
         }
     }
 
@@ -34,12 +50,12 @@ class ErrorLog {
         return array.map(item => item.replace('    at ', ''));
     }
 
-    get stackTemplate() {
+    stackTemplate() {
+        const date = new Date();
         const msg = this.message || this.msg;
-        let out = '';
+        let out = '\n';
 
-        out += '------------------------------------------------------------------------------------------------------------------------------';
-        if (this.name) out += `\n[ERROR] ${this.name}: ${msg ? msg : ''}\n\n`;
+        if (this.name) out += `[${date.toLocaleDateString()} - ${date.toLocaleTimeString()}] ${this.name}: ${msg ? msg : ''}\n\n`;
         if (this.stack) out += 'Stack: ' + this.stackArray.join('\n    ');
         out += '\n--------------------------------------------------------------------------------------------------------------------------------\n\n';
 
@@ -50,14 +66,18 @@ class ErrorLog {
         return { ...this };
     }
 
-    print(...args) {
-        console.log(this.stackTemplate);
-        console.log(...args, '\n');
+    print() {
+        console.error(this.stackTemplate(), '\n');
+    }
+
+    printWarn() {
+        console.warn(this.stackTemplate(), '\n');
     }
 
     async writeLog() {
-        const logFilePath = path.join(__dirname, 'errors.log');
-        const logString = this.stackTemplate;
+        const projectPath = path.normalize(__dirname.replace(path.normalize('/node_modules/4hands-api/src/models'), '/'));
+        const logFilePath = path.join(projectPath, 'errors.log');
+        const logString = this.stackTemplate();
         
         // Check if the log file exists
         if (!fs.existsSync(logFilePath)) {
