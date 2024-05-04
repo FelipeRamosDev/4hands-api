@@ -36,7 +36,7 @@ module.exports = new Endpoint({
             const body = req.body;
             const newUser = await User.create(body, { confirmationEmail: true });
     
-            if (newUser instanceof Error.Log) {
+            if (newUser.error) {
                 return res.status(500).send(newUser.response());
             }
 

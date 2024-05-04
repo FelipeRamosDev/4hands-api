@@ -5,7 +5,7 @@ async function preSave(next) {
         const auth = new AuthService();
         const hash = await auth.createHash(this.password);
 
-        if (hash instanceof Error.Log || !hash) {
+        if (hash.error || !hash) {
             throw hash;
         }
 
@@ -22,7 +22,7 @@ async function preUpdate(next) {
             const auth = new AuthService();
             const hash = await auth.createHash(this._update.password);
     
-            if (hash instanceof Error.Log || !hash) {
+            if (hash.error
                 throw hash;
             }
     

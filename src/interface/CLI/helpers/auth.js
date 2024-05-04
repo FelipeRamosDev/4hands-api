@@ -60,7 +60,7 @@ async function createUserCLISession(user) {
         }
 
         const sessionCreated = await FS.writeJSON(sessionPath, session);
-        if (sessionCreated instanceof Error.Log) {
+        if (sessionCreated.error) {
             throw sessionCreated;
         }
 

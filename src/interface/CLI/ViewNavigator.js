@@ -206,7 +206,7 @@ class ViewNavigator extends ToolsCLI {
             const questionText = this.question && this.question.text || '';
 
             const fired = await this.prompt.question(questionText);
-            if (fired instanceof Error.Log) {
+            if (fired.error) {
                 throw fired;
             }
 

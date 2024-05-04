@@ -272,7 +272,7 @@ class User extends _Global {
             const currentUser = filter || sessionCLI.currentUser || '';
             const userDOC = await this.getUser(currentUser);
 
-            if (userDOC instanceof Error.Log) {
+            if (userDOC.error) {
                 throw userDOC;
             }
 
@@ -316,7 +316,7 @@ class User extends _Global {
     static async isExist(email, returnUID) {
         try {
             const result = await dbHelpers.isDocExist('users', { email });
-            if (result instanceof Error.Log) {
+            if (result.error) {
                 throw result;
             }
 
@@ -377,7 +377,7 @@ class User extends _Global {
             }
 
             const newUser = await CRUD.create('users', setup);
-            if (newUser instanceof Error.Log) {
+            if (newUser.error) {
                 throw newUser;
             }
 

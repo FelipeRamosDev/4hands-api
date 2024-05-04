@@ -20,7 +20,7 @@ module.exports = new Endpoint({
             if (body.confirmationtoken === data.confirmationToken) {
                 const updated = await user.updateDB({ data: { isEmailConfirmed: true }});
     
-                if (updated instanceof Error.Log) {
+                if (updated.error) {
                     throw updated;
                 }
 

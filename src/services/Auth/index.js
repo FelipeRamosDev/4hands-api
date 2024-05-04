@@ -251,7 +251,7 @@ class AuthService {
         try {
             const userData = this.validateToken(token);
 
-            if (userData instanceof Error.Log) {
+            if (userData.error) {
                 throw userData;
             }
 

@@ -19,7 +19,7 @@ module.exports = new Endpoint({
                 const body = req.body;
                 const user = await User.signIn(body.email, body.password);
         
-                if (user instanceof Error.Log) {
+                if (user.error) {
                     let status = 500;
         
                     if (user.name === 'AUTH_INVALID_CREDENTIALS') {

@@ -9,7 +9,7 @@ class UsersClass {
             if (this.isNew) {
                 const auth = await AuthBucket.draft(this);
 
-                if (auth instanceof Error.Log) {
+                if (auth.error) {
                     throw auth;
                 }
 

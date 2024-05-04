@@ -160,7 +160,7 @@ class Component extends ValidateSchema {
             }
 
             const loaded = this.TEMPLATE_STRING;
-            if (loaded instanceof Error.Log) {
+            if (loaded.error) {
                 throw loaded;
             }
 
@@ -326,7 +326,7 @@ class Component extends ValidateSchema {
     renderToString(params) {
         try {
             const stringResult = this.toMarkdown(params);
-            if (stringResult instanceof Error.Log) {
+            if (stringResult.error) {
                 throw stringResult;
             }
 

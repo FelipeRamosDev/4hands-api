@@ -22,7 +22,7 @@ class GlobalClass {
             
             if (docQuery.defaultPopulate) {
                 const docPopulated = await docQuery.defaultPopulate();
-                if (docPopulated instanceof Error.Log) {
+                if (docPopulated.error) {
                     throw docPopulated;
                 }
 

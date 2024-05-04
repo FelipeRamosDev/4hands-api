@@ -67,7 +67,7 @@ class AuthBucket extends _Global {
         try {
             const updated = await this.updateDB({ data: { password: newPassword }});
 
-            if (updated instanceof Error.Log) {
+            if (updated.error) {
                 throw updated;
             }
 
@@ -93,7 +93,7 @@ class AuthBucket extends _Global {
                 password: user.raw.password
             });
 
-            if (auth instanceof Error.Log || !auth) {
+            if (auth.error || !auth) {
                 throw auth;
             }
 

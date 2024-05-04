@@ -79,7 +79,7 @@ class DataDependency {
             if (this.type === 'doc') {
                 const docQuery = await CRUD.getDoc({ collectionName: this.collectionName, filter: this.filter }).defaultPopulate();
 
-                if (docQuery instanceof Error.Log) {
+                if (docQuery.error) {
                     return docQuery;
                 }
 
@@ -90,7 +90,7 @@ class DataDependency {
             if (this.type === 'list') {
                 const queryList = await CRUD.query({ collectionName: this.collectionName, filter: this.filter }).defaultPopulate();
 
-                if (queryList instanceof Error.Log || !Array.isArray(queryList)) {
+                if (queryList.error || !Array.isArray(queryList)) {
                     return queryList;
                 }
 

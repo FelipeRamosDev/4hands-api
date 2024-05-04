@@ -78,7 +78,7 @@ class GlobalMap {
         try {
             const created = await CRUDDB.create(collectionName || this.collectionName, {...this});
 
-            if (created instanceof Error.Log) {
+            if (created.error) {
                 return logError(created);
             }
 
@@ -110,7 +110,7 @@ class GlobalMap {
         try {
             const loaded = await CRUD.getDoc({collectionName, filter: this._id}).defaultPopulate();
             
-            if (loaded instanceof Error.Log) {
+            if (loaded.error) {
                 throw logError(loaded);
             }
 
@@ -134,7 +134,7 @@ class GlobalMap {
             if (!collection) throw logError('database.missing_params', 'collectionName', '_Global.updateDB');
 
             const loaded = await crud.update({collectionName: collection, filter: filter || this.UID || this._id, data: data || {...this}, options: {returnDocs: true} });
-            if (loaded instanceof Error.Log) {
+            if (loaded.error) {
                 throw logError(loaded);
             }
 
@@ -158,7 +158,7 @@ class GlobalMap {
                 filter: filter || this._id
             });
 
-            if (deleted instanceof Error.Log) {
+            if (deleted.error) {
                 throw deleted;
             }
 
@@ -187,7 +187,7 @@ class GlobalMap {
             }
 
             const increased = await increaseDocProp(this.collectionName, {_id: this._id}, increaseValue);
-            if (increased instanceof Error.Log) {
+            if (increased.error) {
                 return increased;
             }
 
@@ -224,7 +224,7 @@ class GlobalMap {
                 data: { [fieldName]: newSafeValue.id }
             });
 
-            if (!updated || updated instanceof Error.Log) {
+            if (!updated || updated.error) {
                 throw logError(updated);
             } else {
                 return { success: true, message: 'New safe value created!', data: newSafeValue };
@@ -232,7 +232,7 @@ class GlobalMap {
         } else {
             const updated = await currValue.setEncrypted(value);
 
-            if (!updated || updated instanceof Error.Log) {
+            if (!updated || updated.error) {
                 throw logError(updated);
             } else {
                 return { success: true, message: 'SafeValue updated!', data: updated };
