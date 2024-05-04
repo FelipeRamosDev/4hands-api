@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const counters = require('4hands-api/src/collections/counters');
-const logs = require('4hands-api/src/collections/logs');
 const safe_values = require('4hands-api/src/collections/safe_values');
 
 /**
@@ -46,7 +45,6 @@ class DatabaseServer {
 
         // Initialize default collections
         this.collections.push(counters.init(this));
-        this.collections.push(logs.init(this));
         this.collections.push(safe_values.init(this));
 
         // Initialize additional collections, if provided
