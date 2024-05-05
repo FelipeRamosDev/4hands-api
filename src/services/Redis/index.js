@@ -18,7 +18,7 @@ class RedisService {
         const { clientOptions, onConnect, onReady, onEnd, onError, onReconnecting } = Object(setup);
 
         try {
-            this.apiServer = apiServer;
+            this._apiServer = () => apiServer;
             this.client = createClient(clientOptions);
             
             this.addListener('connect', onConnect);
@@ -27,8 +27,12 @@ class RedisService {
             this.addListener('error', onError);
             this.addListener('reconnecting', onReconnecting);
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
+    }
+
+    get apiServer() {
+        return this._apiServer();
     }
 
     /**
@@ -41,10 +45,10 @@ class RedisService {
      */
     async connect() {
         try {
-            this.connection = await this.client.connect();
+            await this.client.connect();
             return this;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -61,7 +65,7 @@ class RedisService {
             delete this.connection;
             return await this.client.disconnect();
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -108,7 +112,7 @@ class RedisService {
             await this.client.set(keyName, parsedValue);
             return { success: true, keyName, value };
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -145,7 +149,7 @@ class RedisService {
                 return value;
             }
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -171,7 +175,7 @@ class RedisService {
             const keyName = buildKey(prefix, key);
             return await this.client.del(keyName);
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -201,7 +205,7 @@ class RedisService {
             RedisEventEmitters.postCreate.call(setup);
             return created;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -227,7 +231,7 @@ class RedisService {
             RedisEventEmitters.postUpdate.call(setup);
             return updated;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -247,11 +251,11 @@ class RedisService {
 
         try {
             if (collection && typeof collection !== 'string') {
-                throw new Error.Log('commom.bad_format_param', 'collection', 'RedisService.setDoc', 'string', collection);
+                throw logError('commom.bad_format_param', 'collection', 'RedisService.setDoc', 'string', collection);
             }
 
             if (!uid || typeof uid !== 'string') {
-                throw new Error.Log('commom.bad_format_param', 'uid', 'RedisService.setDoc', 'string', uid);
+                throw logError('commom.bad_format_param', 'uid', 'RedisService.setDoc', 'string', uid);
             }
 
             if (!data || typeof data !== 'object' || Array.isArray(data)) {
@@ -273,7 +277,7 @@ class RedisService {
             await Promise.all(setters);
             return { success: true };
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -304,7 +308,7 @@ class RedisService {
             RedisEventEmitters.postRead.call(setup);
             return parseDocToRead(this.apiServer.getCollectionSet(collection), doc);
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -323,15 +327,15 @@ class RedisService {
 
         try {
             if (collection && typeof collection !== 'string') {
-                throw new Error.Log('commom.bad_format_param', 'collection', 'RedisService.setDocField', 'string', collection);
+                throw logError('commom.bad_format_param', 'collection', 'RedisService.setDocField', 'string', collection);
             }
 
             if (!uid || typeof uid !== 'string') {
-                throw new Error.Log('commom.bad_format_param', 'uid', 'RedisService.setDocField', 'string', uid);
+                throw logError('commom.bad_format_param', 'uid', 'RedisService.setDocField', 'string', uid);
             }
 
             if (!field || typeof field !== 'string') {
-                throw new Error.Log('commom.bad_format_param', 'field', 'RedisService.setDocField', 'string', uid);
+                throw logError('commom.bad_format_param', 'field', 'RedisService.setDocField', 'string', uid);
             }
 
             if (!value) {
@@ -341,7 +345,7 @@ class RedisService {
             const ready = await this.client.hSet(buildKey(collection, uid), field, value);
             return { success: true, status: ready };
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -374,7 +378,7 @@ class RedisService {
                 return { success: true };
             }
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 }

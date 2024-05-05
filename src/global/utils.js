@@ -21,7 +21,7 @@ function getObjectPath(obj, path) {
 
         return obj;
     } catch (err) {
-        throw new Error.Log(err);
+        throw logError(err);
     }
 }
 
@@ -34,11 +34,11 @@ function getObjectPath(obj, path) {
  */
 function convertToMillis(value, unit) {
     if (typeof value !== 'number' && !isNaN(value)) {
-        throw new Error.Log('common.bad_format_param', 'value', 'convertToMillis', 'number', unit, 'utils.js');
+        throw logError('common.bad_format_param', 'value', 'convertToMillis', 'number', unit, 'utils.js');
     }
 
     if (typeof unit !== 'string') {
-        throw new Error.Log('common.bad_format_param', 'unit', 'convertToMillis', 'string', unit, 'utils.js');
+        throw logError('common.bad_format_param', 'unit', 'convertToMillis', 'string', unit, 'utils.js');
     }
 
     switch (unit.toUpperCase()) {
@@ -61,7 +61,7 @@ function convertToMillis(value, unit) {
             return value * 12 * 4 * 7 * 24 * 60 * 60 * 1000;
         }
         default: {
-            throw new Error.Log('common.bad_format_param', 'unit', 'convertToMillis', 'minute || hour || day || week || month || year', unit, 'utils.js');
+            throw logError('common.bad_format_param', 'unit', 'convertToMillis', 'minute || hour || day || week || month || year', unit, 'utils.js');
         }
     }
 }
@@ -76,11 +76,11 @@ function convertToMillis(value, unit) {
 function convertMillisTo(value, unit) {
     if (!value) return;
     if (typeof value !== 'number' && !isNaN(value)) {
-        throw new Error.Log('common.bad_format_param', 'value', 'convertToMillis', 'number', unit, 'utils.js');
+        throw logError('common.bad_format_param', 'value', 'convertToMillis', 'number', unit, 'utils.js');
     }
 
     if (typeof unit !== 'string') {
-        throw new Error.Log('common.bad_format_param', 'unit', 'convertToMillis', 'string', unit, 'utils.js');
+        throw logError('common.bad_format_param', 'unit', 'convertToMillis', 'string', unit, 'utils.js');
     }
 
     switch (unit.toUpperCase()) {
@@ -103,7 +103,7 @@ function convertMillisTo(value, unit) {
             return value / 1000 / 60 / 60 / 24 / 7 / 4 / 12;
         }
         default: {
-            throw new Error.Log('common.bad_format_param', 'unit', 'convertToMillis', 'minute || hour || day || week || month || year', unit, 'utils.js');
+            throw logError('common.bad_format_param', 'unit', 'convertToMillis', 'minute || hour || day || week || month || year', unit, 'utils.js');
         }
     }
 }

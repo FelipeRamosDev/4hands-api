@@ -92,7 +92,7 @@ class CLI extends ToolsCLI {
 
             return loadedView;
         } else {
-            this.printError(new Error.Log({
+            this.printError(logError({
                 name: 'LoadingView',
                 message: `View path not found! ${viewPath}`
             }));

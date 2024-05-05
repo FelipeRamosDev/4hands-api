@@ -2,7 +2,7 @@ async function preSave(next) {
     try {
         const signedUp = await this.signUp();
 
-        if (signedUp instanceof Error.Log || !signedUp){
+        if (signedUp.error || !signedUp){
             throw signedUp;
         }
 
@@ -13,7 +13,7 @@ async function preSave(next) {
         this.auth = signedUp._id;
         next();
     } catch (err) {
-        throw new Error.Log(err);
+        throw logError(err);
     }
 }
 

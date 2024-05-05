@@ -93,7 +93,7 @@ class Collection extends SchemaDB {
              * Thrown if collection setup fails.
              * @throws {Error.Log}
              */
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -107,7 +107,7 @@ class Collection extends SchemaDB {
         try {
             return this.fieldsSet.find(item => item.fieldName === fieldName);
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 

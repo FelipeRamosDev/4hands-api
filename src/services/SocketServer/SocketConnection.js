@@ -29,7 +29,7 @@ class SocketConnection {
 
             this.init();
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -89,7 +89,7 @@ class SocketConnection {
             if (doc) {
                 process.on(`socket:update:${collectionName}:${JSON.stringify(filter)}`, () => {
                     subs.trigger().catch(err => {
-                        throw new Error.Log(err);
+                        throw logError(err);
                     });
                 });
 
@@ -97,7 +97,7 @@ class SocketConnection {
                 return subs;
             }
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -123,7 +123,7 @@ class SocketConnection {
             this.subscriptions.push(subscription);
             return comp;
         } catch (err) {
-            this.socket.emit('subscribe:component:error:' + subsUID, new Error.Log(err).response());
+            this.socket.emit('subscribe:component:error:' + subsUID, logError(err).response());
         }
     }
 
@@ -145,7 +145,7 @@ class SocketConnection {
             subscription.socket.data.subscribedComponents[subscription.subscriptionUID] = subscription.component;
             return subscription.component;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -162,7 +162,7 @@ class SocketConnection {
 
             return this.socket.data.subscribedComponents[subscriptionUID];
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -179,7 +179,7 @@ class SocketConnection {
 
             return this.subscriptions.find(item => item.subscriptionUID === subscriptionUID);
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -199,7 +199,7 @@ class SocketConnection {
             this.socket.emit('subscribe:component:data:' + subscriptionUID, stringHTML.toSuccess());
             return component;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 }

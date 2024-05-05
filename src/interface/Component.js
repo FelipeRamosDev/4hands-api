@@ -66,10 +66,10 @@ class Component extends ValidateSchema {
     
                 return this;
             } catch(err) {
-                throw new Error.Log(err);
+                throw logError(err);
             }
         } catch(err) {
-            const error = new Error.Log(err).append('common.required_params', err.validationErrors, this.componentName);
+            const error = logError(err);
 
             Object.keys(self).map(key => delete self[key]);
             Object.keys(error).map(key => self[key] = error[key]);
@@ -102,7 +102,7 @@ class Component extends ValidateSchema {
         try {
             this.subscriptions.push(subscription);
         } catch(err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -121,7 +121,7 @@ class Component extends ValidateSchema {
 
             return this;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -143,7 +143,7 @@ class Component extends ValidateSchema {
                 }
             });
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -160,14 +160,14 @@ class Component extends ValidateSchema {
             }
 
             const loaded = this.TEMPLATE_STRING;
-            if (loaded instanceof Error.Log) {
+            if (loaded.error) {
                 throw loaded;
             }
 
             this.outputModel = loaded;
             return loaded;
         } catch(err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -181,7 +181,7 @@ class Component extends ValidateSchema {
         if (typeof value === 'string' || typeof value === 'number') {
             return String(value || '');
         } else {
-            throw new Error.Log('common.bad_format_param', 'value', 'StringComponent', 'string', value, 'StringComponent.js');
+            throw logError('common.bad_format_param', 'value', 'StringComponent', 'string', value, 'StringComponent.js');
         }
     }
 
@@ -228,7 +228,7 @@ class Component extends ValidateSchema {
         try {
             return JSON.stringify(Object(value));
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -326,13 +326,13 @@ class Component extends ValidateSchema {
     renderToString(params) {
         try {
             const stringResult = this.toMarkdown(params);
-            if (stringResult instanceof Error.Log) {
+            if (stringResult.error) {
                 throw stringResult;
             }
 
             return stringResult;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -346,7 +346,7 @@ class Component extends ValidateSchema {
             const stringResult = this.renderToString(params);
             this.tools.printTemplate(stringResult);
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 }

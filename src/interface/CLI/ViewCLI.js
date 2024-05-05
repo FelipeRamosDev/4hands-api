@@ -28,7 +28,7 @@ class ViewCLI extends ToolsCLI {
         const { name, poolForm, navigator, Template } = setup || {};
 
         if (!cli) {
-            throw new Error.Log('common.missing_params', 'cli', 'ViewCLI', 'ViewCLI.js');
+            throw logError('common.missing_params', 'cli', 'ViewCLI', 'ViewCLI.js');
         }
 
         /**
@@ -79,7 +79,7 @@ class ViewCLI extends ToolsCLI {
         try {
             this.cli().loadView(viewPath, params);
         } catch(err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -112,7 +112,7 @@ class ViewCLI extends ToolsCLI {
                 this.navigator.render(tableHeaders);
             }
         } catch(err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 }
