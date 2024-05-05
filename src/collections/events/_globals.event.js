@@ -25,14 +25,14 @@ async function preSave(next) {
                 this.index = count;
                 this.cod = symbol + count;
             } else {
-                throw new Error.Log('database.counter_not_found', collection);
+                throw logError('database.counter_not_found', collection);
             }
 
             await dbHelpers.createEncryptFields(this);
             next();
         }
     } catch(err) {
-        throw new Error.Log(err).append('database.events.pre_save');
+        throw logError(err);
     }
 }
 
@@ -64,7 +64,7 @@ async function preUpdateOne(next) {
         dbHelpers.updateEncryptFields(this);
         next();
     } catch(err) {
-        throw new Error.Log(err).append('database.events.post_save');
+        throw logError(err);
     }
 }
 
@@ -92,7 +92,7 @@ async function postUpdateOne() {
         process.emit(`update:${collection}`, this);
         process.emit(`socket:update:${collection}:${JSON.stringify(this.getFilter())}`, this);
     } catch (err) {
-        throw new Error.Log(err);
+        throw logError(err);
     }
 }
 
@@ -114,7 +114,7 @@ async function postSave() {
 
         return;
     } catch(err) {
-        throw new Error.Log(err).append('database.events.post_save');
+        throw logError(err);
     }
 }
 
@@ -136,7 +136,7 @@ async function preDelete(next) {
 
         next();
     } catch(err) {
-        throw new Error.Log('database.events.pre_delete');
+        throw logError('database.events.pre_delete');
     }
 }
 
@@ -151,7 +151,7 @@ async function postDelete() {
     try {
         return;
     } catch(err) {
-        throw new Error.Log('database.events.post_delete');
+        throw logError('database.events.post_delete');
     }
 }
 

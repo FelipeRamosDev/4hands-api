@@ -30,7 +30,7 @@ async function isAuthenticated(token) {
 
         return true;
     } catch (err) {
-        throw new Error.Log(err);
+        throw logError(err);
     }
 }
 
@@ -60,7 +60,7 @@ async function createUserCLISession(user) {
         }
 
         const sessionCreated = await FS.writeJSON(sessionPath, session);
-        if (sessionCreated instanceof Error.Log) {
+        if (sessionCreated.error) {
             throw sessionCreated;
         }
 
@@ -70,7 +70,7 @@ async function createUserCLISession(user) {
             throw sessionCreated;
         }
     } catch (err) {
-        throw new Error.Log(err);
+        throw logError(err);
     }
 }
 
@@ -84,7 +84,7 @@ function getSessionCurrentUser() {
     try {
         return sessionCLI && sessionCLI.currentUser;
     } catch (err) {
-        throw new Error.Log(err);
+        throw logError(err);
     }
 }
 

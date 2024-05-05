@@ -78,7 +78,7 @@ class QuestionModel {
                 }, timeout || 2000);
             });
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -150,7 +150,7 @@ class QuestionModel {
                 
                 this.answer = answer;
                 const answerRes = await this.events.triggerEvent('answer', this, answer);
-                if (answerRes instanceof Error.Log) {
+                if (answerRes.error) {
                     answerRes.consolePrint();
                     return answerRes;
                 }

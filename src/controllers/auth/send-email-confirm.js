@@ -20,7 +20,7 @@ module.exports = new Endpoint({
             const user = await User.getUser({ email: req.body?.userEmail });
             const emailSent = await user.sendConfirmationEmail();
 
-            if (!emailSent.success || emailSent instanceof Error.Log) {
+            if (!emailSent.success || emailSent.error) {
                 throw emailSent
             }
 
@@ -48,7 +48,7 @@ module.exports = new Endpoint({
                 });
             });
         } catch(err) {
-            return res.status(500).send(new Error.Log(err).response());
+            return res.status(500).send(logError(err).response());
         }
     }
 });

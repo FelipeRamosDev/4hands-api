@@ -11,7 +11,7 @@ function isCollectionExist(collection) {
     try {
         return mongoose.modelNames().find(model => model === collection);
     } catch(err) {
-        throw new Error.Log('helpers.is_collection_exist', collection);
+        throw logError('helpers.is_collection_exist', collection);
     }
 }
 
@@ -40,10 +40,10 @@ function getCollectionModel(collection) {
         if (isCollectionExist(collection)) {
             return mongoose.model(collection);
         } else {
-            throw new Error.Log('database.collection_dont_exist', collection);
+            throw logError('database.collection_dont_exist', collection);
         }
     } catch(err) {
-        throw new Error.Log(err).append('helpers.get_collection_model', collection);
+        throw logError(err);
     }
 }
 
@@ -66,7 +66,7 @@ async function createCounter(collection){
             await newCounter.save();
         }
     } catch(err) {
-        throw new Error.Log(err).append('helpers.create_counter', collection.name);
+        throw logError(err);
     }
 }
 
@@ -83,7 +83,7 @@ async function increaseCounter(collection) {
 
         return counter.toObject();
     } catch(err) {
-        throw new Error.Log(err).append('helpers.increase_counter', collection);
+        throw logError(err);
     }
 }
 
@@ -100,7 +100,7 @@ async function increaseLog(logUID) {
 
         return logCounter.toObject();
     } catch(err) {
-        throw new Error.Log(err).append('helpers.increase_log');
+        throw logError(err);
     }
 }
 
@@ -119,7 +119,7 @@ async function increaseDocProp(collectionName, filter, data) {
 
         return doc.initialize();
     } catch(err) {
-        throw new Error.Log(err).append('helpers.increase_doc_prop', collectionName, filter, data);
+        throw logError(err);
     }
 }
 
@@ -163,7 +163,7 @@ function treatFilter(filter) {
         } else if (Boolean.isValid(filter).object().eval()) {
             query = filter;
         } else {
-            throw new Error.Log('common.bad_format_param',
+            throw logError('common.bad_format_param',
                 'filter',
                 'treatFilter',
                 ['String(ObjectId._id)', 'Object'],
@@ -172,7 +172,7 @@ function treatFilter(filter) {
             );
         }
     } catch(err) {
-        throw new Error.Log(err).append('helpers.treat_filter');
+        throw logError(err);
     }
 
     return query;
@@ -224,10 +224,10 @@ function findRelFields(schema, exclude, levels, currentLevel) {
     
             return result;
         } else {
-            return new Error.Log('common.missing_params', 'schema', 'findRelFields', 'dbHelpers.js');
+            return logError('common.missing_params', 'schema', 'findRelFields', 'dbHelpers.js');
         }
     } catch(err) {
-        throw new Error.Log(err).append('helpers.find_rel_fields');
+        throw logError(err);
     }
 }
 
@@ -262,7 +262,7 @@ async function createEncryptFields(context) {
  */
 async function updateEncryptFields(context) {
     try {
-        const { CRUD } = require('4hands-api');
+        const CRUD = require('4hands-api/src/services/database/crud');;
         const schemaObj = Object(context?.schema?.obj);
         const encryptFields = [];
 
@@ -288,12 +288,12 @@ async function updateEncryptFields(context) {
                 const updated = await safeValue.setEncrypted(rawValue);
 
                 if (!updated.success) {
-                    throw new Error.Log({ name: 'UPDATING_ENCRYPTED_FIELD', message: `Error caught when updating a encrypted field!` }).append(err);
+                    throw logError({ name: 'UPDATING_ENCRYPTED_FIELD', message: `Error caught when updating a encrypted field!` });
                 }
             }
         }
     } catch (err) {
-        throw new Error.Log(err);
+        throw logError(err);
     }
 }
 

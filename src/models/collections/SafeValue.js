@@ -37,7 +37,7 @@ class SafeValue extends _Global {
                 this.derivatedKey = derivatedKey;
             }
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 

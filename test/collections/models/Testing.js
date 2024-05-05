@@ -6,7 +6,7 @@ class Testing {
             this.testName = testName;
             this.isTested = isTested;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 }

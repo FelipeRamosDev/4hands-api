@@ -24,20 +24,20 @@ module.exports = new Endpoint({
         
             const tokenData = authService.validateToken(resettoken);
             if (!tokenData) {
-                return res.status(401).send(new Error.Log('common.bad_params', 'resettoken'));
+                return res.status(401).send(logError('common.bad_params', 'resettoken'));
             }
 
             if (useremail !== tokenData.userEmail) {
-                return res.status(401).send(new Error.Log('common.bad_params', 'useremail'));
+                return res.status(401).send(logError('common.bad_params', 'useremail'));
             }
 
             sessionStore.get(tokenData.sessionID, (err, data) => {
                 if (err) {
-                    throw new Error.Log(err);
+                    throw logError(err);
                 }
 
                 if (useremail !== data.userEmail) {
-                    return res.status(401).send(new Error.Log('common.bad_params', 'session.userEmail'));
+                    return res.status(401).send(logError('common.bad_params', 'session.userEmail'));
                 }
 
                 session.userSession = data;

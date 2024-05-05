@@ -38,7 +38,7 @@ class EventStd {
 
             this.add(target);
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -58,7 +58,7 @@ class EventStd {
 
             return process.emit(this.name, target);
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
     
@@ -96,13 +96,13 @@ class EventStd {
 
                     self.handler.call(context, ...args);
                 } catch (err) {
-                    throw new Error.Log(err);
+                    throw logError(err);
                 }
             });
 
             return this.listener;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -130,7 +130,7 @@ class EventStd {
             
             return doc;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 }

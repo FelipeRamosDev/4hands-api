@@ -50,7 +50,7 @@ module.exports = new Endpoint({
     
             return res.status(200).json(response);
         } catch(err) {
-            const error = new Error.Log(err).append('database.updating_document', body.filter);
+            const error = logError(err);
             return res.status(500).json(error.response());
         }
     }

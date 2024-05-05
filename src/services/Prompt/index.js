@@ -46,12 +46,12 @@ class Prompt {
                     };
                 }
 
-                return new Error.Log(cmd);
+                return logError(cmd);
             } else {
                 return '>> No command provided!';
             }
         } catch(err) {
-            return new Error.Log(err);
+            return logError(err);
         }
     }
 
@@ -68,7 +68,7 @@ class Prompt {
                 const child = exec(cmd, { cwd: this.rootPath }, (err, stdout, stderr) => {
                     if (err) {
                         console.error(stderr);
-                        return reject(new Error.Log(err));
+                        return reject(logError(err));
                     }
     
                     child.kill();
@@ -80,7 +80,7 @@ class Prompt {
                     });
                 });
             } catch(err) {
-                return reject(new Error.Log(err));
+                return reject(logError(err));
             }
         });
     }
@@ -147,7 +147,7 @@ class Prompt {
     
             return stringParams;
         } catch(err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 }

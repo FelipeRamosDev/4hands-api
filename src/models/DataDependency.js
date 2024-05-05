@@ -28,7 +28,7 @@ class DataDependency {
              */
             this._parent = () => parent;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -65,7 +65,7 @@ class DataDependency {
             const htmlString = this.parent.renderToString();
             socketConnection.socket.emit('subscribe:component:data:' + subsUID, htmlString.toSuccess());
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -79,7 +79,7 @@ class DataDependency {
             if (this.type === 'doc') {
                 const docQuery = await CRUD.getDoc({ collectionName: this.collectionName, filter: this.filter }).defaultPopulate();
 
-                if (docQuery instanceof Error.Log) {
+                if (docQuery.error) {
                     return docQuery;
                 }
 
@@ -90,7 +90,7 @@ class DataDependency {
             if (this.type === 'list') {
                 const queryList = await CRUD.query({ collectionName: this.collectionName, filter: this.filter }).defaultPopulate();
 
-                if (queryList instanceof Error.Log || !Array.isArray(queryList)) {
+                if (queryList.error || !Array.isArray(queryList)) {
                     return queryList;
                 }
 
@@ -98,7 +98,7 @@ class DataDependency {
                 return this.value;
             }
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 }

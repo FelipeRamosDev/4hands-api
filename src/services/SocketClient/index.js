@@ -31,7 +31,7 @@ class SocketClient {
             // Set up 'disconnect' event listener
             this.io.on('disconnect', () => console.log('Socket connetion with "url" was lost!'));
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -43,11 +43,11 @@ class SocketClient {
      */
     addListener(eventName, callback) {
         if (typeof eventName !== 'string' || eventName?.length < 3) {
-            throw new Error.Log('common.bad_format_param', 'eventName', 'a string with a minimum of 3 characters');
+            throw logError('common.bad_format_param', 'eventName', 'a string with a minimum of 3 characters');
         }
 
         if (typeof callback !== 'function') {
-            throw new Error.Log('common.bad_format_param', 'callback', 'a function');
+            throw logError('common.bad_format_param', 'callback', 'a function');
         }
         
         return this.io.on(eventName, callback);
@@ -61,7 +61,7 @@ class SocketClient {
      */
     triggerEvent(eventName, data) {
         if (typeof eventName !== 'string' || eventName?.length < 3) {
-            throw new Error.Log('common.bad_format_param', 'eventName', 'a string with a minimum of 3 characters');
+            throw logError('common.bad_format_param', 'eventName', 'a string with a minimum of 3 characters');
         }
 
         return this.io.emit(eventName, data);

@@ -16,7 +16,7 @@ module.exports = new Endpoint({
                 return res.status(200).send({ success: true });
             });
         } catch(err) {
-            return res.status(500).send(new Error.Log(err).response());
+            return res.status(500).send(logError(err).response());
         }
     }
 });

@@ -28,11 +28,11 @@ module.exports = new Endpoint({
             if (!doc.errors) {
                 return res.status(200).json(new Response(doc));
             } else {
-                const error = new Error.Log(doc).append('apiResponse.collection.create_doc_errors', body.collectionName);
+                const error = logError(doc);
                 return res.status(500).json(error.response());
             }
         } catch(err) {
-            const error = new Error.Log(err).append('apiResponse.collection.create', req.body.collectionName);
+            const error = logError(err);
             return res.status(500).json(error.response());
         }
     }

@@ -5,14 +5,14 @@ async function preSave(next) {
         const auth = new AuthService();
         const hash = await auth.createHash(this.password);
 
-        if (hash instanceof Error.Log || !hash) {
+        if (hash.error || !hash) {
             throw hash;
         }
 
         this.password = hash;
         next();
     } catch (err) {
-        throw new Error.Log(err);
+        throw logError(err);
     }
 }
 
@@ -22,7 +22,7 @@ async function preUpdate(next) {
             const auth = new AuthService();
             const hash = await auth.createHash(this._update.password);
     
-            if (hash instanceof Error.Log || !hash) {
+            if (!hash || hash.error) {
                 throw hash;
             }
     
@@ -31,7 +31,7 @@ async function preUpdate(next) {
 
         next();
     } catch (err) {
-        throw new Error.Log(err);
+        throw logError(err);
     }
 }
 

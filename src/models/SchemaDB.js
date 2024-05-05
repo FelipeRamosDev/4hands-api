@@ -71,7 +71,7 @@ class SchemaDB {
                 console.log(`[${date.toLocaleDateString()} ${date.toLocaleTimeString()}] Collection "${this.name}" was successful initialized!`)
             }
         } catch(err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 
@@ -91,7 +91,7 @@ class SchemaDB {
             if (!isDup && !isDupSymbol) {
                 this.DB = mongoose.model(this.name, this.schema);
             } else {
-                const error = new Error.Log('database.duplicated_schema', this.name, this.symbol);
+                const error = logError('database.duplicated_schema', this.name, this.symbol);
                 if (isDup) error.append('database.duplicated_schema_name', this.name);
                 if (isDupSymbol) error.append('database.duplicated_schema_symbol', this.symbol);
                 throw error;
@@ -99,7 +99,7 @@ class SchemaDB {
 
             return this;
         } catch(err) {
-            throw new Error.Log(err).append('database.schema_init');
+            throw logError(err);
         } 
     }
 
@@ -126,7 +126,7 @@ class SchemaDB {
 
             this.schema.query = this.queries;
         } catch(err) {
-            throw new Error.Log(err).append('database.init_queries');
+            throw logError(err);
         }
     }
 
@@ -159,7 +159,7 @@ class SchemaDB {
             // Adding custom events for the schema
             this.addEventsToSchema(this.events);
         } catch(err) {
-            throw new Error.Log(err).append('database.init_events');
+            throw logError(err);
         }
     }
 
@@ -204,7 +204,7 @@ class SchemaDB {
                 process.on('redis:postdelete:' + this.name, postDelete);
             }
         } catch(err) {
-            throw new Error.Log(err).append('database.init_events');
+            throw logError(err);
         }
     }
 
@@ -229,7 +229,7 @@ class SchemaDB {
 
             this.schema.set('toObject', {virtuals: true});
         } catch(err) {
-            throw new Error.Log(err).append('database.init_classes');
+            throw logError(err);
         }
     }
 

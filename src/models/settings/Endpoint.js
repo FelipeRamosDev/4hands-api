@@ -25,14 +25,14 @@ class Endpoint {
 
         // Validation checks for required parameters
         if (!routePath) {
-            throw new Error.Log({
+            throw logError({
                 name: 'ROUTE_REQUIRED',
                 message: 'The "routePath" param is required to declare a new endpoint!'
             });
         }
 
         if (typeof controller !== 'function') {
-            throw new Error.Log({
+            throw logError({
                 name: 'CONTROLLER_REQUIRED',
                 message: 'The "controller" param is required to be a function when declaring a new endpoint!'
             });

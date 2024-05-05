@@ -13,7 +13,7 @@ module.exports = new Endpoint({
     controller: async (req, res) => {
         const isLogFileExist = FS.isExist(CONSOLE_OUTPUT_FILE);
         if (!isLogFileExist) {
-            res.status(404).send(new Error.Log({
+            res.status(404).send(logError({
                 name: 'LOGS_FILE_NOT_FOUND',
                 message: `The logs fole wasn't found on the server.`
             }));

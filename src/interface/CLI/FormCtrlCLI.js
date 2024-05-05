@@ -57,7 +57,7 @@ class FormCtrlCLI {
                 }
             });
         } else {
-            throw new Error.Log('common.missing_param', 'this.schema', 'FormCtrl.buildFormData');
+            throw logError('common.missing_param', 'this.schema', 'FormCtrl.buildFormData');
         }
 
         this.formData = result;
@@ -72,7 +72,7 @@ class FormCtrlCLI {
         if (schema) {
             this.schema = schema;
         } else {
-            throw new Error.Log('common.missing_param', 'schama', 'FormCtrlCLI.setSchema');
+            throw logError('common.missing_param', 'schama', 'FormCtrlCLI.setSchema');
         }
     }
 

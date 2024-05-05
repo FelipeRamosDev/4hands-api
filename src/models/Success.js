@@ -43,7 +43,7 @@ class Success {
              * Thrown if JSON stringification fails.
              * @throws {Error.Log}
              */
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 }

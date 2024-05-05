@@ -33,7 +33,7 @@ class Logstamp {
              */
             this.activityDescription = activityDescription;
         } catch (err) {
-            throw new Error.Log(err);
+            throw logError(err);
         }
     }
 }
