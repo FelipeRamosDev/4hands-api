@@ -26,7 +26,7 @@ module.exports = new Endpoint({
                         status = 401;
                     }
         
-                    return res.status(status).send(user.response());
+                    return res.status(status).send(user);
                 }
         
                 
@@ -37,7 +37,7 @@ module.exports = new Endpoint({
                 req.session.isEmailConfirmed = user.isEmailConfirmed;
                 return next();
             } catch(err) {
-                return res.status(500).send(logError(err).response());
+                return res.status(500).send(logError(err));
             }
         }
     ],

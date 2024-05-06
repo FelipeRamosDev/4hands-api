@@ -53,7 +53,7 @@ module.exports = new Endpoint({
                 res.status(400).send(new Error.Log({
                     name: 'PASSWORD_NOT_MATCH',
                     message: 'The password confirmation need to be the same value of password!'
-                }).response());
+                }));
             } else {
                 next();
             }
@@ -65,7 +65,7 @@ module.exports = new Endpoint({
             const newUser = await User.create(body);
     
             if (newUser instanceof Error.Log) {
-                return res.status(500).send(newUser.response());
+                return res.status(500).send(newUser);
             }
 
             req.session.user = newUser;
@@ -73,7 +73,7 @@ module.exports = new Endpoint({
     
             return res.status(200).send({...newUser, sessionID: req.session.id});
         } catch(err) {
-            return res.status(500).send(new Error.Log(err).response());
+            return res.status(500).send(new Error.Log(err));
         }
     }
 });

@@ -59,7 +59,7 @@ module.exports = new Endpoint({
             return res.status(200).json(response);
         } catch(err) {
             const error = logError(err);
-            res.status(500).json(error.response());
+            res.status(500).send(error);
         }
     }
 });

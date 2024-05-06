@@ -61,7 +61,7 @@ class ComponentSubscription extends SocketSubscription {
             }
 
             const err = logError(error);
-            this.socket.emit('subscribe:component:error:' + this.subscriptionUID, err.response());
+            this.socket.emit('subscribe:component:error:' + this.subscriptionUID, err);
         } catch (err) {
             throw logError(err);
         }

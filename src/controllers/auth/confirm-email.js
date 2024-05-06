@@ -33,7 +33,7 @@ module.exports = new Endpoint({
             req.sessionStore.destroy(req.sessionID);
             res.status(200).send({ success: true });
         } catch(err) {
-            return res.status(500).send(logError(err).response());
+            return res.status(500).send(logError(err));
         }
     }
 });

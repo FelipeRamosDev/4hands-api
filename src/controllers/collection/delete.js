@@ -30,11 +30,11 @@ module.exports = new Endpoint({
                 return res.status(200).json(new Response(deleted));
             } else {
                 const error = logError('apiResponse.collection.delete');
-                return res.status(500).json(error.response());
+                return res.status(500).send(error);
             }
         } catch(err) {
             const error = logError(err);
-            return res.status(500).json(error.response());
+            return res.status(500).send(error);
         }
     }
 });
