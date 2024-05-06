@@ -48,7 +48,7 @@ module.exports = new Endpoint({
                 });
             });
         } catch(err) {
-            return res.status(500).send(logError(err).response());
+            return res.status(500).send(logError(err));
         }
     }
 });

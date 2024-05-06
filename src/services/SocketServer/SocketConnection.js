@@ -123,7 +123,7 @@ class SocketConnection {
             this.subscriptions.push(subscription);
             return comp;
         } catch (err) {
-            this.socket.emit('subscribe:component:error:' + subsUID, logError(err).response());
+            this.socket.emit('subscribe:component:error:' + subsUID, logError(err));
         }
     }
 

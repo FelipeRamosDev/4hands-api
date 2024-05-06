@@ -79,7 +79,7 @@ module.exports = new Endpoint({
             return res.status(200).json(response);
         } catch(err) {
             const error = new Error.Log(err).append('database.updating_document', body.filter);
-            return res.status(500).json(error.response());
+            return res.status(500).send(error);
         }
     }
 });

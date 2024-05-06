@@ -1,4 +1,4 @@
-# 4Hands API (v0.4.9 BETA)
+# 4Hands API (v0.4.10 BETA)
 This is a API framework to create a backend for your applications.
 
 ### New Features
@@ -263,7 +263,7 @@ module.exports = new Endpoint({
             return res.status(201).send(response);
         } catch(err) {
             const error = logError(err);
-            return res.status(500).json(error.response());
+            return res.status(500).send(error);
         }
     }
 });
