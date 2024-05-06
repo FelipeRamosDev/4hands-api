@@ -55,7 +55,7 @@ module.exports = new Endpoint({
                         status = 401;
                     }
         
-                    return res.status(status).send(user.response());
+                    return res.status(status).send(user);
                 }
         
                 
@@ -65,7 +65,7 @@ module.exports = new Endpoint({
                 req.session.isAuthorized = true;
                 return next();
             } catch(err) {
-                return res.status(500).send(new Error.Log(err).response());
+                return res.status(500).send(new Error.Log(err));
             }
         }
     ],
