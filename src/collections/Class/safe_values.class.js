@@ -58,7 +58,7 @@ class SafeValueClass {
 
         const authService = new AuthService();
         const salt = authService.generateRandom();
-        const derivatedKey = authService.generateKey(process.env.API_SECRET, salt);
+        const derivatedKey = authService.generateKey(process.env.API_SECRET || global?.API?.API_SECRET, salt);
         const { iv, encryptedToken } = authService.encryptToken(this.raw.rawValue, derivatedKey);
 
         return {

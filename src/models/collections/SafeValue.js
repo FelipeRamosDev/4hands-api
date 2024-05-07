@@ -51,6 +51,10 @@ class SafeValue extends _Global {
         return this.encrypted.toString();
     }
 
+    get readSync() {
+        return this.read();
+    }
+
     /**
      * Creates a new encrypted SafeValue instance with the given raw value.
      *
@@ -66,27 +70,6 @@ class SafeValue extends _Global {
             type: 'encrypt',
             rawValue
         });
-    }
-
-    /**
-     * Updates the encrypted data with a new encrypted value.
-     *
-     * @param {string} newValue - The new encrypted value to be set.
-     * @returns {Promise<Object>} A Promise that resolves to the updated SafeValue object.
-     * @async
-     */
-    async setEncrypted(newValue) {
-        const CRUD = require('4hands-api/src/services/database/crud');
-
-        if (this.isEmpty) {
-            return await SafeValue.createEncrypt(newValue);
-        } else {
-            return await CRUD.update({
-                collectionName: 'safe_values',
-                filter: this._id,
-                data: { rawValue: newValue }
-            });
-        }
     }
 
      /**
