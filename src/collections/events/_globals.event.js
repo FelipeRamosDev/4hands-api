@@ -61,7 +61,6 @@ async function preUpdateOne(next) {
             relationalHelper.onUpdate.call(this);
         }
 
-        dbHelpers.updateEncryptFields(this);
         next();
     } catch(err) {
         throw logError(err);
