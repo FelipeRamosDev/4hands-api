@@ -291,7 +291,7 @@ class RedisService {
      * @throws {Error} Will throw an error if retrieval fails.
      */
     async getDoc(setup) {
-        const { collection, uid } = Object(setup);
+        const { prefixName, collection, uid } = Object(setup);
 
         try {
             await new Promise((resolve, reject) => {
@@ -299,7 +299,7 @@ class RedisService {
                 RedisEventEmitters.preRead.call(setup, resolve, reject);
             });
 
-            const doc = await this.client.hGetAll(buildKey(collection, uid));
+            const doc = await this.client.hGetAll(buildKey(collection || prefixName, uid));
 
             if (!Object.keys(doc).length) {
                 return;
