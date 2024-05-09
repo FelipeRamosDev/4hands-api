@@ -53,9 +53,9 @@ class ErrorLog {
     stackTemplate() {
         const date = new Date();
         const msg = this.message || this.msg;
-        let out = '\n';
+        let out = `\n[${date.toLocaleDateString()} - ${date.toLocaleTimeString()}]\n`;
 
-        if (this.name) out += `[${date.toLocaleDateString()} - ${date.toLocaleTimeString()}] ${this.name}: ${msg ? msg : ''}\n\n`;
+        if (this.name || msg) out += `${this.name || 'Error'}: ${msg ? msg : ''}\n`;
         if (this.stack) out += 'Stack: ' + this.stackArray.join('\n    ');
         out += '\n--------------------------------------------------------------------------------------------------------------------------------\n\n';
 
@@ -94,11 +94,16 @@ class ErrorLog {
     }
 
     append() {}
+
     static logError(err) {
         const error = new ErrorLog(err);
         
         error.writeLog();
         return error;
+    }
+
+    static toError(err) {
+        return new ErrorLog(err);
     }
 }
 
