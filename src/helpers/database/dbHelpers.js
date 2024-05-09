@@ -22,11 +22,12 @@ function isCollectionExist(collection) {
  * @returns {Promise<boolean>} - A promise that resolves to true if the document exists, false otherwise.
  * @throws {Error} - Throws an error if there is an issue accessing the database.
  */
-function isDocExist(collectionName, filter) {
-    return new Promise(async (resolve, reject) => {
-        resolve(await mongoose.model(collectionName).exists(filter));
-    });
-
+async function isDocExist(collectionName, filter) {
+    try {
+        return await mongoose.model(collectionName).exists(filter);
+    } catch (err) {
+        return;   
+    }
 }
 
 /**
