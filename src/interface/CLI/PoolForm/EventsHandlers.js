@@ -175,15 +175,14 @@ class EventsHandlers {
                     name: 'AnswerRequired',
                     message: `The answer for this question is required!`
                 });
-    
-                error.consolePrint();
+
                 return ev.trigger();
             }
 
             if (ev.parentPool && ev.parentPool.autoSaveAnswers) {
                 ev.setValue(ev.id, ev.answer);
             }
-    
+
             await this.triggerEvent('onAnswer', ev, this.tools, ev.answer);
         } catch (err) {
             this.triggerEvent('error', this, err);

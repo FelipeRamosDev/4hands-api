@@ -151,8 +151,7 @@ class QuestionModel {
                 this.answer = answer;
                 const answerRes = await this.events.triggerEvent('answer', this, answer);
                 if (answerRes.error) {
-                    answerRes.consolePrint();
-                    return answerRes;
+                    return logError(answerRes);
                 }
             }
 
