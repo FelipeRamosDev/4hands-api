@@ -22,11 +22,12 @@ function isCollectionExist(collection) {
  * @returns {Promise<boolean>} - A promise that resolves to true if the document exists, false otherwise.
  * @throws {Error} - Throws an error if there is an issue accessing the database.
  */
-function isDocExist(collectionName, filter) {
-    return new Promise(async (resolve, reject) => {
-        resolve(await mongoose.model(collectionName).exists(filter));
-    });
-
+async function isDocExist(collectionName, filter) {
+    try {
+        return await mongoose.model(collectionName).exists(filter);
+    } catch (err) {
+        return;   
+    }
 }
 
 /**
@@ -253,50 +254,6 @@ async function createEncryptFields(context) {
     return context;
 }
 
-/**
- * Updates encrypted fields in the given context object with new encrypted values of Mongoose Event.
- *
- * @param {Object} context - The context object containing data, schema, and _update property coming for the Mongoose Event.
- * @throws {Error} If there's an error during encryption update, it is caught and logged.
- * @async
- */
-async function updateEncryptFields(context) {
-    try {
-        const CRUD = require('4hands-api/src/services/database/crud');;
-        const schemaObj = Object(context?.schema?.obj);
-        const encryptFields = [];
-
-        Object.keys(schemaObj).map(key => {
-            const rawValue = context._update['_' + key];
-
-            if (rawValue) {
-                encryptFields.push(key);
-            }
-        })
-
-        for (let key of encryptFields) {
-            const currentValue = context._update[key];
-            const rawValue = context._update['_' + key];
-
-            if (currentValue) {
-                const safeValueDoc = await CRUD.getDoc({
-                    collectionName: 'safe_values',
-                    filter: currentValue
-                });
-
-                const safeValue = safeValueDoc.initialize();
-                const updated = await safeValue.setEncrypted(rawValue);
-
-                if (!updated.success) {
-                    throw logError({ name: 'UPDATING_ENCRYPTED_FIELD', message: `Error caught when updating a encrypted field!` });
-                }
-            }
-        }
-    } catch (err) {
-        throw logError(err);
-    }
-}
-
 module.exports = {
     createCounter,
     increaseCounter,
@@ -308,6 +265,5 @@ module.exports = {
     pickQueryType,
     treatFilter,
     findRelFields,
-    createEncryptFields,
-    updateEncryptFields
+    createEncryptFields
 };

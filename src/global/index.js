@@ -28,9 +28,15 @@ global.toolsCLI = toolsCLI;
 
 /**
  * @global
- * @name Error.Log - To log errors and any other log.
+ * @name logError - To log errors to the errors.log file.
  */
 global.logError = ErrorLog.logError;
+
+/**
+ * @global
+ * @name toError - Build and return a ErroLog object.
+ */
+global.toError = ErrorLog.toError;
 
 // Utils
 Boolean.isValid = validation.base.build;

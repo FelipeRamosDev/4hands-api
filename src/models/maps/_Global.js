@@ -133,7 +133,13 @@ class GlobalMap {
         try {
             if (!collection) throw logError('database.missing_params', 'collectionName', '_Global.updateDB');
 
-            const loaded = await crud.update({collectionName: collection, filter: filter || this.UID || this._id, data: data || {...this}, options: {returnDocs: true} });
+            const filterParse = filter || this.UID || this._id;
+            const loaded = await crud.update({
+                collectionName: collection,
+                filter: filterParse,
+                data: data || { ...this },
+                options: { returnDocs: true }
+            });
             if (loaded.error) {
                 throw logError(loaded);
             }
@@ -211,33 +217,21 @@ class GlobalMap {
      */
     async setEncryptField(fieldName, value) {
         const SafeValue = require('4hands-api/src/models/collections/SafeValue');
-        const currValue = this[fieldName];
 
         if (!value) {
             throw logError({ name: `It's required to have a value to proceed on setting a safe value!`});
         }
 
-        if (!currValue || currValue.isEmpty) {
-            const newSafeValue = await SafeValue.createEncrypt(value);
+        const newSafeValue = await SafeValue.createEncrypt(value);
+        const updated = await this.updateDB({
+            data: { [fieldName]: newSafeValue.id }
+        });
 
-            const updated = await this.updateDB({
-                data: { [fieldName]: newSafeValue.id }
-            });
-
-            if (!updated || updated.error) {
-                throw logError(updated);
-            } else {
-                return { success: true, message: 'New safe value created!', data: newSafeValue };
-            }
-        } else {
-            const updated = await currValue.setEncrypted(value);
-
-            if (!updated || updated.error) {
-                throw logError(updated);
-            } else {
-                return { success: true, message: 'SafeValue updated!', data: updated };
-            }
+        if (!updated || updated.error) {
+            throw logError(updated);
         }
+
+        return { success: true, message: 'New safe value created!', data: newSafeValue };
     }
 
     async createCache(data) {
