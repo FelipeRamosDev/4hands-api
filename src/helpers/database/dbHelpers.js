@@ -89,23 +89,6 @@ async function increaseCounter(collection) {
 }
 
 /**
- * Increases the 'groupedLogs' property of a specific log document and returns the updated log object.
- * @param {string} logUID - The unique identifier of the log document to increase the property for.
- * @returns {Object} - The updated log object.
- * @throws {Error} - Throws an error if there is an issue increasing the log property.
- */
-async function increaseLog(logUID) {   
-    try {
-        const Logs = mongoose.model(configs.database.logCollection);
-        const logCounter = await Logs.findByIdAndUpdate(logUID, { $inc: { groupedLogs: 1 }});
-
-        return logCounter.toObject();
-    } catch(err) {
-        throw logError(err);
-    }
-}
-
-/**
  * Increases specified properties of a document based on the provided filter and data object.
  * @param {string} collectionName - The name of the collection to update the document in.
  * @param {Object} filter - The filter object to match the document.
@@ -257,7 +240,6 @@ async function createEncryptFields(context) {
 module.exports = {
     createCounter,
     increaseCounter,
-    increaseLog,
     increaseDocProp,
     isCollectionExist,
     isDocExist,
