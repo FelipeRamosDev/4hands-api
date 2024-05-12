@@ -13,7 +13,8 @@ const helpers = helpersModule.database.dbHelpers;
  * @throws {Error.Log} If an error occurs during document creation.
  */
 async function create(collectionName, data, options) {
-    const { isDraft } = options || {};
+    const { isDraft } = Object(options);
+
     try {
         const Collection = helpers.getCollectionModel(collectionName);
         const newDoc = new Collection(data);
