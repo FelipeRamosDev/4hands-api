@@ -316,7 +316,7 @@ class User extends _Global {
     static async isExist(email, returnUID) {
         try {
             const result = await dbHelpers.isDocExist('users', { email });
-            if (result.error) {
+            if (result?.error) {
                 throw result;
             }
 
