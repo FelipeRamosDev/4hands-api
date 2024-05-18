@@ -44,6 +44,11 @@ module.exports = new Collection({
             fieldName: 'isEmailConfirmed',
             type: Boolean,
             default: false
+        },
+        {
+            fieldName: 'rules',
+            type: [String],
+            default: ['user']
         }
     ]
 });

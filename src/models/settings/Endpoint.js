@@ -12,6 +12,7 @@ class Endpoint {
      * @param {Object} setup - The setup object containing endpoint details and configurations.
      * @param {string} setup.method - The HTTP method for the endpoint (default: 'GET').
      * @param {string} setup.routePath - The path of the endpoint's route.
+     * @param {string[]} setup.rules - The allowed user rules for the endpoint.
      * @param {function} setup.controller - The controller function handling the endpoint logic.
      * @param {Object} setup.bodySchema - The schema object for validating the request body.
      * @param {boolean} setup.isAuthRoute - Indicates if the endpoint requires authentication.
@@ -21,7 +22,7 @@ class Endpoint {
      * @throws {Error.Log} If setup parameters are invalid.
      */
     constructor(setup) {
-        const { method, routePath, controller, bodySchema, isAuthRoute, authRule, middlewares, noValidateBody } = Object(setup);
+        const { method, routePath, rules, controller, bodySchema, isAuthRoute, authRule, middlewares, noValidateBody } = Object(setup);
 
         // Validation checks for required parameters
         if (!routePath) {
@@ -29,6 +30,11 @@ class Endpoint {
                 name: 'ROUTE_REQUIRED',
                 message: 'The "routePath" param is required to declare a new endpoint!'
             });
+        }
+
+        // Validation checks for required parameters
+        if (rules && !Array.isArray(rules)) {
+            throw logError('common.bad_params');
         }
 
         if (typeof controller !== 'function') {
@@ -51,6 +57,12 @@ class Endpoint {
         this.routePath = routePath;
 
         /**
+         * The allowed user rules for the endpoint.
+         * @type {string[]}
+         */
+        this.rules = rules;
+
+        /**
          * The controller function handling the endpoint logic.
          * @type {function}
          */
@@ -66,6 +78,11 @@ class Endpoint {
         if (isAuthRoute) {
             this.authRule = authRule;
             this.middlewares.push(authVerify);
+
+            // Validation the user rules
+            if (this.rules && this.rules.length) {
+                this.middlewares.push(this.validateRule.bind(this));
+            }
         }
 
         // Adding body validation middleware if body schema provided and validation is not skipped
@@ -92,6 +109,23 @@ class Endpoint {
      */
     updateBodySchema(data) {
         this.bodySchema = {...this.bodySchema, ...data};
+    }
+
+    async validateRule(req, res, next) {
+        const userRules = req.session.user?.rules;
+        const searchRules = this.rules.find(rule => {
+            const searchUserRules = userRules?.find(userRule => userRule === rule);
+            return searchUserRules;
+        });
+
+        if (!searchRules) {
+            return res.status(401).send(toError({
+                name: 'USER_RULE_NOT_AUTHORIZED',
+                message: `User's rules is not allowed for this endpoint!`
+            }));
+        }
+
+        next();
     }
 }
 
