@@ -111,6 +111,15 @@ class Endpoint {
         this.bodySchema = {...this.bodySchema, ...data};
     }
 
+    /**
+     * This asynchronous function validates the user's rules.
+     * 
+     * @param {Object} req - The request object, containing session information and user rules.
+     * @param {Object} res - The response object, used to send responses back to the client.
+     * @param {Function} next - The next middleware function in the Express.js routing process.
+     * 
+     * @returns {Object} If the user's rules are not found in the system rules, it returns a 401 status code with an error message. Otherwise, it calls the next middleware function.
+     */
     async validateRule(req, res, next) {
         const userRules = req.session.user?.rules;
         const searchRules = this.rules.find(rule => {
