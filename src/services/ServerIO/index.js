@@ -83,7 +83,7 @@ class ServerIO {
             return this.io.sockets.sockets.get(socketID);
         }
     }
-    
+
     postMessage(data, cb) {
         this.io.emit('message', data, cb);
     }
@@ -119,24 +119,26 @@ class ServerIO {
     }
 
     createRoom(id, options) {
-        const { participants, isPrivate } = Object(options);
+        const { name, participants, isPrivate } = Object(options);
 
         if (typeof id !== 'string') {
             return;
         }
 
-        const newRoom = new RoomIO({ id, participants, isPrivate }, this);
+        const newRoom = new RoomIO({ id, name, participants, isPrivate }, this);
         this.appendRoom(newRoom);
         return newRoom;
     }
 
-    joinRoom(roomID, participantID) {
-        const room = this.getRoom(roomID);
+    joinRoom(roomID, participantID, name) {
+        let room = this.getRoom(roomID);
 
-        if (room) {
-            room.join(participantID);
+        if (!room) {
+            this.createRoom(roomID, { name, participants: [participantID] });
+            room = this.getRoom(roomID);
         }
 
+        room.join(participantID);
         return room;
     }
 

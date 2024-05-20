@@ -44,7 +44,7 @@ async function preSave(next) {
  * @param {function} next - The function to be called to proceed to the next middleware in the stack.
  * @throws {Error} - Throws an error if there is an issue updating the document or handling relationships.
  */
-async function preUpdateOne(next) {
+async function preUpdate(next) {
     try {
         const collection = this._collection.collectionName;
 
@@ -74,10 +74,10 @@ async function preUpdateOne(next) {
  * @async
  * @throws {Error} - Throws an error if there is an issue emitting events.
  */
-async function postUpdateOne() {
+async function postUpdate(doc) {
     try {
         const collection = this.model.modelName;
-        const $set = Object(this).getSafe('_update.$set');
+        const { $set } = this.getUpdate();
 
         if (!$set) {
             return;
@@ -102,7 +102,7 @@ async function postUpdateOne() {
  * @async
  * @throws {Error} - Throws an error if there is an issue handling relationships or emitting events.
  */
-async function postSave() {
+async function postSave(doc) {
     try {
         const collection = this.collection.collectionName;
 
@@ -156,8 +156,8 @@ async function postDelete() {
 
 module.exports = {
     preSave,
-    preUpdate: preUpdateOne,
-    postUpdate: postUpdateOne,
+    preUpdate,
+    postUpdate,
     postSave,
     preDelete,
     postDelete
