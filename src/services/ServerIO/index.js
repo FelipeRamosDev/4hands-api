@@ -1,19 +1,14 @@
 const RoomIO = require('./RoomIO');
 const socketIO = require('socket.io');
 
+/**
+ * Class representing a ServerIO.
+ */
 class ServerIO {
-     /**
-     * Build a ServerIO setup configs.
-     * @constructor
-     * @param {object} setup - New namespace configs
-     * @param {string} setup.path - Path for the new namespace that will be created.
-     * @param {number} setup.port - Path for the new namespace that will be created.
-     * @param {function[]} setup.middlewares - Array with middleware functions that receives (socket, next) as paramenter.
-     * @param {function} setup.onConnect - Callback for when the socket connection is completed with success.
-     * @param {function} setup.onDisconnect - Callback for when the client socket is disconnected.
-     * @param {function} setup.onData - Callback for the 'message' socket event.
-     * @param {function} setup.onError - Callback for errors during socket connection.
-     * @returns {object} With the configs to import on ServerIO to use.
+    /**
+     * Create a ServerIO.
+     * @param {Object} setup - The setup object.
+     * @param {Object} serverIO - The serverIO object.
      */
     constructor(setup, serverIO) {
         const {
@@ -68,14 +63,27 @@ class ServerIO {
         });
     }
 
+    /**
+     * Get the serverIO.
+     * @return {Object} The serverIO object.
+     */
     get serverIO() {
         return this._serverIO();
     }
 
+    /**
+     * Get the mainIO.
+     * @return {Object} The mainIO object.
+     */
     get mainIO() {
         return this.serverIO.io;
     }
 
+    /**
+     * Get the connection.
+     * @param {string} socketID - The ID of the socket.
+     * @return {Object} The connection object.
+     */
     getConnection(socketID) {
         if (this.serverIO) {
             return this.io.sockets.get(socketID);
@@ -84,22 +92,48 @@ class ServerIO {
         }
     }
 
+    /**
+     * Post a message.
+     * @param {Object} data - The data to post.
+     * @param {function} cb - The callback function.
+     */
     postMessage(data, cb) {
         this.io.emit('message', data, cb);
     }
 
+    /**
+     * Get the room.
+     * @param {string} roomID - The ID of the room.
+     * @return {Object} The room object.
+     */
     toRoom(roomID) {
         return this.io.to(roomID);
     }
 
+    /**
+     * Post a message to a room.
+     * @param {string} roomID - The ID of the room.
+     * @param {Object} data - The data to post.
+     * @param {function} cb - The callback function.
+     */
     postMessageTo(roomID, data, cb) {
         this.toRoom(roomID).emit('message', data, cb);
     }
 
+    /**
+     * Broadcast a message.
+     * @param {Object} data - The data to broadcast.
+     * @param {function} cb - The callback function.
+     */
     broadcastMessage(data, cb) {
         this.io.broadcast.emit('message', data, cb);
     }
 
+    /**
+     * Create a namespace.
+     * @param {Object} nsSetup - The setup object for the namespace.
+     * @return {Object} The namespace object.
+     */
     createNamespace(nsSetup) {
         if (!nsSetup) {
             return;
@@ -110,6 +144,10 @@ class ServerIO {
         return namespaceIO;
     }
 
+    /**
+     * Append a namespace.
+     * @param {Object} namespace - The namespace object.
+     */
     appendNamespace(namespace) {
         if (!namespace?.path || !(namespace instanceof ServerIO)) {
             return;
@@ -118,6 +156,12 @@ class ServerIO {
         this.namespaces[namespace.path] = namespace;
     }
 
+    /**
+     * Create a room.
+     * @param {string} id - The ID of the room.
+     * @param {Object} options - The options object for the room.
+     * @return {RoomIO} The room object.
+     */
     createRoom(id, options) {
         const { name, participants, isPrivate } = Object(options);
 
@@ -130,6 +174,13 @@ class ServerIO {
         return newRoom;
     }
 
+    /**
+     * Join a room.
+     * @param {string} roomID - The ID of the room.
+     * @param {string} participantID - The ID of the participant.
+     * @param {string} name - The name of the participant.
+     * @return {RoomIO} The room object.
+     */
     joinRoom(roomID, participantID, name) {
         let room = this.getRoom(roomID);
 
@@ -142,10 +193,18 @@ class ServerIO {
         return room;
     }
 
+    /**
+     * Delete a room.
+     * @param {string} id - The ID of the room.
+     */
     deleteRoom(id) {
         delete this.rooms[id];
     }
 
+    /**
+     * Append a room.
+     * @param {Object|RoomIO} room - The room object.
+     */
     appendRoom(room) {
         if (!room || !(room instanceof RoomIO)) {
             return;
@@ -154,10 +213,20 @@ class ServerIO {
         this.rooms[room.id] = room;
     }
 
+    /**
+     * Get a room.
+     * @param {string} roomID - The ID of the room.
+     * @return {RoomIO} The room object.
+     */
     getRoom(roomID) {
         return this.rooms[roomID];
     }
 
+    /**
+     * Build a namespace.
+     * @param {Object} setup - The setup object for the namespace.
+     * @return {Object} The namespace config object.
+     */
     static buildNamespace(setup) {
         const { path, middlewares, onConnect, onDisconnect, onData, onError } = Object(setup);
 
