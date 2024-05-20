@@ -129,7 +129,7 @@ async function update(setup) {
                 try {
                     const updated = await Collection.findOneAndUpdate(query, data, mongooseOpt);
 
-                    if (!updated) throw logError('database.updating_document', query)
+                    if (!updated) throw toError('database.updating_document', query);
                     if (returnDocs) return updated;
                     return { success: true };
                 } catch(err) {
@@ -140,7 +140,7 @@ async function update(setup) {
                 try {
                     const docs = await Collection.find(query);
                     const updated = await Collection.updateMany(query, data, mongooseOpt);
-    
+
                     if (returnDocs) return docs;
                     return updated;
                 } catch(err) {
