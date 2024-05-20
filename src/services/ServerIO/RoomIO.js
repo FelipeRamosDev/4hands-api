@@ -1,4 +1,12 @@
+/**
+ * Class representing a RoomIO.
+ */
 class RoomIO {
+    /**
+     * Create a RoomIO.
+     * @param {Object} setup - The setup object.
+     * @param {Object} serverIO - The serverIO object.
+     */
     constructor(setup, serverIO) {
         const {
             id,
@@ -14,10 +22,19 @@ class RoomIO {
         this.participants = participants;
     }
 
+    /**
+     * Get the serverIO.
+     * @return {Object} The serverIO object.
+     */
     get serverIO() {
         return this._serverIO();
     }
 
+    /**
+     * Join a participant to the room.
+     * @param {string} participantID - The ID of the participant.
+     * @return {Object} The RoomIO object.
+     */
     join(participantID) {
         const socket = this.serverIO.getConnection(participantID);
         
@@ -33,6 +50,10 @@ class RoomIO {
         return this;
     }
 
+    /**
+     * Remove a participant from the room.
+     * @param {string} participantID - The ID of the participant.
+     */
     leave(participantID) {
         const participantIndex = this.participants.indexOf(participantID);
 
