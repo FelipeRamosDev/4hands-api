@@ -2,12 +2,14 @@ class RoomIO {
     constructor(setup, serverIO) {
         const {
             id,
+            name,
             isPrivate = false,
             participants = []
         } = Object(setup);
 
         this._serverIO = () => serverIO;
         this.id = id;
+        this.name = name || id;
         this.isPrivate = isPrivate;
         this.participants = participants;
     }
