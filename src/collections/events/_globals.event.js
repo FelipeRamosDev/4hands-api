@@ -111,6 +111,7 @@ async function postSave(doc) {
             process.emit(`create:${collection}`, this);
         }
 
+        process.emit('subscribe:update', collection, doc);
         return;
     } catch(err) {
         throw logError(err);

@@ -2,6 +2,7 @@ const collections = require('./src/collections');
 const DatabaseServer = require('./src/services/database/DatabaseServer');
 const ServerAPI = require('./src/services/ServerAPI');
 const ServerIO = require('./src/services/ServerIO');
+const SubscriberIO = require('./src/services/ServerIO/SubscriberIO');
 const SocketServer = require('./src/services/SocketServer');
 const SocketClient = require('./src/services/SocketClient');
 const Collection = require('./src/models/settings/Collection');
@@ -32,6 +33,12 @@ exports.ServerAPI = ServerAPI;
  * @name ServerIO
  */
 exports.ServerIO = ServerIO;
+
+/**
+ * @class
+ * @name SubscriberIO
+ */
+exports.SubscriberIO = SubscriberIO;
 
 /**
  * @class
