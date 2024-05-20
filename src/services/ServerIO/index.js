@@ -23,8 +23,12 @@ class ServerIO {
                 throw err;
             },
         } = Object(setup);
+        let {
+            toCreateNamespaces = []
+        } = Object(setup);
 
         this._serverIO = () => serverIO;
+        this.isSubscriber = false;
         this.path = path;
         this.middlewares = middlewares;
         this.namespaces = {};
@@ -35,8 +39,17 @@ class ServerIO {
             this.io = socketIO(port, {
                 cors: { origin: corsOrigin }
             });
+
+            this.isMainIO = true;
             this.port = Number(port);
             this.corsOrigin = corsOrigin;
+
+            toCreateNamespaces = [
+                require('../../io/subscribe'),
+                ...toCreateNamespaces
+            ];
+
+            toCreateNamespaces.map(space => this.createNamespace(space));
         } else {
             // This means a namespace under the serverIO param. Param path is require for this case
             if (!this.path) {
@@ -139,7 +152,14 @@ class ServerIO {
             return;
         }
 
-        const namespaceIO = new ServerIO(nsSetup, this);
+        let namespaceIO;
+        if (nsSetup.isSubscriber) {
+            const SubscriberIO = require('./SubscriberIO');
+            namespaceIO = new SubscriberIO(nsSetup, this);
+        } else {
+            namespaceIO = new ServerIO(nsSetup, this);
+        }
+
         this.appendNamespace(namespaceIO);
         return namespaceIO;
     }
@@ -149,7 +169,7 @@ class ServerIO {
      * @param {Object} namespace - The namespace object.
      */
     appendNamespace(namespace) {
-        if (!namespace?.path || !(namespace instanceof ServerIO)) {
+        if (!this.isMainIO) {
             return;
         }
 
