@@ -8,12 +8,16 @@ class SubscriberIO extends ServerIO {
             onCreate,
             onUpdate,
             onDelete,
+            customLoadDocs,
+            customLoadQueries,
             onSubscribe = () => {},
             eventNamePrefix = 'subscribe'
         } = Object(setup);
 
         this.isSubscriber = true;
         this.eventNamePrefix = eventNamePrefix;
+        this.customLoadQueries = customLoadQueries;
+        this.customLoadDocs = customLoadDocs;
 
         this.subscriptions = {
             query: {
@@ -37,9 +41,11 @@ class SubscriberIO extends ServerIO {
 
         if (typeof onUpdate === 'function') {
             this.onUpdate = onUpdate;
+
             process.on(this.getEventName('update'), (...args) => {
-                const [collection] = args;
-                if (collection === 'counter') {
+                const [ collection ] = args;
+
+                if (!collection || collection === 'counter') {
                     return;
                 }
 
@@ -64,8 +70,10 @@ class SubscriberIO extends ServerIO {
     }
 
     subscribeQuery(socketID, collection, filter, options) {
+        const { loadMethod } = Object(options);
         const subscription = new SubscriptionIO({
             type: 'query',
+            loadMethod,
             socketID,
             collection,
             filter,
@@ -140,12 +148,14 @@ class SubscriberIO extends ServerIO {
     }
 
     static buildSubscriber(setup) {
-        const { updateEventName, onSubscribe, onCreate, onUpdate, onDelete } = Object(setup);
+        const { updateEventName, onSubscribe, onCreate, onUpdate, onDelete, customLoadDocs, customLoadQueries } = Object(setup);
 
         return {
             ...ServerIO.buildNamespace(setup),
             isSubscriber: true,
             updateEventName,
+            customLoadDocs,
+            customLoadQueries,
             onSubscribe,
             onCreate,
             onUpdate,

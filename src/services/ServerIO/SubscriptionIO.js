@@ -3,7 +3,7 @@ const CRUD = require('4hands-api/src/services/database/crud');
 
 class SubscriptionIO {
     constructor(setup, subscriber) {
-        const { socketID, type, collection, docUID, filter, options } = Object(setup);
+        const { socketID, type, loadMethod, collection, docUID, filter, options } = Object(setup);
 
         if (!type || !collection) {
             throw logError('common.missing_params');
@@ -13,15 +13,14 @@ class SubscriptionIO {
         this.id = crypto.randomUUID();
         this.socketID = socketID;
         this.type = type;
+        this.loadMethod = loadMethod;
         this.collection = collection;
 
         if (type === 'query') {
             this.filter = filter;
             this.options = options;
 
-            this.loadQuery().then(() => {
-                this.sendCallback({ success: true, snapshotEvent: this.id });
-            });
+            this.loadQuery();
         }
 
         if (type === 'doc') {
@@ -34,11 +33,35 @@ class SubscriptionIO {
         return this._subscriber();
     }
 
-    sendCallback(data) {
-        const socket = this.subscriber.getConnection(this.socketID);
+    get customLoadQueries() {
+        return this.subscriber?.customLoadQueries;
+    }
 
-        if (socket) {
-            socket.emit('new-subscription', data);
+    get customLoadDocs() {
+        return this.subscriber?.customLoadDocs;
+    }
+
+    get customLoadMethod() {
+        let loadMethod;
+        
+        if (this.type === 'query') {
+            if (!this.customLoadQueries) {
+                return;
+            }
+
+            loadMethod = this.customLoadQueries[this.loadMethod]
+        }
+        
+        if (this.type === 'doc') {
+            if (!this.customLoadDocs) {
+                return;
+            }
+
+            loadMethod = this.customLoadDocs[this.loadMethod]
+        }
+
+        if (typeof loadMethod === 'function') {
+            return loadMethod;
         }
     }
 
@@ -50,7 +73,11 @@ class SubscriptionIO {
         }
     }
 
-    async loadQuery() {
+    async loadQuery(jumpCustom, preventSnapshot) {
+        if (!jumpCustom && this.customLoadMethod) {
+            return this.customLoadMethod();
+        }
+
         try {
             const { sort, limit, page } = Object(this.options);
             const toLoad = CRUD.query({
@@ -62,7 +89,7 @@ class SubscriptionIO {
             });
 
             const loaded = toLoad.defaultPopulate ? await toLoad.defaultPopulate() : await toLoad.exec();
-            if (loaded.error) {
+            if (!loaded || loaded?.error) {
                 this.subscriber.closeSubscription(this.socketID);
                 throw toError(loaded);
             }
@@ -71,14 +98,21 @@ class SubscriptionIO {
             this.lastQueryLoaded = loaded;
 
             // Sending to FE side
-            this.sendSnapshot(loaded);
+            if (!preventSnapshot) {
+                this.sendSnapshot(loaded);
+            }
+
             return loaded;
         } catch (err) {
             throw toError(err);
         }
     }
 
-    async loadDoc() {
+    async loadDoc(jumpCustom, preventSnapshot) {
+        if (!jumpCustom && this.customLoadMethod) {
+            return this.customLoadMethod();
+        }
+
         try {
             const toLoad = CRUD.getDoc({
                 collectionName: this.collection,
@@ -97,7 +131,11 @@ class SubscriptionIO {
 
             this.docUID = doc.id;
             this.lastDocLoaded = doc;
-            this.sendSnapshot(doc);
+
+            if (!preventSnapshot) {
+                this.sendSnapshot(doc);
+            }
+
             return doc;
         } catch (err) {
             throw toError(err);
@@ -112,17 +150,19 @@ class SubscriptionIO {
                 if (this.type === 'query') {
                     const isMatch = await CRUD.getDoc({
                         collectionName: this.collection,
-                        filter: { _id: id, ...this.filter }
+                        filter: { _id: id, ...Object(this.filter) }
                     });
                     
                     if (isMatch) {
                         this.loadQuery();
                     }
+
+                    break;
                 }
             }
             case 'update': {
                 if (this.type === 'query') {
-                    if (this.uidString.indexOf(id) > -1) {
+                    if (this.uidString && this.uidString.indexOf(id) > -1) {
                         this.loadQuery();
                     }
                 }
@@ -130,6 +170,8 @@ class SubscriptionIO {
                 if (this.type === 'doc') {
                     this.loadDoc();
                 }
+
+                break;
             }
         }
     }
