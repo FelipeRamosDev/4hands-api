@@ -28,10 +28,14 @@ module.exports = SubscriberIO.buildSubscriber({
     },
     onUpdate(collection, docSnapshot) {
         const querySubscriptions = this.getQuerySubscriptions(collection);
-        querySubscriptions.map(sub => sub.exec('update', docSnapshot));
+        if (Array.isArray(querySubscriptions)) {
+            querySubscriptions.map(sub => sub.exec('update', docSnapshot));
+        }
 
         const docSubscriptions = this.getDocSubscriptions(collection, docSnapshot.id);
-        docSubscriptions.map(sub => sub.exec('update', docSnapshot));
+        if (Array.isArray(docSubscriptions)) {
+            docSubscriptions.map(sub => sub.exec('update', docSnapshot));
+        }
     },
     onDelete() {
 

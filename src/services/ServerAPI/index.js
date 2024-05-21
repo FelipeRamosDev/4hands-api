@@ -8,11 +8,6 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const https = require('https');
 const path = require('path');
-const Database = require('../database/DatabaseServer');
-const FS = require('../FS');
-const Endpoint = require('../../models/settings/Endpoint');
-const MailService = require('../Mail');
-const RedisService = require('4hands-api/src/services/Redis');
 
 /**
  * @class ServerAPI
@@ -26,7 +21,7 @@ class ServerAPI {
      * @description Creates an instance of ServerAPI.
      * @param {Object} setup - Configuration options for the server.
      * @param {string} setup.projectName - The name of the project.
-     * @param {Database} setup.databaseConfig - Configuration options for the database.
+     * @param {Object} setup.databaseConfig - Configuration options for the Database.
      * @param {string} setup.API_SECRET - The API secret key for session encryption.
      * @param {number} setup.sessionCookiesMaxAge - Maximum age of session cookies in milliseconds. Default is 86400000.
      * @param {string} setup.staticPath - The path to static files.
@@ -40,7 +35,7 @@ class ServerAPI {
      * @param {string} setup.certSSLPath - The path to the SSL certificate file.
      * @param {string} setup.FE_ORIGIN - The front-end host URL.
      * @param {number} setup.PORT - The port number on which the server will listen. Default is 80.
-     * @param {MailService} setup.emailConfig - Configurations for the server emails sent.
+     * @param {Object} setup.emailConfig - Configurations for the MailService.
      * @param {string[]} setup.corsOrigin - Array with the allowed domains for CORS configuration. Default is ['http://localhost', 'https://localhost'].
      * @param {boolean} setup.noServer - If true, it doesn't start the server. Default is false.
      */
@@ -60,6 +55,7 @@ class ServerAPI {
             emailConfig,
             noServer,
             PORT,
+            useSockets,
 
             // Defaults
             jsonLimit = '10mb',
@@ -85,6 +81,7 @@ class ServerAPI {
         this.PORT = PORT || 80;
         this.noServer = noServer;
         this.defaultMaxListeners = defaultMaxListeners;
+        this.useSockets = useSockets;
         
         console.log(`[${this.projectName || '4hands-api'}] Starting Server API...`)
         if (this.defaultMaxListeners) {
@@ -100,6 +97,7 @@ class ServerAPI {
         }
 
         if (emailConfig) {
+            const MailService = require('../Mail');
             this.mailService = new MailService(emailConfig);
         }
 
@@ -121,6 +119,12 @@ class ServerAPI {
             this.PORT = PORT || 443;
         }
 
+        if (!this.socketIO && this.useSockets) {
+            // Initializing the Socket server
+            const ServerIO = require('4hands-api/src/services/ServerIO');
+            this.socketIO = new ServerIO({ corsOrigin: this.corsOrigin });
+        }
+
         if (!this.noServer) {
             // 4hands-api native endpoints
             this.createEndpoint(require('4hands-api/src/controllers/api/health-check'));
@@ -140,6 +144,7 @@ class ServerAPI {
         }
 
         if (databaseConfig) {
+            const Database = require('../database/DatabaseServer');
             this.database = new Database({ ...databaseConfig }).init({
                 success: this.init.bind(this),
                 error: (err) => {
@@ -172,6 +177,7 @@ class ServerAPI {
             console.log(compile.toString());
         }
 
+        const RedisService = require('4hands-api/src/services/Redis');
         this.redisServ = new RedisService({
             url: this.redisURL,
             onError: (err) => {
@@ -183,6 +189,7 @@ class ServerAPI {
         
         // Configuring server
         if (!this.noServer) {
+            // Initializing the Redis DB
             const RedisStore = require('connect-redis').default;
             this.app.use(cors({
                 origin: this.corsOrigin,
@@ -242,6 +249,8 @@ class ServerAPI {
      * @param {Function} callback - Callback function to be executed when the server starts listening.
      */
     listenSSL(PORT, callback) {
+        const FS = require('../FS');
+
         try {
             if (this.PORT || PORT) {
                 const SSL_KEY = FS.readFileSync(this.keySSLPath);
@@ -279,10 +288,11 @@ class ServerAPI {
 
     /**
      * Creates an endpoint for the server.
-     * @param {Endpoint} endpoint - The endpoint to be created.
+     * @param {Object} endpoint - The Endpoint to be created.
      * @throws {Error.Log} If the endpoint parameter is not an instance of the Endpoint class.
      */
     createEndpoint(endpoint) {
+        const Endpoint = require('../../models/settings/Endpoint');
         if (!endpoint instanceof Endpoint) {
             throw logError({
                 name: 'INVALID_ENDPOINT',

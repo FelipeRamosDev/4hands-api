@@ -1,6 +1,7 @@
 const dbHelpers = require('4hands-api/src/helpers/database/dbHelpers');
 const relationalHelper = require('4hands-api/src/helpers/database/relationalFields');
 const config = require('4hands-api/configs/project');
+const { parentPort } = require('worker_threads');
 
 /**
  * Middleware function executed before saving a document.
@@ -80,8 +81,10 @@ async function postUpdate(doc) {
 
         if (collection !== config.database.counterCollection) {
             // New approach
-            if (doc) {
-                process.emit('subscribe:update', collection, doc.toObject());
+            if (typeof doc?.toObject === 'function') {
+                const toDoc = doc.toJSON();
+                toDoc.id = doc.id;
+                process.emit('subscribe:update', collection, toDoc);
             }
         }
 
@@ -111,7 +114,9 @@ async function postSave(doc) {
             process.emit(`create:${collection}`, this);
 
             // NEW approach
-            process.emit('subscribe:save', collection, doc);
+            const toDoc = doc.toJSON();
+            toDoc.id = doc.id;
+            process.emit('subscribe:save', collection, toDoc);
         }
 
         return;

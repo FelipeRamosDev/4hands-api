@@ -132,7 +132,7 @@ class SubscriberIO extends ServerIO {
         const subs = this.subscriptions.doc;
         const collectionDocs = subs[collection];
 
-        return collectionDocs && (collectionDocs[docUID] || []);
+        return collectionDocs && collectionDocs[docUID] || [];
     }
 
     closeSubscription(socketID) {
