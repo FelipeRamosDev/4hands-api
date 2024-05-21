@@ -8,6 +8,14 @@ class ServerIO {
     /**
      * Create a ServerIO.
      * @param {Object} setup - The setup object.
+     * @param {string} setup.path - The namespace path.
+     * @param {number} setup.port - The server port.
+     * @param {string[]} setup.corsOrigin - The server cors policy.
+     * @param {Function[]} setup.middlewares - The server/namespace middlewares.
+     * @param {Function} setup.onConnect - The callback for when the socket connection is concluded with success.
+     * @param {Function} setup.onData - The callback for when an 'message' event arrives.
+     * @param {Function} setup.onDisconnect - The callback for when the client disconnected.
+     * @param {Function} setup.onError - The callback for when an error is caught.
      * @param {Object} serverIO - The serverIO object.
      */
     constructor(setup, serverIO) {
