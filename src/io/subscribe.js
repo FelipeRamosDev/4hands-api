@@ -1,21 +1,40 @@
-const { SubscriberIO } = require('4hands-api')
+const { SubscriberIO, CRUD } = require('4hands-api')
 
+const PATH = '/subscribe-changes';
 module.exports = SubscriberIO.buildSubscriber({
-    path: '/subscribe',
-    middlewares: [
-        function (socket, next) {
-            console.log('Middleware /subscribe connection:', socket.id);
-            next();
-        }
-    ],
+    path: PATH,
     onConnect(socket) {
-        console.log('User connected on /subscribe:', socket.id);
+        console.log(`User is connected on ${PATH}:`, socket.id);
     },
-    onDisconnect() {
+    onDisconnect(socketID) {
+        console.log(`User is disconnected from ${PATH}:`, socketID);
+    },
+    onSubscribe(socket, setup, callback = () => {}) {
+        const { type, collection, filter, docUID, options } = Object(setup);
 
+        if (type === 'query') {
+            const subscription = this.subscribeQuery(socket.id, collection, filter, options);
+            callback(subscription);
+        }
+        
+        if (type === 'doc') {
+            const subscription = this.subscribeDoc(socket.id, collection, docUID);
+            callback(subscription);
+        }
     },
-    onUpdate(collection, doc) {
-        debugger;
+    onCreate(collection, docSnapshot) {
+        const querySubscriptions = this.getQuerySubscriptions(collection);
+        querySubscriptions.map(sub => sub.exec('save', docSnapshot));
+    },
+    onUpdate(collection, docSnapshot) {
+        const querySubscriptions = this.getQuerySubscriptions(collection);
+        querySubscriptions.map(sub => sub.exec('update', docSnapshot));
+
+        const docSubscriptions = this.getDocSubscriptions(collection, docSnapshot.id);
+        docSubscriptions.map(sub => sub.exec('update', docSnapshot));
+    },
+    onDelete() {
+
     },
     onError(err) {
         throw logError(err);

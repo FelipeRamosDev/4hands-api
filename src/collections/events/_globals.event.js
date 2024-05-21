@@ -77,17 +77,15 @@ async function preUpdate(next) {
 async function postUpdate(doc) {
     try {
         const collection = this.model.modelName;
-        const { $set } = this.getUpdate();
 
-        if (!$set) {
-            return;
+        if (collection !== config.database.counterCollection) {
+            // New approach
+            if (doc) {
+                process.emit('subscribe:update', collection, doc.toObject());
+            }
         }
 
-        if ($set.status) {
-            process.emit(`status:transition:${collection}:${$set.status}`, this);
-        }
-
-        delete $set.status;
+        // DEPRECATED
         process.emit(`update:${collection}`, this);
         process.emit(`socket:update:${collection}:${JSON.stringify(this.getFilter())}`, this);
     } catch (err) {
@@ -108,10 +106,14 @@ async function postSave(doc) {
 
         if (collection !== config.database.counterCollection) {
             await relationalHelper.onCreate.call(this);
+
+            // DEPRECATED
             process.emit(`create:${collection}`, this);
+
+            // NEW approach
+            process.emit('subscribe:save', collection, doc);
         }
 
-        process.emit('subscribe:update', collection, doc);
         return;
     } catch(err) {
         throw logError(err);
