@@ -69,6 +69,10 @@ class ServerIO {
             socket.on('disconnect', () => {
                 this.deleteRoom(socket.id);
                 onDisconnect.call(this, socket.id);
+
+                if (this.isSubscriber) {
+                    this.closeSubscription(socket.id);
+                }
             });
 
             this.createRoom(socket.id, { participants: [socket.id], isPrivate: true});
@@ -245,6 +249,12 @@ class ServerIO {
     /**
      * Build a namespace.
      * @param {Object} setup - The setup object for the namespace.
+     * @param {string} setup.path - The path to connect with the namespace.
+     * @param {function[]} setup.middlewares - Middlewares to execute before connecting.
+     * @param {function} setup.onConnect - Callback to execute when connection is completed with success.
+     * @param {function} setup.onDisconnect - Callback to execute when the client disconnect.
+     * @param {function} setup.onData - Callback to execute when a 'message' event arrives from the FE side.
+     * @param {function} setup.onError - Callback to execute when there is an error with the connection.
      * @return {Object} The namespace config object.
      */
     static buildNamespace(setup) {
