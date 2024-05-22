@@ -30,6 +30,14 @@ async function isDocExist(collectionName, filter) {
     }
 }
 
+async function countDocuments(collectionName, filter) {
+    try {
+        return await mongoose.model(collectionName).countDocuments(filter);
+    } catch (err) {
+        throw toError(err)
+    }
+}
+
 /**
  * Retrieves the Mongoose model for a given collection name.
  * @param {string} collection - The name of the collection to retrieve the model for.
@@ -243,6 +251,7 @@ module.exports = {
     increaseDocProp,
     isCollectionExist,
     isDocExist,
+    countDocuments,
     getCollectionModel,
     pickQueryType,
     treatFilter,
