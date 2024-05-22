@@ -2,6 +2,7 @@ const { createClient } = require('redis');
 const crypto = require('crypto');
 const { buildKey, parseDocToSave, parseDocToRead } = require('./RedisHelpers');
 const RedisEventEmitters = require('./RedisEventEmitters');
+const { toError } = require('4hands-api/src/models/ErrorLog');
 
 /**
  * A class representing a Redis service for handling data operations.
@@ -227,8 +228,13 @@ class RedisService {
                 RedisEventEmitters.preUpdate.call(setup, resolve, reject);
             });
 
-            const updated = await this.setDoc({ collection, uid, data });
-            RedisEventEmitters.postUpdate.call(setup);
+            const ready = await this.setDoc({ collection, uid, data });
+            if (!ready || ready.error) {
+                throw toError(ready)
+            }
+
+            const updated = await this.getDoc({ collection, uid });
+            RedisEventEmitters.postUpdate.call({ ...setup, data: updated });
             return updated;
         } catch (err) {
             throw logError(err);
