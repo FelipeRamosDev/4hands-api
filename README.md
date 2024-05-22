@@ -1,4 +1,4 @@
-# 4Hands API (v0.4.11 BETA)
+# 4Hands API (v0.5.0 BETA)
 This is a API framework to create a backend for your applications.
 
 ### New Features

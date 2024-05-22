@@ -31,6 +31,24 @@ async function isDocExist(collectionName, filter) {
 }
 
 /**
+ * Asynchronously counts the number of documents in a specified collection that match a given filter.
+ *
+ * @async
+ * @function countDocuments
+ * @param {string} collectionName - The name of the collection to count documents in.
+ * @param {Object} filter - The filter criteria to match documents against.
+ * @returns {Promise<number>} - A promise that resolves to the number of documents matching the filter.
+ * @throws {Error} - Throws an error if there is an issue with the counting operation.
+ */
+async function countDocuments(collectionName, filter) {
+    try {
+        return await mongoose.model(collectionName).countDocuments(filter);
+    } catch (err) {
+        throw toError(err)
+    }
+}
+
+/**
  * Retrieves the Mongoose model for a given collection name.
  * @param {string} collection - The name of the collection to retrieve the model for.
  * @returns {Model} - The Mongoose model for the specified collection.
@@ -83,23 +101,6 @@ async function increaseCounter(collection) {
         const counter = await Counters.findByIdAndUpdate(collection, { $inc: { value: 1 }});
 
         return counter.toObject();
-    } catch(err) {
-        throw logError(err);
-    }
-}
-
-/**
- * Increases the 'groupedLogs' property of a specific log document and returns the updated log object.
- * @param {string} logUID - The unique identifier of the log document to increase the property for.
- * @returns {Object} - The updated log object.
- * @throws {Error} - Throws an error if there is an issue increasing the log property.
- */
-async function increaseLog(logUID) {   
-    try {
-        const Logs = mongoose.model(configs.database.logCollection);
-        const logCounter = await Logs.findByIdAndUpdate(logUID, { $inc: { groupedLogs: 1 }});
-
-        return logCounter.toObject();
     } catch(err) {
         throw logError(err);
     }
@@ -257,10 +258,10 @@ async function createEncryptFields(context) {
 module.exports = {
     createCounter,
     increaseCounter,
-    increaseLog,
     increaseDocProp,
     isCollectionExist,
     isDocExist,
+    countDocuments,
     getCollectionModel,
     pickQueryType,
     treatFilter,
