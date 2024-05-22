@@ -13,7 +13,8 @@ const helpers = helpersModule.database.dbHelpers;
  * @throws {Error.Log} If an error occurs during document creation.
  */
 async function create(collectionName, data, options) {
-    const { isDraft } = options || {};
+    const { isDraft } = Object(options);
+
     try {
         const Collection = helpers.getCollectionModel(collectionName);
         const newDoc = new Collection(data);
@@ -34,26 +35,33 @@ async function create(collectionName, data, options) {
  * Performs a query on the specified collection based on the provided filter and sort options.
  * @param {Object} setup - The query setup object.
  * @param {string} setup.collectionName - The name of the collection to query.
- * @param {Object} [setup.filter] - The filter criteria for the query.
- * @param {Object} [setup.sort] - The sort criteria for the query.
+ * @param {Object} setup.filter - The filter criteria for the query.
+ * @param {string} setup.sort - The sort criteria for the query.
+ * @param {number} setup.limit - The limit value for the search.
+ * @param {number} setup.page - The page number.
  * @returns {Query} The query result.
  * @throws {Error.Log} If the specified collection schema is not found or an error occurs during querying.
  */
 function query(setup) {
     try {
         const schemas = API.database.collections;
-        const {collectionName, filter, sort} = setup || {};
+        const { collectionName, filter, sort, limit, page = 1 } = Object(setup);
         const filterObj = helpers.treatFilter(filter || {});
         const Schema = schemas.find(item => item.name === collectionName);
 
         if (Schema) {
             const Collection = Schema.DB;
+            let query = Collection.find(filterObj);
 
-            if (!sort) {
-                return Collection.find(filterObj);
-            } else {
-                return Collection.find(filterObj).sort(sort);
+            if (sort) {
+                query.sort(sort);
             }
+
+            if (limit && !isNaN(limit)) {
+                query.skip((Number(page) - 1) * limit).limit(Number(limit));
+            }
+
+            return query;
         } else {
             throw logError('database.schema_not_found', collectionName);
         }
@@ -121,7 +129,7 @@ async function update(setup) {
                 try {
                     const updated = await Collection.findOneAndUpdate(query, data, mongooseOpt);
 
-                    if (!updated) throw logError('database.updating_document', query)
+                    if (!updated) throw toError('database.updating_document', query);
                     if (returnDocs) return updated;
                     return { success: true };
                 } catch(err) {
@@ -132,7 +140,7 @@ async function update(setup) {
                 try {
                     const docs = await Collection.find(query);
                     const updated = await Collection.updateMany(query, data, mongooseOpt);
-    
+
                     if (returnDocs) return docs;
                     return updated;
                 } catch(err) {

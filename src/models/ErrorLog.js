@@ -6,7 +6,7 @@ class ErrorLog {
         this.error = true;
 
         if (!err) {
-            this.name = 'UNKNOW_ERROR';
+            this.name = 'UNKNOWN_ERROR';
             this.message = 'An unknow error was caught!'
         }
 

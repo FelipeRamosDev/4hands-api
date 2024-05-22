@@ -24,7 +24,7 @@ module.exports = new Collection({
         {
             fieldName: 'value',
             type: Number,
-            default: 0
+            default: 1
         }
     ]
 });

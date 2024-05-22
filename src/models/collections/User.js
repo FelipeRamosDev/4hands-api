@@ -31,7 +31,8 @@ class User extends _Global {
             email,
             phone,
             isEmailConfirmed,
-            frontURL
+            frontURL,
+            rules
         } = Object(setup);
 
         try {
@@ -89,6 +90,8 @@ class User extends _Global {
              * @property {string}
              */
             this.isEmailConfirmed = isEmailConfirmed;
+
+            this.rules = rules;
         } catch(err) {
             /**
              * Thrown if there is an error during the User object construction.
@@ -244,7 +247,8 @@ class User extends _Global {
             fullName: this.fullName,
             email: this.email,
             userToken: this.token,
-            isEmailConfirmed: this.isEmailConfirmed
+            isEmailConfirmed: this.isEmailConfirmed,
+            rules: this.rule
         };
     }
 
@@ -316,7 +320,7 @@ class User extends _Global {
     static async isExist(email, returnUID) {
         try {
             const result = await dbHelpers.isDocExist('users', { email });
-            if (result.error) {
+            if (result?.error) {
                 throw result;
             }
 
