@@ -8,6 +8,14 @@ class ServerIO {
     /**
      * Create a ServerIO.
      * @param {Object} setup - The setup object.
+     * @param {string} setup.path - The namespace path.
+     * @param {number} setup.port - The server port.
+     * @param {string[]} setup.corsOrigin - The server cors policy.
+     * @param {Function[]} setup.middlewares - The server/namespace middlewares.
+     * @param {Function} setup.onConnect - The callback for when the socket connection is concluded with success.
+     * @param {Function} setup.onData - The callback for when an 'message' event arrives.
+     * @param {Function} setup.onDisconnect - The callback for when the client disconnected.
+     * @param {Function} setup.onError - The callback for when an error is caught.
      * @param {Object} serverIO - The serverIO object.
      */
     constructor(setup, serverIO) {
@@ -23,8 +31,12 @@ class ServerIO {
                 throw err;
             },
         } = Object(setup);
+        let {
+            toCreateNamespaces = []
+        } = Object(setup);
 
         this._serverIO = () => serverIO;
+        this.isSubscriber = false;
         this.path = path;
         this.middlewares = middlewares;
         this.namespaces = {};
@@ -35,8 +47,17 @@ class ServerIO {
             this.io = socketIO(port, {
                 cors: { origin: corsOrigin }
             });
+
+            this.isMainIO = true;
             this.port = Number(port);
             this.corsOrigin = corsOrigin;
+
+            toCreateNamespaces = [
+                require('../../io/subscribe'),
+                ...toCreateNamespaces
+            ];
+
+            toCreateNamespaces.map(space => this.createNamespace(space));
         } else {
             // This means a namespace under the serverIO param. Param path is require for this case
             if (!this.path) {
@@ -139,7 +160,14 @@ class ServerIO {
             return;
         }
 
-        const namespaceIO = new ServerIO(nsSetup, this);
+        let namespaceIO;
+        if (nsSetup.isSubscriber) {
+            const SubscriberIO = require('./SubscriberIO');
+            namespaceIO = new SubscriberIO(nsSetup, this);
+        } else {
+            namespaceIO = new ServerIO(nsSetup, this);
+        }
+
         this.appendNamespace(namespaceIO);
         return namespaceIO;
     }
@@ -149,7 +177,7 @@ class ServerIO {
      * @param {Object} namespace - The namespace object.
      */
     appendNamespace(namespace) {
-        if (!namespace?.path || !(namespace instanceof ServerIO)) {
+        if (!this.isMainIO) {
             return;
         }
 
@@ -225,6 +253,12 @@ class ServerIO {
     /**
      * Build a namespace.
      * @param {Object} setup - The setup object for the namespace.
+     * @param {string} setup.path - The path to connect with the namespace.
+     * @param {function[]} setup.middlewares - Middlewares to execute before connecting.
+     * @param {function} setup.onConnect - Callback to execute when connection is completed with success.
+     * @param {function} setup.onDisconnect - Callback to execute when the client disconnect.
+     * @param {function} setup.onData - Callback to execute when a 'message' event arrives from the FE side.
+     * @param {function} setup.onError - Callback to execute when there is an error with the connection.
      * @return {Object} The namespace config object.
      */
     static buildNamespace(setup) {

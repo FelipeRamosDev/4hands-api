@@ -33,7 +33,7 @@ class MemoryMonitor {
      * @param {number} interval - The interval for the loop.
      * @return {Object} The loop.
      */
-    setLoop(interval = 3000) {
+    setLoop(interval = 7000) {
         return setInterval(() => {
             const { heapUsed, heapTotal } = this.analyser.getInfo();
 

@@ -5,6 +5,10 @@ class RoomIO {
     /**
      * Create a RoomIO.
      * @param {Object} setup - The setup object.
+     * @param {string} setup.id - The RoomIO unique identification.
+     * @param {string} setup.name - The room name.
+     * @param {boolean} setup.isPrivate - If the the connection private room.
+     * @param {string[]} setup.participants - Arry of participants connections.
      * @param {Object} serverIO - The serverIO object.
      */
     constructor(setup, serverIO) {
