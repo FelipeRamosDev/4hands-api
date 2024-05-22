@@ -143,8 +143,38 @@ class SubscriberIO extends ServerIO {
         return collectionDocs && collectionDocs[docUID] || [];
     }
 
-    closeSubscription(socketID) {
-        delete this.subscriptions[socketID];
+    closeSubscription(subscription) {
+        const { collection, docUID } = Object(subscription);
+
+        if (subscription.type === 'query') {
+            const subs = this.getQuerySubscriptions(collection);
+            const subIndex = subs ? subs.indexOf(subscription) : undefined;
+
+            if (isNaN(subIndex) || subIndex < 0) {
+                return;
+            }
+
+            const querySubs = this.subscriptions.query;
+            const collectionSubs = querySubs[collection];
+
+            if (collectionSubs) {
+                collectionSubs.splice(subIndex, 1);
+            }
+        }
+
+        if (subscription.type === 'doc') {
+            const subs = this.getDocSubscriptions(collection, docUID);
+            const subsIndex = subs ? subs.indexOf(subscription) : undefined;
+
+            if (isNaN(subsIndex) || subsIndex < 0) {
+                return;
+            }
+
+            subs.splice(subsIndex, 1);
+            if (!this.getDocSubscriptions(collection, docUID).length) {
+                delete this.subscriptions.doc[collection][docUID];
+            }
+        }
     }
 
     static buildSubscriber(setup) {
