@@ -1,8 +1,20 @@
 const crypto = require('crypto');
 const CRUD = require('4hands-api/src/services/database/crud');
-const { countDocuments } = require('4hands-api/src/helpers/database/dbHelpers');
 
+/**
+ * Class representing a SubscriptionIO for managing query and document subscriptions.
+ *
+ * @class
+ */
 class SubscriptionIO {
+    /**
+     * Create a SubscriptionIO instance.
+     *
+     * @constructor
+     * @param {Object} setup - Configuration object for the subscription.
+     * @param {Object} subscriber - The subscriber instance managing this subscription.
+     * @throws {Error} - Throws an error if the type or collection is missing.
+     */
     constructor(setup, subscriber) {
         const { socketID, type, loadMethod, collection, docUID, filter, options } = Object(setup);
 
@@ -30,18 +42,38 @@ class SubscriptionIO {
         }
     }
 
+    /**
+     * Get the subscriber instance.
+     *
+     * @returns {Object} - The subscriber instance.
+     */
     get subscriber() {
         return this._subscriber();
     }
 
+    /**
+     * Get custom load queries from the subscriber.
+     *
+     * @returns {Object} - Custom load queries.
+     */
     get customLoadQueries() {
         return this.subscriber?.customLoadQueries;
     }
 
+    /**
+     * Get custom load documents from the subscriber.
+     *
+     * @returns {Object} - Custom load documents.
+     */
     get customLoadDocs() {
         return this.subscriber?.customLoadDocs;
     }
 
+    /**
+     * Get the custom load method for the subscription.
+     *
+     * @returns {Function} - The custom load method.
+     */
     get customLoadMethod() {
         let loadMethod;
         
@@ -50,7 +82,7 @@ class SubscriptionIO {
                 return;
             }
 
-            loadMethod = this.customLoadQueries[this.loadMethod]
+            loadMethod = this.customLoadQueries[this.loadMethod];
         }
         
         if (this.type === 'doc') {
@@ -58,7 +90,7 @@ class SubscriptionIO {
                 return;
             }
 
-            loadMethod = this.customLoadDocs[this.loadMethod]
+            loadMethod = this.customLoadDocs[this.loadMethod];
         }
 
         if (typeof loadMethod === 'function') {
@@ -66,6 +98,11 @@ class SubscriptionIO {
         }
     }
 
+    /**
+     * Send a snapshot of data to the client.
+     *
+     * @param {Object} data - The data to send as a snapshot.
+     */
     sendSnapshot(data) {
         const socket = this.subscriber.getConnection(this.socketID);
 
@@ -74,7 +111,16 @@ class SubscriptionIO {
         }
     }
 
-    async loadQuery(jumpCustom, preventSnapshot) {
+    /**
+     * Load query data based on the filter and options.
+     *
+     * @async
+     * @param {boolean} [jumpCustom=false] - Whether to skip the custom load method.
+     * @param {boolean} [preventSnapshot=false] - Whether to prevent sending a snapshot.
+     * @returns {Promise<Object[]>} - The loaded query data.
+     * @throws {Error} - Throws an error if the loading operation fails.
+     */
+    async loadQuery(jumpCustom = false, preventSnapshot = false) {
         if (!jumpCustom && this.customLoadMethod) {
             return this.customLoadMethod();
         }
@@ -109,7 +155,16 @@ class SubscriptionIO {
         }
     }
 
-    async loadDoc(jumpCustom, preventSnapshot) {
+    /**
+     * Load a document based on the filter or document UID.
+     *
+     * @async
+     * @param {boolean} [jumpCustom=false] - Whether to skip the custom load method.
+     * @param {boolean} [preventSnapshot=false] - Whether to prevent sending a snapshot.
+     * @returns {Promise<Object>} - The loaded document.
+     * @throws {Error} - Throws an error if the loading operation fails.
+     */
+    async loadDoc(jumpCustom = false, preventSnapshot = false) {
         if (!jumpCustom && this.customLoadMethod) {
             return this.customLoadMethod();
         }
@@ -143,6 +198,15 @@ class SubscriptionIO {
         }
     }
 
+    /**
+     * Execute actions based on the event type and document snapshot.
+     *
+     * @async
+     * @param {string} eventType - The type of event (e.g., 'save', 'update').
+     * @param {Object} docSnapshot - The document snapshot.
+     * @returns {Promise<void>} - Resolves when the operation is complete.
+     * @throws {Error} - Throws an error if the operation fails.
+     */
     async exec(eventType, docSnapshot) {
         const { id } = Object(docSnapshot);
 
@@ -194,6 +258,11 @@ class SubscriptionIO {
         }
     }
 
+    /**
+     * Terminate the subscription.
+     *
+     * @returns {void} - Closes the subscription.
+     */
     terminate() {
         return this.subscriber.closeSubscription(this);
     }

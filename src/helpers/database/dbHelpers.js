@@ -30,6 +30,16 @@ async function isDocExist(collectionName, filter) {
     }
 }
 
+/**
+ * Asynchronously counts the number of documents in a specified collection that match a given filter.
+ *
+ * @async
+ * @function countDocuments
+ * @param {string} collectionName - The name of the collection to count documents in.
+ * @param {Object} filter - The filter criteria to match documents against.
+ * @returns {Promise<number>} - A promise that resolves to the number of documents matching the filter.
+ * @throws {Error} - Throws an error if there is an issue with the counting operation.
+ */
 async function countDocuments(collectionName, filter) {
     try {
         return await mongoose.model(collectionName).countDocuments(filter);

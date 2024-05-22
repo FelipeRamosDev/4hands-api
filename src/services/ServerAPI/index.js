@@ -38,6 +38,7 @@ class ServerAPI {
      * @param {Object} setup.emailConfig - Configurations for the MailService.
      * @param {string[]} setup.corsOrigin - Array with the allowed domains for CORS configuration. Default is ['http://localhost', 'https://localhost'].
      * @param {boolean} setup.noServer - If true, it doesn't start the server. Default is false.
+     * @param {boolean} setup.useSockets - If true, it will start a sockets server. Default is false.
      */
     constructor (setup) {
         const {
