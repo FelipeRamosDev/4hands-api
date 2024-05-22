@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const CRUD = require('4hands-api/src/services/database/crud');
+const { countDocuments } = require('4hands-api/src/helpers/database/dbHelpers');
 
 class SubscriptionIO {
     constructor(setup, subscriber) {
@@ -152,12 +153,29 @@ class SubscriptionIO {
                         collectionName: this.collection,
                         filter: { _id: id, ...Object(this.filter) }
                     });
-                    
+
                     if (isMatch) {
-                        this.loadQuery();
+                        this.lastQueryLoaded.push(isMatch);
+
+                        if (Object.keys(this.options?.sort).length) {
+                            const key = Object.keys(this.options.sort)[0];
+                            this.lastQueryLoaded = this.lastQueryLoaded.sort((a, b) => {
+                                if (this.options?.sort[key] === -1) {
+                                    return b[key] - a[key];
+                                } else {
+                                    return a[key] - b[key];
+                                }
+                            });
+                        }
+
+                        if (this.options?.limit) {
+                            this.lastQueryLoaded = this.lastQueryLoaded.splice(0, this.options.limit);
+                        }
+
+                        this.sendSnapshot(this.lastQueryLoaded);
                     }
 
-                    break;
+                    return;
                 }
             }
             case 'update': {
@@ -171,7 +189,7 @@ class SubscriptionIO {
                     this.loadDoc();
                 }
 
-                break;
+                return;
             }
         }
     }
