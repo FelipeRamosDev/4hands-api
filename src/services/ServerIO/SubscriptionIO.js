@@ -175,6 +175,10 @@ class SubscriptionIO {
             }
         }
     }
+
+    terminate() {
+        return this.subscriber.closeSubscription(this);
+    }
 }
 
 module.exports = SubscriptionIO;

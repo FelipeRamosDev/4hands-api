@@ -77,10 +77,6 @@ class ServerIO {
             socket.on('disconnect', () => {
                 this.deleteRoom(socket.id);
                 onDisconnect.call(this, socket.id);
-
-                if (this.isSubscriber) {
-                    this.closeSubscription(socket.id);
-                }
             });
 
             this.createRoom(socket.id, { participants: [socket.id], isPrivate: true});

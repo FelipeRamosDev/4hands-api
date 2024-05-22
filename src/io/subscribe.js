@@ -24,15 +24,21 @@ module.exports = SubscriberIO.buildSubscriber({
 
     onSubscribe(socket, setup, callback = () => {}) {
         const { type, collection, filter, docUID, options } = Object(setup);
+        let subscription;
 
         if (type === 'query') {
-            const subscription = this.subscribeQuery(socket.id, collection, filter, options);
-            callback(subscription);
+            subscription = this.subscribeQuery(socket.id, collection, filter, options);
         }
         
         if (type === 'doc') {
-            const subscription = this.subscribeDoc(socket.id, collection, docUID);
+            subscription = this.subscribeDoc(socket.id, collection, docUID);
+        }
+
+        if (subscription) {
+            socket.on('disconnect', () => subscription.terminate());
             callback(subscription);
+        } else {
+            callback(toError());
         }
     },
 
