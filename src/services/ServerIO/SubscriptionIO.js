@@ -209,10 +209,6 @@ class SubscriptionIO {
      */
     async exec(eventType, docSnapshot) {
         const { id } = Object(docSnapshot);
-        const sortOpt = this.options?.sort;
-        const limitOpt = this.options?.limit;
-        const sortOptKeys = sortOpt && Object.keys(sortOpt);
-        const hasSortOpt = sortOptKeys?.length;
 
         switch (eventType) {
             case 'save': {
@@ -225,11 +221,10 @@ class SubscriptionIO {
                     if (isMatch) {
                         this.lastQueryLoaded.push(isMatch);
 
-                        if (hasSortOpt) {
-                            const key = sortOptKeys[0];
-
+                        if (Object.keys(this.options?.sort).length) {
+                            const key = Object.keys(this.options.sort)[0];
                             this.lastQueryLoaded = this.lastQueryLoaded.sort((a, b) => {
-                                if (sortOpt[key] === -1) {
+                                if (this.options?.sort[key] === -1) {
                                     return b[key] - a[key];
                                 } else {
                                     return a[key] - b[key];
@@ -237,8 +232,8 @@ class SubscriptionIO {
                             });
                         }
 
-                        if (limitOpt) {
-                            this.lastQueryLoaded = this.lastQueryLoaded.splice(0, limitOpt);
+                        if (this.options?.limit) {
+                            this.lastQueryLoaded = this.lastQueryLoaded.splice(0, this.options.limit);
                         }
 
                         this.sendSnapshot(this.lastQueryLoaded);
@@ -250,22 +245,12 @@ class SubscriptionIO {
             case 'update': {
                 if (this.type === 'query') {
                     if (this.uidString && this.uidString.indexOf(id) > -1) {
-                        // Updating the changed document
-                        this.lastQueryLoaded = this.lastQueryLoaded.map((item, i) => {
-                            if (item.id === docSnapshot._id) {
-                                item = docSnapshot;
-                            }
-
-                            return item;
-                        });
-
-                        this.sendSnapshot(this.lastQueryLoaded);
+                        this.loadQuery();
                     }
                 }
 
                 if (this.type === 'doc') {
-                    this.lastDocLoaded = docSnapshot;
-                    this.sendSnapshot(docSnapshot);
+                    this.loadDoc();
                 }
 
                 return;

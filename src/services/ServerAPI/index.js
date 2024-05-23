@@ -8,6 +8,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const https = require('https');
 const path = require('path');
+const FS = require('../FS');
 
 /**
  * @class ServerAPI
@@ -55,10 +56,11 @@ class ServerAPI {
             FE_ORIGIN,
             emailConfig,
             noServer,
-            PORT,
+            SOCKET_PORT,
             useSockets,
-
+            
             // Defaults
+            PORT = 80,
             jsonLimit = '10mb',
             defaultMaxListeners = 20,
             sessionCookiesMaxAge = 86400000,
@@ -80,6 +82,7 @@ class ServerAPI {
         this.listenCallback = listenCallback;
         this.FE_ORIGIN = FE_ORIGIN;
         this.PORT = PORT || 80;
+        this.SOCKET_PORT = SOCKET_PORT;
         this.noServer = noServer;
         this.defaultMaxListeners = defaultMaxListeners;
         this.useSockets = useSockets;
@@ -117,13 +120,24 @@ class ServerAPI {
         this.useSSL = false;
         if (this.keySSLPath && this.certSSLPath) {
             this.useSSL = true;
-            this.PORT = PORT || 443;
+
+            if (this.PORT === 80) {
+                this.PORT = 443;
+            }
         }
 
-        if (!this.socketIO && this.useSockets) {
-            // Initializing the Socket server
+        // Initializing the Socket server
+        if (this.useSockets) {
             const ServerIO = require('4hands-api/src/services/ServerIO');
-            this.socketIO = new ServerIO({ corsOrigin: this.corsOrigin });
+
+            this.socketIO = new ServerIO({
+                port: this.SOCKET_PORT,
+                corsOrigin: this.corsOrigin,
+                ssl: {
+                    keyPath: this.keySSLPath,
+                    certPath: this.certSSLPath
+                }
+            });
         }
 
         if (!this.noServer) {
@@ -250,8 +264,6 @@ class ServerAPI {
      * @param {Function} callback - Callback function to be executed when the server starts listening.
      */
     listenSSL(PORT, callback) {
-        const FS = require('../FS');
-
         try {
             if (this.PORT || PORT) {
                 const SSL_KEY = FS.readFileSync(this.keySSLPath);
