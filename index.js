@@ -2,6 +2,7 @@ const collections = require('./src/collections');
 const DatabaseServer = require('./src/services/database/DatabaseServer');
 const ServerAPI = require('./src/services/ServerAPI');
 const ServerIO = require('./src/services/ServerIO');
+const FS = require('./src/services/FS');
 const SubscriberIO = require('./src/services/ServerIO/SubscriberIO');
 const SocketServer = require('./src/services/SocketServer');
 const SocketClient = require('./src/services/SocketClient');
@@ -21,6 +22,12 @@ const validation = require('./src/validation');
  * @name DatabaseServer
  */
 exports.Database = DatabaseServer;
+
+/**
+ * @class 
+ * @name FS
+ */
+exports.FS = FS;
 
 /**
  * @class
