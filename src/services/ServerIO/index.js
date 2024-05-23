@@ -10,6 +10,11 @@ class ServerIO {
      * @param {Object} setup - The setup object.
      * @param {string} setup.path - The namespace path.
      * @param {number} setup.port - The server port.
+     * @param {Object} setup.ssl - The server SSL certificate configurations.
+     * @param {string} setup.ssl.key - The SSL key file content.
+     * @param {string} setup.ssl.cert - The SSL certificate file content.
+     * @param {string} setup.ssl.keyPath - The SSL key file path.
+     * @param {string} setup.ssl.certPath - The SSL certificate file file.
      * @param {string[]} setup.corsOrigin - The server cors policy.
      * @param {Function[]} setup.middlewares - The server/namespace middlewares.
      * @param {Function} setup.onConnect - The callback for when the socket connection is concluded with success.
@@ -22,6 +27,7 @@ class ServerIO {
         const {
             path,
             port = 8888,
+            ssl,
             corsOrigin = ['http://localhost', 'https://localhost'],
             middlewares = [],
             onConnect = () => {},
@@ -31,26 +37,33 @@ class ServerIO {
                 throw err;
             },
         } = Object(setup);
-        let {
-            toCreateNamespaces = []
-        } = Object(setup);
+        let { toCreateNamespaces = [] } = Object(setup);
 
         this._serverIO = () => serverIO;
         this.isSubscriber = false;
         this.path = path;
+        this.ssl = ssl;
         this.middlewares = middlewares;
         this.namespaces = {};
         this.rooms = {};
 
         if (!serverIO) {
             // If doesn't have the serverIO param declared, means that it's the main instance so the server should be declared
-            this.io = socketIO(port, {
-                cors: { origin: corsOrigin }
-            });
-
             this.isMainIO = true;
             this.port = Number(port);
             this.corsOrigin = corsOrigin;
+
+            const serverOptions = { cors: { origin: corsOrigin } };
+            const isSSLValid = [
+                (this.ssl?.key && this.ssl?.cert),
+                (this.ssl?.keyPath && this.ssl?.certPath)
+            ].some(item => item);
+            
+            if (isSSLValid) {
+                this.io = socketIO(this.createHttps(), serverOptions);
+            } else {
+                this.io = socketIO(port, serverOptions);
+            }
 
             toCreateNamespaces = [
                 require('../../io/subscribe'),
@@ -67,10 +80,12 @@ class ServerIO {
             this.io = serverIO.io.of(this.path);
         }
 
+        // Adding MIDDLEWARES provided
         this.middlewares.map(middle => {
             this.io.use(middle);
         });
 
+        // Adding EVENTS listeners
         this.io.on('connect_error', onError.bind(this));
         this.io.on('connect', (socket) => {
             socket.on('message', onData.bind(this));
@@ -98,6 +113,35 @@ class ServerIO {
      */
     get mainIO() {
         return this.serverIO.io;
+    }
+
+    createHttps() {
+        const https = require('https');
+        const FS = require('../FS');
+        const serverOptions = {};
+
+        if (this.ssl.key && this.ssl.cert) {
+            // In case of the file be provided
+            serverOptions.key = this.ssl.key;
+            serverOptions.cert = this.ssl.cert;
+        } else if (this.ssl.keyPath && this.ssl.certPath) {
+            // In case of the file PATH be provided
+            const isKeyExist = FS.isExist(this.ssl.keyPath);
+            const isCertExist = FS.isExist(this.ssl.certPath);
+            const keyContent = FS.readFileSync(this.ssl.keyPath);
+            const certContent = FS.readFileSync(this.ssl.certPath);
+
+            if (!isKeyExist || !isCertExist) {
+                throw new Error('SSL files wasn\'t found!');
+            }
+
+            serverOptions.key = keyContent;
+            serverOptions.cert = certContent;
+        }
+
+        const server = https.createServer(serverOptions);
+        server.listen(this.port);
+        return server;
     }
 
     /**
