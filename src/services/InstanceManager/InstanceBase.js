@@ -14,10 +14,6 @@ class InstanceBase {
             parent
         } = Object(setup);
 
-        if (!filePath || typeof filePath !== 'string') {
-            throw logError('The param "filePath" is required!');
-        }
-
         this._parent = () => parent;
         this._dataStore = dataStore;
 
