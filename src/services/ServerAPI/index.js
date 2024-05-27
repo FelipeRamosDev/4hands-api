@@ -9,6 +9,7 @@ const cors = require('cors');
 const https = require('https');
 const path = require('path');
 const FS = require('../FS');
+const Database = require('../database/DatabaseServer');
 
 /**
  * @class ServerAPI
@@ -22,7 +23,7 @@ class ServerAPI {
      * @description Creates an instance of ServerAPI.
      * @param {Object} setup - Configuration options for the server.
      * @param {string} setup.projectName - The name of the project.
-     * @param {Object} setup.databaseConfig - Configuration options for the Database.
+     * @param {Database} setup.databaseConfig - Configuration options for the Database.
      * @param {string} setup.API_SECRET - The API secret key for session encryption.
      * @param {number} setup.sessionCookiesMaxAge - Maximum age of session cookies in milliseconds. Default is 86400000.
      * @param {string} setup.staticPath - The path to static files.
@@ -38,7 +39,9 @@ class ServerAPI {
      * @param {number} setup.PORT - The port number on which the server will listen. Default is 80.
      * @param {Object} setup.emailConfig - Configurations for the MailService.
      * @param {string[]} setup.corsOrigin - Array with the allowed domains for CORS configuration. Default is ['http://localhost', 'https://localhost'].
+     * @param {string[]} setup.httpEndpoints - The path to the endpoints to be created on initialization.
      * @param {boolean} setup.noServer - If true, it doesn't start the server. Default is false.
+     * @param {boolean} setup.noRedisServer - If true, it doesn't start the Redis server. Default is false.
      * @param {boolean} setup.useSockets - If true, it will start a sockets server. Default is false.
      * @param {number} setup.SOCKET_PORT - The port number on which the SOCKET server will listen.
      */
@@ -49,20 +52,21 @@ class ServerAPI {
             API_SECRET,
             staticPath,
             listenCallback,
-            compileFE,
             sessionResave,
             sessionSaveUninitialized,
             keySSLPath,
             certSSLPath,
             FE_ORIGIN,
             emailConfig,
-            noServer,
             SOCKET_PORT,
             useSockets,
             
             // Defaults
             PORT = 80,
             jsonLimit = '10mb',
+            noServer = false,
+            httpEndpoints = [],
+            noRedisServer = false,
             defaultMaxListeners = 20,
             sessionCookiesMaxAge = 86400000,
             redisURL = 'redis://localhost:6379',
@@ -76,7 +80,6 @@ class ServerAPI {
         this.staticPath = staticPath;
         this.redisURL = redisURL;
         this.corsOrigin = corsOrigin;
-        this.compileFE = compileFE;
         this.jsonLimit = jsonLimit;
         this.sessionResave = (sessionResave !== undefined) ? sessionResave : true;
         this.sessionSaveUninitialized = (sessionSaveUninitialized !== undefined) ? sessionSaveUninitialized : true;
@@ -84,7 +87,9 @@ class ServerAPI {
         this.FE_ORIGIN = FE_ORIGIN;
         this.PORT = PORT || 80;
         this.SOCKET_PORT = SOCKET_PORT;
+        this.httpEndpoints = httpEndpoints;
         this.noServer = noServer;
+        this.noRedisServer = noRedisServer;
         this.defaultMaxListeners = defaultMaxListeners;
         this.useSockets = useSockets;
         
@@ -157,10 +162,11 @@ class ServerAPI {
             this.createEndpoint(require('4hands-api/src/controllers/collection/get/doc'));
             this.createEndpoint(require('4hands-api/src/controllers/collection/get/query'));
             this.createEndpoint(require('4hands-api/src/controllers/collection/update/document'));
+
+            this.httpEndpoints.map(endpoint => this.createEndpoint(endpoint));
         }
 
         if (databaseConfig) {
-            const Database = require('../database/DatabaseServer');
             this.database = new Database({ ...databaseConfig }).init({
                 success: this.init.bind(this),
                 error: (err) => {
@@ -186,22 +192,17 @@ class ServerAPI {
         this.app = express();
         this.serverState = 'loading';
 
-        if (this.compileFE) {
-            // Compiling frontend code
-            const compile = execSync('npm run build');
-            // Printiting webpack compile result
-            console.log(compile.toString());
+        if (!this.noRedisServer || !this.noServer) {
+            const RedisService = require('4hands-api/src/services/Redis');
+            this.redisServ = new RedisService({
+                url: this.redisURL,
+                onError: (err) => {
+                    throw logError(err);
+                }
+            }, this);
+    
+            await this.redisServ.connect();
         }
-
-        const RedisService = require('4hands-api/src/services/Redis');
-        this.redisServ = new RedisService({
-            url: this.redisURL,
-            onError: (err) => {
-                throw logError(err);
-            }
-        }, this);
-
-        await this.redisServ.connect();
         
         // Configuring server
         if (!this.noServer) {

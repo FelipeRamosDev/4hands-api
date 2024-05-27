@@ -39,7 +39,9 @@ class GlobalMap {
      * @returns {Object} - The parent object.
      */
     get parent() {
-        return this.getParent();
+        if (typeof this.getParent === 'function') {
+            return this.getParent();
+        }
     }
 
     /**

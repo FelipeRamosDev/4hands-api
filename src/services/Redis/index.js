@@ -13,6 +13,12 @@ class RedisService {
      * 
      * @constructor
      * @param {Object} setup - Configuration options for the Redis service.
+     * @param {Object} setup.clientOptions - The native 'redis' package options.
+     * @param {Object} setup.onConnect - Callback to when the client is connected to the Redis.
+     * @param {Object} setup.onReady - Callback to when the RedisService is ready to be used.
+     * @param {Object} setup.onEnd - Callback to when the client is closed.
+     * @param {Object} setup.onError - Callback to when the client got an error.
+     * @param {Object} setup.onReconnecting - Callback to when the client is reconnected to the Redis.
      * @param {Object} apiServer - An API server object.
      */
     constructor(setup, apiServer) {
