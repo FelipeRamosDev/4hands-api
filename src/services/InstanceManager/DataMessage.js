@@ -13,6 +13,10 @@ class DataMessage {
         this.target = target;
         this.from = from;
         this.data = data;
+
+        if (this.target === '/') {
+            this.isToMaster = true
+        }
     }
 
     get targetArray() {
@@ -44,7 +48,7 @@ class DataMessage {
         return thread;
     }
 
-    get output() {
+    toObject() {
         return { ...this };
     }
 
