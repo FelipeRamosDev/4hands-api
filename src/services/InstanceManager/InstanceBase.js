@@ -34,6 +34,10 @@ class InstanceBase {
         return this._parent();
     }
 
+    setParent(newParent) {
+        this._parent = () => newParent;        
+    }
+
     genRandomBytes(bytes = 4) {
         return crypto.randomBytes(bytes).toString('hex');
     }
