@@ -35,7 +35,7 @@ class Thread extends InstanceBase {
 
                 if (dataMessage) {
                     if (dataMessage.isArrived(this.threadPath)) {
-                        this.callbacks.onData.call(this, dataMessage.from, dataMessage.data);
+                        this.callbacks.onData.call(this, dataMsg.from, dataMsg.data);
                     }
                 } else {
                     this.callbacks.onData.call(this, dataMsg, ...params);
