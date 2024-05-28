@@ -2,6 +2,7 @@ const InstanceBase = require('./InstanceBase');
 const Core = require('./Core');
 const cluster = require('cluster');
 const path = require('path');
+const DataMessage = require('4hands-api/src/services/InstanceManager/DataMessage');
 
 class Cluster extends InstanceBase {
     constructor(setup) {
@@ -53,20 +54,19 @@ class Cluster extends InstanceBase {
                     });
                 });
 
-                cluster.on('message', (worker, messageData, ...args) => {
-                    const { target, from, data } = Object(messageData);
-                    const dataToSend = data || messageData;
-                    let fromPath = from;
-
-                    if (!fromPath) {
-                        const fromWorker = this.findCore(worker.id)
-                        fromPath = fromWorker?.tagName
+                cluster.on('message', (worker, dataMsg, ...args) => {
+                    const dataMessage = DataMessage.build(dataMsg);
+                    if (dataMessage.isToMaster) {
+                        return this.callbacks.onData.call(this, dataMessage.from, dataMessage.data);
                     }
 
-                    if (!target || target === '/') {
-                        this.callbacks.onData.call(this, fromPath, dataToSend, ...args);
-                    } else {
-                        // Redirect here
+                    if (!dataMessage || !dataMessage.targetCore) {
+                        return this.callbacks.onData.call(this, dataMsg, worker, ...args);
+                    }
+
+                    const core = this.getCore(dataMessage.targetCore);
+                    if (core) {
+                        core.postMe(dataMsg, ...args);
                     }
                 });
             } else {
@@ -103,7 +103,7 @@ class Cluster extends InstanceBase {
 
     get workerID() {
         if (this.isWorker) {
-            return cluster.worker.id;
+            return cluster.worker?.id;
         }
     }
 
@@ -132,11 +132,14 @@ class Cluster extends InstanceBase {
         }
     }
     
-    sendTo(coreTagName, data) {
-        const core = this.getCore(coreTagName);
+    sendTo(target, data) {
+        if (this.isMaster) {
+            const dataMessage = DataMessage.build({ target, data, from: '/' });
+            const core = this.getCore(dataMessage.targetCore);
 
-        if (core) {
-            core.send(data);
+            if (core) {
+                core.worker.send(data);
+            }
         }
     }
 }

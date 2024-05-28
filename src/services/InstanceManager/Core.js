@@ -1,6 +1,7 @@
 const cluster = require('cluster');
 const InstanceBase = require('./InstanceBase');
 const Thread = require('./Thread');
+const DataMessage = require('./DataMessage');
 const path = require('path');
 
 class Core extends InstanceBase {
@@ -12,8 +13,9 @@ class Core extends InstanceBase {
         this._threads = {};
         this.type = 'core';
         this.onlineThreads = 0;
+        this.isWorker = cluster.isWorker;
 
-        if (cluster.isWorker) {
+        if (this.isWorker) {
             threads.map(threadPath => {
                 try {
                     const configPath = path.normalize(
@@ -23,8 +25,7 @@ class Core extends InstanceBase {
                         )
                     );
                     
-                    const thread = require(configPath);
-                    this.setThread(thread);
+                    const thread = require(configPath).init(this);
                     thread.worker.on('online', () => {
                         this.onlineThreads++;
 
@@ -34,16 +35,28 @@ class Core extends InstanceBase {
                     });
 
                     thread.worker.on('message', this.handleThreadData.bind(this));
+                    this.setThread(thread);
                 } catch (err) {
                     throw logError(err);
                 }
             });
 
-            this.worker.on('message', this.callbacks.onData.bind(this));
+            this.worker.on('message', this.handleThreadData.bind(this));
             this.worker.on('exit', this.callbacks.onClose.bind(this));
             this.worker.on('error', this.callbacks.onError.bind(this));
             this.worker.on('errormessage', this.callbacks.onError.bind(this));
         }
+    }
+
+    get corePath() {
+        return `/${this.parent?.tagName}/${this.tagName}`;
+    }
+    
+    get cleanOut() {
+        return JSON.parse(JSON.stringify({
+            ...this,
+            parent: undefined
+        }));
     }
 
     get worker() {
@@ -51,31 +64,38 @@ class Core extends InstanceBase {
     }
 
     get coreIndex() {
-        if (cluster.isWorker) {
+        if (this.isWorker) {
             return cluster.worker?.id;
         } else {
             return this.worker.id;
         }
     }
 
-    handleThreadData(messageData, ...params) {
-        if (typeof messageData === 'object' && !Array.isArray(messageData) && messageData !== null) {
-            const { target, from, data } = Object(messageData);
+    handleThreadData(dataMsg, ...params) {
+        const dataMessage = DataMessage.build(dataMsg);
 
-            if (target === '/') {
-                return this.sendToCluster(messageData, ...params);
+        if (dataMessage) {
+            if (dataMessage.isArrived(this.corePath)) {
+                return this.callbacks.onData.call(this, dataMessage.from, dataMessage.data);
             }
 
-            if (typeof target === 'string') {
-                const parsedPath = target.split('/');
+            if (dataMessage.isToMaster) {
+                return this.sendToCluster(dataMsg, ...params);
+            }
 
-                if (parsedPath.length === 1) {
-                    // this.sendToCore()
+            if (dataMessage.isCoreMatch(this.tagName)) {
+                const thread = this.getThread(dataMessage.targetThread);
+
+                if (thread) {
+                    return thread.postMe(dataMsg, ...params);
+                } else if (!dataMessage.targetThread) {
+                    return this.callbacks.onData.call(this, dataMessage.from, dataMessage.data);
                 }
             }
-
-            this.callbacks.onData.call(this, messageData, ...params);
+        } else {
+            this.callbacks.onData.call(this, dataMsg, ...params);
         }
+
     }
 
     setWorker(worker) {
@@ -95,22 +115,41 @@ class Core extends InstanceBase {
             thread = new Thread(params);
         }
 
-        thread.setParent(this);
         this._threads[thread.tagName] = thread;
         return thread;
     }
 
-    send(...data) {
+    postMe(...data) {
         this.worker.send(...data);
     }
 
-    sendToThread(threadTag, ...data) {
-        const thread = this.getThread(threadTag);
-        thread.send(...data);
+    sendTo(target, data) {
+        if (this.isWorker) {
+            const dataMessage = DataMessage.build({ target, data, from: this.corePath });
+
+            if (!dataMessage) return;
+            if (dataMessage.targetCore === this.tagName) {
+                const thread = this.getThread(dataMessage.targetThread);
+
+                if (thread) {
+                    thread.sendMe(dataMessage.from, dataMessage.data);
+                }
+            } else {
+                this.sendToCluster(dataMessage.toObject()?.data);
+            }
+        }
+    }
+
+    sendToThread(threadTag, data) {
+        if (this.isWorker) {
+            this.sendTo(`${this.corePath}/${threadTag}`, data);
+        }
     }
 
     sendToCluster(...data) {
-        process.send(...data);
+        if (this.isWorker) {
+            process.send(...data);
+        }
     }
 }
 
