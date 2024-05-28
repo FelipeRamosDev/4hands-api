@@ -124,9 +124,9 @@ class Core extends InstanceBase {
         this.worker.send(...data);
     }
 
-    sendTo(target, data) {
+    sendTo(target, data, route) {
         if (this.isWorker) {
-            const dataMessage = DataMessage.build({ target, data, from: this.corePath });
+            const dataMessage = DataMessage.build({ target, route, data, from: this.corePath });
 
             if (!dataMessage) return;
             if (dataMessage.targetCore === this.tagName) {
@@ -136,7 +136,7 @@ class Core extends InstanceBase {
                     thread.sendMe(dataMessage.from, dataMessage.data);
                 }
             } else {
-                this.sendToCluster(dataMessage.toObject()?.data);
+                this.sendToCluster(dataMessage.data);
             }
         }
     }

@@ -33,12 +33,17 @@ class Thread extends InstanceBase {
             parentPort.on('message', (dataMsg, ...params) => {
                 const dataMessage = DataMessage.build(dataMsg);
 
-                if (dataMessage) {
-                    if (dataMessage.isArrived(this.threadPath)) {
-                        this.callbacks.onData.call(this, dataMsg.from, dataMsg.data);
+                if (!dataMessage) {
+                    return this.callbacks.onData.call(this, dataMsg, ...params);
+                }
+
+                if (dataMessage.isArrived(this.threadPath)) {
+                    if (!dataMessage.route) {
+                        return this.callbacks.onData.call(this, dataMsg.from, dataMsg.data);
                     }
-                } else {
-                    this.callbacks.onData.call(this, dataMsg, ...params);
+
+                    const route = this.getRoute(dataMessage.route);
+                    route.trigger(dataMessage);
                 }
             });
         }
@@ -76,18 +81,18 @@ class Thread extends InstanceBase {
         }
     }
 
-    sendMe(from, data) {
+    sendMe(from, data, route) {
         if (!this.isThread) {
-            const dataMessage = DataMessage.build({ target: this.threadPath, data, from });
+            const dataMessage = DataMessage.build({ target: this.threadPath, route, data, from });
 
             if (!dataMessage) return;
             this.worker.postMessage(dataMessage.toObject());
         }
     }
 
-    sendTo(target, data) {
+    sendTo(target, data, route) {
         if (this.isThread) {
-            const dataMessage = DataMessage.build({ target, data, from: this.threadPath });
+            const dataMessage = DataMessage.build({ target, route, data, from: this.threadPath });
 
             if (!dataMessage) return;
             this.parentPost(dataMessage.toObject());

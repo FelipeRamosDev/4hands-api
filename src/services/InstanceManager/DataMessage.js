@@ -1,6 +1,6 @@
 class DataMessage {
     constructor(setup) {
-        const { target = '/', from, data } = Object(setup);
+        const { target = '/', route, from, data } = Object(setup);
 
         if (!from || typeof from !== 'string') {
             throw new Error('The "setup.from" param is required and it needs to be a string!');
@@ -11,6 +11,7 @@ class DataMessage {
         }
 
         this.target = target;
+        this.route = route;
         this.from = from;
         this.data = data;
 
