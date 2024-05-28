@@ -76,7 +76,7 @@ class Core extends InstanceBase {
 
         if (dataMessage) {
             if (dataMessage.isArrived(this.corePath)) {
-                return this.callbacks.onData.call(this, dataMessage.from, dataMessage.data);
+                return this.callbacks.onData.call(this, dataMsg.from, dataMsg.data);
             }
 
             if (dataMessage.isToMaster) {
@@ -89,13 +89,14 @@ class Core extends InstanceBase {
                 if (thread) {
                     return thread.postMe(dataMsg, ...params);
                 } else if (!dataMessage.targetThread) {
-                    return this.callbacks.onData.call(this, dataMessage.from, dataMessage.data);
+                    return this.callbacks.onData.call(this, dataMsg.from, dataMsg.data);
                 }
+            } else {
+                return this.sendToCluster(dataMsg, ...params);
             }
         } else {
             this.callbacks.onData.call(this, dataMsg, ...params);
         }
-
     }
 
     setWorker(worker) {

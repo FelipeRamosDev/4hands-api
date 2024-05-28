@@ -57,7 +57,7 @@ class Cluster extends InstanceBase {
                 cluster.on('message', (worker, dataMsg, ...args) => {
                     const dataMessage = DataMessage.build(dataMsg);
                     if (dataMessage.isToMaster) {
-                        return this.callbacks.onData.call(this, dataMessage.from, dataMessage.data);
+                        return this.callbacks.onData.call(this, dataMsg.from, dataMsg.data);
                     }
 
                     if (!dataMessage || !dataMessage.targetCore) {
@@ -138,7 +138,7 @@ class Cluster extends InstanceBase {
             const core = this.getCore(dataMessage.targetCore);
 
             if (core) {
-                core.worker.send(data);
+                core.sendMe(dataMessage.toObject());
             }
         }
     }
