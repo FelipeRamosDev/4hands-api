@@ -12,6 +12,7 @@ class Cluster extends InstanceBase {
             const maxCPUs = os.cpus().length;
             const { cores = [] } = Object(setup);
 
+            this.type = 'cluster';
             if (this.isMaster) {
                 this._cores = {};
                 this.onlineCores = 0;
@@ -51,6 +52,23 @@ class Cluster extends InstanceBase {
                         this.callbacks.onError.call(this, toError(err));
                     });
                 });
+
+                cluster.on('message', (worker, messageData, ...args) => {
+                    const { target, from, data } = Object(messageData);
+                    const dataToSend = data || messageData;
+                    let fromPath = from;
+
+                    if (!fromPath) {
+                        const fromWorker = this.findCore(worker.id)
+                        fromPath = fromWorker?.tagName
+                    }
+
+                    if (!target || target === '/') {
+                        this.callbacks.onData.call(this, fromPath, dataToSend, ...args);
+                    } else {
+                        // Redirect here
+                    }
+                });
             } else {
                 const worker = cores[this.workerID - 1];
                 
@@ -64,7 +82,8 @@ class Cluster extends InstanceBase {
                         )
                     );
 
-                    this.setCore(require(configPath));
+                    const newCore = require(configPath);
+                    this.setCore(newCore);
                 }
             }
         } catch (err) {
@@ -98,6 +117,11 @@ class Cluster extends InstanceBase {
         }
     }
 
+    findCore(index) {
+        const tagName = Object.keys(this._cores).find(key => (this._cores[key].coreIndex === index));
+        return this.getCore(tagName);
+    }
+
     setCore(params) {
         const core = new Core(params);
 
@@ -105,6 +129,14 @@ class Cluster extends InstanceBase {
             this._cores[core.tagName] = core;
         } else {
             this._childCore = core;
+        }
+    }
+    
+    sendTo(coreTagName, data) {
+        const core = this.getCore(coreTagName);
+
+        if (core) {
+            core.send(data);
         }
     }
 }
