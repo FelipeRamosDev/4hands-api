@@ -2,6 +2,7 @@ const InstanceBase = require('./InstanceBase');
 const Core = require('./Core');
 const cluster = require('cluster');
 const path = require('path');
+const DataMessage = require('4hands-api/src/services/InstanceManager/DataMessage');
 
 class Cluster extends InstanceBase {
     constructor(setup) {
@@ -12,6 +13,7 @@ class Cluster extends InstanceBase {
             const maxCPUs = os.cpus().length;
             const { cores = [] } = Object(setup);
 
+            this.type = 'cluster';
             if (this.isMaster) {
                 this._cores = {};
                 this.onlineCores = 0;
@@ -51,6 +53,22 @@ class Cluster extends InstanceBase {
                         this.callbacks.onError.call(this, toError(err));
                     });
                 });
+
+                cluster.on('message', (worker, dataMsg, ...args) => {
+                    const dataMessage = DataMessage.build(dataMsg);
+                    if (dataMessage.isToMaster) {
+                        return this.callbacks.onData.call(this, dataMsg.from, dataMsg.data);
+                    }
+
+                    if (!dataMessage || !dataMessage.targetCore) {
+                        return this.callbacks.onData.call(this, dataMsg, worker, ...args);
+                    }
+
+                    const core = this.getCore(dataMessage.targetCore);
+                    if (core) {
+                        core.postMe(dataMsg, ...args);
+                    }
+                });
             } else {
                 const worker = cores[this.workerID - 1];
                 
@@ -64,7 +82,8 @@ class Cluster extends InstanceBase {
                         )
                     );
 
-                    this.setCore(require(configPath));
+                    const newCore = require(configPath);
+                    this.setCore(newCore);
                 }
             }
         } catch (err) {
@@ -84,7 +103,7 @@ class Cluster extends InstanceBase {
 
     get workerID() {
         if (this.isWorker) {
-            return cluster.worker.id;
+            return cluster.worker?.id;
         }
     }
 
@@ -98,6 +117,11 @@ class Cluster extends InstanceBase {
         }
     }
 
+    findCore(index) {
+        const tagName = Object.keys(this._cores).find(key => (this._cores[key].coreIndex === index));
+        return this.getCore(tagName);
+    }
+
     setCore(params) {
         const core = new Core(params);
 
@@ -105,6 +129,17 @@ class Cluster extends InstanceBase {
             this._cores[core.tagName] = core;
         } else {
             this._childCore = core;
+        }
+    }
+    
+    sendTo(target, data) {
+        if (this.isMaster) {
+            const dataMessage = DataMessage.build({ target, data, from: '/' });
+            const core = this.getCore(dataMessage.targetCore);
+
+            if (core) {
+                core.sendMe(dataMessage.toObject());
+            }
         }
     }
 }

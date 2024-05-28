@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const InstanceRoute = require('./InstanceRoute');
 
 class InstanceBase {
     constructor(setup) {
@@ -6,6 +7,7 @@ class InstanceBase {
             id,
             tagName,
             filePath,
+            routes = [],
             dataStore = {},
             onReady = () => {},
             onData = () => {},
@@ -16,6 +18,7 @@ class InstanceBase {
 
         this._parent = () => parent;
         this._dataStore = dataStore;
+        this._routes = {};
 
         this.id = id || this.genRandomBytes();
         this.tagName = tagName || this.id;
@@ -28,10 +31,16 @@ class InstanceBase {
             onClose,
             onError
         };
+
+        routes.map(route => this.setRoute(route));
     }
 
     get parent() {
         return this._parent();
+    }
+
+    setParent(newParent) {
+        this._parent = () => newParent;        
     }
 
     genRandomBytes(bytes = 4) {
@@ -53,6 +62,25 @@ class InstanceBase {
 
     deleteValue(key) {
         delete this._dataStore[key];
+    }
+
+    setRoute(route) {
+        try {
+            if (route instanceof InstanceRoute) {
+                route.setInstance(this);
+                this._routes[route.path] = route;
+            } else {
+                const newRoute = new InstanceRoute(route, this);
+                this._routes[route.path] = newRoute;
+                return newRoute;
+            }
+        } catch (err) {
+            return;
+        }
+    }
+
+    getRoute(routePath) {
+        return this._routes[routePath];
     }
 }
 
