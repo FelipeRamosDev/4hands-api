@@ -57,22 +57,28 @@ class Thread extends InstanceBase {
     handleOnData(dataMsg, ...params) {
         const dataMessage = DataMessage.build(dataMsg);
 
+        // If it's not a valid DataMessage format, then trigger onData and deliver the message the way it is.
         if (!dataMessage) {
             return this.callbacks.onData.call(this, dataMsg, ...params);
         }
 
+        // Check if the target of the DataMessage match with the current Thread path.
         if (dataMessage.isArrived(this.threadPath)) {
+            // If it doesn't have a route set, then call the onData callback and deliver the DataMessage since we hit the target
             if (!dataMessage.route) {
                 return this.callbacks.onData.call(this, dataMsg.from, dataMsg.data);
             }
 
+            // if the code hit here, means we have a route set.
+            // So we will search for the route endpoint and if it exists we will trigger it, but if not, we call the callback.
             const route = this.getRoute(dataMessage.route);
             if (route) {
                 route.trigger(dataMessage);
             } else {
-                this.parentPost(dataMsg, ...params);
+                this.callbacks.onData.call(this, dataMsg.from, dataMsg.data);
             }
         } else {
+            // If it's not matching, since it the lower level (Thread) then send the raw message to the parent Core to handle.
             this.parentPost(dataMsg, ...params);
         }
 
