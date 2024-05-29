@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const { buildKey, parseDocToSave, parseDocToRead } = require('./RedisHelpers');
 const RedisEventEmitters = require('./RedisEventEmitters');
 const { toError } = require('4hands-api/src/models/ErrorLog');
+const Collection = require('4hands-api/src/models/settings/Collection');
 
 /**
  * A class representing a Redis service for handling data operations.
@@ -14,6 +15,7 @@ class RedisService {
      * @constructor
      * @param {Object} setup - Configuration options for the Redis service.
      * @param {Object} setup.clientOptions - The native 'redis' package options.
+     * @param {Collection[]} setup.collections - Project collections list used to create paralell with the database.
      * @param {Object} setup.onConnect - Callback to when the client is connected to the Redis.
      * @param {Object} setup.onReady - Callback to when the RedisService is ready to be used.
      * @param {Object} setup.onEnd - Callback to when the client is closed.
@@ -22,11 +24,12 @@ class RedisService {
      * @param {Object} apiServer - An API server object.
      */
     constructor(setup, apiServer) {
-        const { clientOptions, onConnect, onReady, onEnd, onError, onReconnecting } = Object(setup);
+        const { clientOptions, collections = [], onConnect, onReady, onEnd, onError, onReconnecting } = Object(setup);
 
         try {
             this._apiServer = () => apiServer;
             this.client = createClient(clientOptions);
+            this.collections = collections;
             
             this.addListener('connect', onConnect);
             this.addListener('ready', onReady);
@@ -204,7 +207,7 @@ class RedisService {
 
         try {
             await new Promise((resolve, reject) => {
-                setup.collectionSet = this.apiServer.getCollectionSet(collection);
+                setup.collectionSet = this.getCollection(collection);
                 RedisEventEmitters.preCreate.call(setup, resolve, reject);
             });
 
@@ -230,7 +233,7 @@ class RedisService {
 
         try {
             await new Promise((resolve, reject) => {
-                setup.collectionSet = this.apiServer.getCollectionSet(collection);
+                setup.collectionSet = this.getCollection(collection);
                 RedisEventEmitters.preUpdate.call(setup, resolve, reject);
             });
 
@@ -279,7 +282,7 @@ class RedisService {
                 collection = prefixName || '';
                 parsedValue = parseDocToSave(null, data);
             } else {
-                parsedValue = parseDocToSave(this.apiServer.getCollectionSet(collection), data);
+                parsedValue = parseDocToSave(this.getCollection(collection), data);
             }
 
             Object.keys(parsedValue).map(key => {
@@ -307,7 +310,7 @@ class RedisService {
 
         try {
             await new Promise((resolve, reject) => {
-                setup.collectionSet = this.apiServer.getCollectionSet(collection);
+                setup.collectionSet = this.getCollection(collection);
                 RedisEventEmitters.preRead.call(setup, resolve, reject);
             });
 
@@ -318,7 +321,7 @@ class RedisService {
             }
 
             RedisEventEmitters.postRead.call(setup);
-            return parseDocToRead(this.apiServer.getCollectionSet(collection), doc);
+            return parseDocToRead(this.getCollection(collection), doc);
         } catch (err) {
             throw logError(err);
         }
@@ -378,7 +381,7 @@ class RedisService {
         try {
             const keys = await this.client.hKeys(key);
             await new Promise((resolve, reject) => {
-                setup.collectionSet = this.apiServer.getCollectionSet(collection);
+                setup.collectionSet = this.getCollection(collection);
                 RedisEventEmitters.preDelete.call(setup, resolve, reject);
             });
 
@@ -392,6 +395,10 @@ class RedisService {
         } catch (err) {
             throw logError(err);
         }
+    }
+
+    getCollection(collectionName) {
+        return this.collections[collectionName];
     }
 }
 
