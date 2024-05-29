@@ -16,30 +16,37 @@ class Core extends InstanceBase {
         this.isWorker = cluster.isWorker;
 
         if (this.isWorker) {
-            threads.map(threadPath => {
-                try {
-                    const configPath = path.normalize(
-                        __dirname.replace(
-                            path.normalize('/node_modules/4hands-api/src/services/InstanceManager'),
-                            threadPath
-                        )
-                    );
-                    
-                    const thread = require(configPath).init(this);
-                    thread.worker.on('online', () => {
-                        this.onlineThreads++;
-
-                        if (this.onlineThreads === threads.length && this.worker.state === 'online') {
-                            this.callbacks.onReady.call(this);
-                        }
-                    });
-
-                    thread.worker.on('message', this.handleThreadData.bind(this));
-                    this.setThread(thread);
-                } catch (err) {
-                    throw logError(err);
+            if (threads.length) {
+                threads.map(threadPath => {
+                    try {
+                        const configPath = path.normalize(
+                            __dirname.replace(
+                                path.normalize('/node_modules/4hands-api/src/services/InstanceManager'),
+                                threadPath
+                            )
+                        );
+                        
+                        const thread = require(configPath).init(this);
+                        thread.worker.on('online', () => {
+                            this.onlineThreads++;
+    
+                            if (this.onlineThreads === threads.length && this.worker.state === 'online') {
+                                this.callbacks.onReady.call(this);
+                            }
+                        });
+    
+                        thread.worker.on('message', this.handleThreadData.bind(this));
+                        this.setThread(thread);
+                    } catch (err) {
+                        throw logError(err);
+                    }
+                });
+            } else {
+                // If any thread needs to be started, then the CORE is READYs
+                if (this.worker.state === 'online') {
+                    this.callbacks.onReady.call(this);
                 }
-            });
+            }
 
             this.worker.on('message', this.handleThreadData.bind(this));
             this.worker.on('exit', this.callbacks.onClose.bind(this));
@@ -49,7 +56,7 @@ class Core extends InstanceBase {
     }
 
     get corePath() {
-        return `/${this.parent?.tagName}/${this.tagName}`;
+        return `/${this.tagName}`;
     }
     
     get cleanOut() {
@@ -74,33 +81,77 @@ class Core extends InstanceBase {
     handleThreadData(dataMsg, ...params) {
         const dataMessage = DataMessage.build(dataMsg);
 
-        if (dataMessage) {
-            if (dataMessage.isArrived(this.corePath)) {
-                return this.callbacks.onData.call(this, dataMsg.from, dataMsg.data);
-            }
+        // If it's not a valid DataMessage format, then trigger onData and deliver the message the way it is.
+        if (!dataMessage) {
+            this.callbacks.onData.call(this, dataMsg, ...params);
+        }
 
-            if (dataMessage.isToMaster) {
-                return this.sendToCluster(dataMsg, ...params);
-            }
+        // Check if the target of the DataMessage match with the current Core path.
+        if (dataMessage.isArrived(this.corePath)) {
+            if (dataMessage.route) {
+                const route = this.getRoute(dataMessage.route);
 
-            if (dataMessage.isCoreMatch(this.tagName)) {
-                const thread = this.getThread(dataMessage.targetThread);
-
-                if (thread) {
-                    return thread.postMe(dataMsg, ...params);
-                } else if (!dataMessage.targetThread) {
+                if (route) {
+                    return route.trigger(dataMessage);
+                } else {
+                    // If the route endpoint wasn't found, then call the onData callback and deliver the DataMessage since we hit the target
                     return this.callbacks.onData.call(this, dataMsg.from, dataMsg.data);
                 }
             } else {
-                return this.sendToCluster(dataMsg, ...params);
+                // If it doesn't have a route set, then call the onData callback and deliver the DataMessage since we hit the target
+                return this.callbacks.onData.call(this, dataMsg.from, dataMsg.data);
+            }
+        }
+
+        // If the DataMessage is set with "isToMaster" property to true, then the target is the Cluster, so send it to the Cluster
+        if (dataMessage.isToMaster) {
+            return this.sendToCluster(dataMsg, ...params);
+        }
+
+        // If we not arrived, but the current Core path match, that means the target iff in one of the child Thread of this current Core.
+        if (dataMessage.isCoreMatch(this.tagName)) {
+            const thread = this.getThread(dataMessage.targetThread);
+
+            // If the target Thread exist, then it will redirect to the Thread. But if don't exist, it will call the callback onData.
+            if (thread) {
+                return thread.postMe(dataMsg, ...params);
+            } else if (!dataMessage.targetThread) {
+                return this.callbacks.onData.call(this, dataMsg.from, dataMsg.data);
             }
         } else {
-            this.callbacks.onData.call(this, dataMsg, ...params);
+            // If the core target doesn't match, we have nothing to do on this level, we need to go up to Cluster.
+            return this.sendToCluster(dataMsg, ...params);
         }
     }
 
     setWorker(worker) {
         this._worker = () => worker;
+    }
+
+    createThread(thread) {
+        if (!this.isWorker) {
+            return;
+        }
+
+        if (thread instanceof Thread) {
+            thread.init(this);
+            thread = this.addThreadListeners(thread);
+
+            this.setThread(thread);
+        } else {
+            const newThread = this.setThread(thread);
+            return newThread.init();
+        }
+    }
+
+    addThreadListeners(thread) {
+        thread.worker.on('online', () => {
+            this.onlineThreads++;
+            this.callbacks.onReady.call(this);
+        });
+
+        thread.worker.on('message', this.handleThreadData.bind(this));
+        return thread;
     }
 
     getThread(tagName) {
