@@ -195,6 +195,7 @@ class ServerAPI {
         if (!this.noRedisServer || !this.noServer) {
             const RedisService = require('4hands-api/src/services/Redis');
             this.redisServ = new RedisService({
+                collections: this.database.collections,
                 url: this.redisURL,
                 onError: (err) => {
                     throw logError(err);

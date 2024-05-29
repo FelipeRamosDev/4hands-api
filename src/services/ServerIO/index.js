@@ -126,10 +126,10 @@ class ServerIO {
             serverOptions.cert = this.ssl.cert;
         } else if (this.ssl.keyPath && this.ssl.certPath) {
             // In case of the file PATH be provided
-            const isKeyExist = FS.isExist(this.ssl.keyPath);
-            const isCertExist = FS.isExist(this.ssl.certPath);
-            const keyContent = FS.readFileSync(this.ssl.keyPath);
-            const certContent = FS.readFileSync(this.ssl.certPath);
+            const isKeyExist = FS.isExist(this.ssl.keyPath.replace(/^\//,''));
+            const isCertExist = FS.isExist(this.ssl.certPath.replace(/^\//,''));
+            const keyContent = FS.readFileSync(this.ssl.keyPath.replace(/^\//,''));
+            const certContent = FS.readFileSync(this.ssl.certPath.replace(/^\//,''));
 
             if (!isKeyExist || !isCertExist) {
                 throw new Error('SSL files wasn\'t found!');
