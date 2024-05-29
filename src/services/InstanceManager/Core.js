@@ -16,30 +16,36 @@ class Core extends InstanceBase {
         this.isWorker = cluster.isWorker;
 
         if (this.isWorker) {
-            threads.map(threadPath => {
-                try {
-                    const configPath = path.normalize(
-                        __dirname.replace(
-                            path.normalize('/node_modules/4hands-api/src/services/InstanceManager'),
-                            threadPath
-                        )
-                    );
-                    
-                    const thread = require(configPath).init(this);
-                    thread.worker.on('online', () => {
-                        this.onlineThreads++;
-
-                        if (this.onlineThreads === threads.length && this.worker.state === 'online') {
-                            this.callbacks.onReady.call(this);
-                        }
-                    });
-
-                    thread.worker.on('message', this.handleThreadData.bind(this));
-                    this.setThread(thread);
-                } catch (err) {
-                    throw logError(err);
+            if (threads.length) {
+                threads.map(threadPath => {
+                    try {
+                        const configPath = path.normalize(
+                            __dirname.replace(
+                                path.normalize('/node_modules/4hands-api/src/services/InstanceManager'),
+                                threadPath
+                            )
+                        );
+                        
+                        const thread = require(configPath).init(this);
+                        thread.worker.on('online', () => {
+                            this.onlineThreads++;
+    
+                            if (this.onlineThreads === threads.length && this.worker.state === 'online') {
+                                this.callbacks.onReady.call(this);
+                            }
+                        });
+    
+                        thread.worker.on('message', this.handleThreadData.bind(this));
+                        this.setThread(thread);
+                    } catch (err) {
+                        throw logError(err);
+                    }
+                });
+            } else {
+                if (this.worker.state === 'online') {
+                    this.callbacks.onReady.call(this);
                 }
-            });
+            }
 
             this.worker.on('message', this.handleThreadData.bind(this));
             this.worker.on('exit', this.callbacks.onClose.bind(this));
@@ -49,7 +55,7 @@ class Core extends InstanceBase {
     }
 
     get corePath() {
-        return `/${this.parent?.tagName}/${this.tagName}`;
+        return `/${this.tagName}`;
     }
     
     get cleanOut() {
@@ -76,7 +82,15 @@ class Core extends InstanceBase {
 
         if (dataMessage) {
             if (dataMessage.isArrived(this.corePath)) {
-                return this.callbacks.onData.call(this, dataMsg.from, dataMsg.data);
+                if (dataMessage.route) {
+                    const route = this.getRoute(dataMessage.route);
+
+                    if (route) {
+                        return route.trigger(dataMessage);
+                    }
+                } else {
+                    return this.callbacks.onData.call(this, dataMsg.from, dataMsg.data);
+                }
             }
 
             if (dataMessage.isToMaster) {
@@ -101,6 +115,32 @@ class Core extends InstanceBase {
 
     setWorker(worker) {
         this._worker = () => worker;
+    }
+
+    createThread(thread) {
+        if (!this.isWorker) {
+            return;
+        }
+
+        if (thread instanceof Thread) {
+            thread.init(this);
+            thread = this.addThreadListeners(thread);
+
+            this.setThread(thread);
+        } else {
+            const newThread = this.setThread(thread);
+            return newThread.init();
+        }
+    }
+
+    addThreadListeners(thread) {
+        thread.worker.on('online', () => {
+            this.onlineThreads++;
+            this.callbacks.onReady.call(this);
+        });
+
+        thread.worker.on('message', this.handleThreadData.bind(this));
+        return thread;
     }
 
     getThread(tagName) {

@@ -1,7 +1,7 @@
-const InstanceBase = require('./InstanceBase');
-const Core = require('./Core');
 const cluster = require('cluster');
 const path = require('path');
+const InstanceBase = require('./InstanceBase');
+const Core = require('./Core');
 const DataMessage = require('4hands-api/src/services/InstanceManager/DataMessage');
 
 class Cluster extends InstanceBase {
@@ -138,7 +138,7 @@ class Cluster extends InstanceBase {
             const core = this.getCore(dataMessage.targetCore);
 
             if (core) {
-                core.sendMe(dataMessage.toObject());
+                core.postMe(dataMessage.toObject());
             }
         }
     }

@@ -30,22 +30,7 @@ class Thread extends InstanceBase {
             // Setting the workerData coming from parent to the Thread's dataStore.
             Object.keys(workerData).map(key => this.setValue(key, workerData[key]));
 
-            parentPort.on('message', (dataMsg, ...params) => {
-                const dataMessage = DataMessage.build(dataMsg);
-
-                if (!dataMessage) {
-                    return this.callbacks.onData.call(this, dataMsg, ...params);
-                }
-
-                if (dataMessage.isArrived(this.threadPath)) {
-                    if (!dataMessage.route) {
-                        return this.callbacks.onData.call(this, dataMsg.from, dataMsg.data);
-                    }
-
-                    const route = this.getRoute(dataMessage.route);
-                    route.trigger(dataMessage);
-                }
-            });
+            parentPort.on('message', this.handleOnData.bind(this));
         }
 
         this.isInit = true;
@@ -67,6 +52,30 @@ class Thread extends InstanceBase {
             ...this,
             parent: undefined
         }));
+    }
+
+    handleOnData(dataMsg, ...params) {
+        const dataMessage = DataMessage.build(dataMsg);
+
+        if (!dataMessage) {
+            return this.callbacks.onData.call(this, dataMsg, ...params);
+        }
+
+        if (dataMessage.isArrived(this.threadPath)) {
+            if (!dataMessage.route) {
+                return this.callbacks.onData.call(this, dataMsg.from, dataMsg.data);
+            }
+
+            const route = this.getRoute(dataMessage.route);
+            if (route) {
+                route.trigger(dataMessage);
+            } else {
+                this.parentPost(dataMsg, ...params);
+            }
+        } else {
+            this.parentPost(dataMsg, ...params);
+        }
+
     }
 
     postMe(...data) {
