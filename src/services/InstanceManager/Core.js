@@ -6,8 +6,8 @@ const path = require('path');
 
 class Core extends InstanceBase {
     constructor(setup) {
-        const { worker, threads = [] } = Object(setup);
         super(setup);
+        const { worker, threads = [] } = Object(setup);
 
         this._worker = () => worker || cluster.worker;
         this._threads = {};
@@ -27,16 +27,7 @@ class Core extends InstanceBase {
                         );
                         
                         const thread = require(configPath).init(this);
-                        thread.worker.on('online', () => {
-                            this.onlineThreads++;
-    
-                            if (this.onlineThreads === threads.length && this.worker.state === 'online') {
-                                this.callbacks.onReady.call(this);
-                            }
-                        });
-    
-                        thread.worker.on('message', this.handleThreadData.bind(this));
-                        this.setThread(thread);
+                        this.setThread(this.addThreadListeners(thread, threads.length));
                     } catch (err) {
                         throw logError(err);
                     }
@@ -48,7 +39,9 @@ class Core extends InstanceBase {
                 }
             }
 
-            this.worker.on('message', this.handleThreadData.bind(this));
+            if (!this.worker?._events?.message) {
+                this.worker.on('message', this.handleThreadData.bind(this));
+            }
             this.worker.on('exit', this.callbacks.onClose.bind(this));
             this.worker.on('error', this.callbacks.onError.bind(this));
             this.worker.on('errormessage', this.callbacks.onError.bind(this));
@@ -83,7 +76,7 @@ class Core extends InstanceBase {
 
         // If it's not a valid DataMessage format, then trigger onData and deliver the message the way it is.
         if (!dataMessage) {
-            this.callbacks.onData.call(this, dataMsg, ...params);
+            return this.callbacks.onData.call(this, dataMsg, ...params);
         }
 
         // Check if the target of the DataMessage match with the current Core path.
@@ -144,10 +137,13 @@ class Core extends InstanceBase {
         }
     }
 
-    addThreadListeners(thread) {
+    addThreadListeners(thread, threadsLength) {
         thread.worker.on('online', () => {
             this.onlineThreads++;
-            this.callbacks.onReady.call(this);
+
+            if ((threadsLength == undefined || threadsLength === this.onlineThreads) && this.worker.state === 'online') {
+                this.callbacks.onReady.call(this);
+            }
         });
 
         thread.worker.on('message', this.handleThreadData.bind(this));
@@ -172,7 +168,9 @@ class Core extends InstanceBase {
     }
 
     postMe(...data) {
-        this.worker.send(...data);
+        if (!this.isWorker) {
+            this.worker.send(...data);
+        }
     }
 
     sendTo(target, data, route) {

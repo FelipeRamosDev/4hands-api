@@ -114,15 +114,27 @@ class Thread extends InstanceBase {
         }
     }
 
-    sendToCore(data) {
+    sendToCore(data, route) {
         if (this.isThread) {
-            this.sendTo('/', data);
+            this.sendTo('/' + this.parent.tagName, data, route);
         }
     }
 
     sendToCluster(data) {
         if (this.isThread) {
             this.sendTo('/', data);
+        }
+    }
+
+    terminate() {
+        if (this.isThread) {
+            this.sendTo(
+                `/${this.parent.tagName}`,
+                { threadTag: this.tagName },
+                '/terminate-thread'
+            );
+        } else {
+            this.worker.terminate();
         }
     }
 }

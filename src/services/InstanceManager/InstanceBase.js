@@ -8,6 +8,7 @@ class InstanceBase {
             tagName,
             filePath,
             routes = [],
+            _routes = {},
             dataStore = {},
             onReady = () => {},
             onData = () => {},
@@ -18,7 +19,7 @@ class InstanceBase {
 
         this._parent = () => parent;
         this._dataStore = dataStore;
-        this._routes = {};
+        this._routes = _routes;
 
         this.id = id || this.genRandomBytes();
         this.tagName = tagName || this.id;
@@ -32,7 +33,7 @@ class InstanceBase {
             onError
         };
 
-        routes.map(route => this.setRoute(route));
+        routes.map(route => !this._routes[route.tagName] && this.setRoute(route));
     }
 
     get parent() {
@@ -69,6 +70,7 @@ class InstanceBase {
             if (route instanceof InstanceRoute) {
                 route.setInstance(this);
                 this._routes[route.path] = route;
+                return route;
             } else {
                 const newRoute = new InstanceRoute(route, this);
                 this._routes[route.path] = newRoute;
