@@ -187,6 +187,13 @@ class Core extends InstanceBase {
 
                 if (thread) {
                     thread.sendMe(dataMessage.from, dataMessage.data);
+                } else {
+                    const route = this.getRoute(dataMessage.route);
+                    if (route) {
+                        route.trigger(dataMessage.toObject());
+                    } else {
+                        this.postMe(dataMessage.toObject());
+                    }
                 }
             } else {
                 this.sendToCluster(dataMessage.data);
@@ -204,6 +211,10 @@ class Core extends InstanceBase {
         if (this.isWorker) {
             process.send(...data);
         }
+    }
+
+    throwError(err) {
+        this.callbacks.onError(err);
     }
 
     terminateThread(threadTag) {

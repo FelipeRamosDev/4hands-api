@@ -126,14 +126,14 @@ class Thread extends InstanceBase {
         }
     }
 
+    restart() {
+        if (!this.isThread) {
+            this.terminate();
+        }
+    }
+
     terminate() {
-        if (this.isThread) {
-            this.sendTo(
-                `/${this.parent.tagName}`,
-                { threadTag: this.tagName },
-                '/terminate-thread'
-            );
-        } else {
+        if (!this.isThread) {
             this.worker.terminate();
         }
     }
