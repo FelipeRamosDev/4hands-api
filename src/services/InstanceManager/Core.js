@@ -167,6 +167,10 @@ class Core extends InstanceBase {
         return thread;
     }
 
+    deleteThread(tagName) {
+        delete this._threads[tagName];
+    }
+
     postMe(...data) {
         if (!this.isWorker) {
             this.worker.send(...data);
@@ -199,6 +203,15 @@ class Core extends InstanceBase {
     sendToCluster(...data) {
         if (this.isWorker) {
             process.send(...data);
+        }
+    }
+
+    terminateThread(threadTag) {
+        const thread = this.getThread(threadTag);
+
+        if (thread) {
+            thread.terminate();
+            this.deleteThread(threadTag);
         }
     }
 }
