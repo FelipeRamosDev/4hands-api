@@ -92,7 +92,15 @@ class Thread extends InstanceBase {
 
     parentPost(...data) {
         if (this.isThread) {
-            parentPort.postMessage(...data);
+            const toSend = data.map(item => {
+                if (typeof item === 'object' && item != null) {
+                    return JSON.parse(JSON.stringify(item));
+                } else {
+                    return item;
+                }
+            });
+
+            parentPort.postMessage(...toSend);
         }
     }
 
