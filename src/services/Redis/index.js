@@ -229,7 +229,7 @@ class RedisService {
      * @throws {Error} Will throw an error if document update fails.
      */
     async updateDoc(setup) {
-        const { collection, uid, data } = Object(setup);
+        const { collection = '', uid = '', data = {} } = Object(setup);
 
         try {
             await new Promise((resolve, reject) => {
@@ -242,9 +242,8 @@ class RedisService {
                 throw toError(ready)
             }
 
-            const updated = await this.getDoc({ collection, uid });
-            RedisEventEmitters.postUpdate.call({ ...setup, data: updated });
-            return updated;
+            RedisEventEmitters.postUpdate.call({ ...setup, data });
+            return data;
         } catch (err) {
             throw logError(err);
         }
@@ -309,18 +308,12 @@ class RedisService {
         const { prefixName, collection, uid } = Object(setup);
 
         try {
-            await new Promise((resolve, reject) => {
-                setup.collectionSet = this.getCollection(collection);
-                RedisEventEmitters.preRead.call(setup, resolve, reject);
-            });
-
             const doc = await this.client.hGetAll(buildKey(collection || prefixName, uid));
 
             if (!Object.keys(doc).length) {
                 return;
             }
 
-            RedisEventEmitters.postRead.call(setup);
             return parseDocToRead(this.getCollection(collection), doc);
         } catch (err) {
             throw logError(err);
