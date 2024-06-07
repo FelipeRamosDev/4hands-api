@@ -42,6 +42,7 @@ class Core extends InstanceBase {
             if (!this.worker?._events?.message) {
                 this.worker.on('message', this.handleThreadData.bind(this));
             }
+
             this.worker.on('exit', this.callbacks.onClose.bind(this));
             this.worker.on('error', this.callbacks.onError.bind(this));
             this.worker.on('errormessage', this.callbacks.onError.bind(this));
@@ -101,7 +102,7 @@ class Core extends InstanceBase {
             return this.sendToCluster(dataMsg, ...params);
         }
 
-        // If we not arrived, but the current Core path match, that means the target iff in one of the child Thread of this current Core.
+        // If we not arrived, but the current Core path match, that means the target if in one of the child Thread of this current Core.
         if (dataMessage.isCoreMatch(this.tagName)) {
             const thread = this.getThread(dataMessage.targetThread);
 
@@ -189,6 +190,7 @@ class Core extends InstanceBase {
                     thread.sendMe(dataMessage.from, dataMessage.data);
                 } else {
                     const route = this.getRoute(dataMessage.route);
+
                     if (route) {
                         route.trigger(dataMessage.toObject());
                     } else {
