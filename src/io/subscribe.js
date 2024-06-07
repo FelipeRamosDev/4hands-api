@@ -31,7 +31,7 @@ module.exports = SubscriberIO.buildSubscriber({
         }
         
         if (type === 'doc') {
-            subscription = this.subscribeDoc(socket.id, collection, docUID);
+            subscription = this.subscribeDoc(socket.id, collection, docUID, options);
         }
 
         if (subscription) {

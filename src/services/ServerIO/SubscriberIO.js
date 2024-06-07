@@ -127,12 +127,14 @@ class SubscriberIO extends ServerIO {
      * @param {string} docUID - The unique identifier of the document to subscribe to.
      * @returns {SubscriptionIO} - The created SubscriptionIO instance.
      */
-    subscribeDoc(socketID, collection, docUID) {
+    subscribeDoc(socketID, collection, docUID, options) {
+        const { loadMethod } = Object(options);
         const subscription = new SubscriptionIO({
             type: 'doc',
             socketID,
             collection,
-            docUID
+            docUID,
+            loadMethod
         }, this);
 
         this.setDocSubscription(subscription);

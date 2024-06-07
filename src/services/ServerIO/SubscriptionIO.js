@@ -33,12 +33,37 @@ class SubscriptionIO {
             this.filter = filter;
             this.options = options;
 
-            this.loadQuery();
+            if (typeof this.customLoadQueries === 'function') {
+                this.customLoadQueries.call(this);
+            } else if (typeof this.customLoadQueries === 'object' && !Array.isArray(this.customLoadQueries)) {
+                const customMethod = this.customLoadQueries[this.loadMethod];
+
+                if (typeof customMethod === 'function') {
+                    customMethod.call(this);
+                } else {
+                    this.loadQuery();
+                }
+            } else {
+                this.loadQuery();
+            }
         }
 
         if (type === 'doc') {
             this.docUID = docUID;
-            this.loadDoc();
+
+            if (typeof this.customLoadDocs === 'function') {
+                this.customLoadDocs.call(this);
+            } else if (typeof this.customLoadDocs === 'object' && !Array.isArray(this.customLoadDocs)) {
+                const customMethod = this.customLoadDocs[this.loadMethod];
+
+                if (typeof customMethod === 'function') {
+                    customMethod.call(this);
+                } else {
+                    this.loadDoc();
+                }
+            } else {
+                this.loadDoc();
+            }
         }
     }
 
@@ -82,7 +107,11 @@ class SubscriptionIO {
                 return;
             }
 
-            loadMethod = this.customLoadQueries[this.loadMethod];
+            if (typeof this.customLoadQueries === 'function') {
+                loadMethod = this.customLoadQueries;
+            } else {
+                loadMethod = this.customLoadQueries[this.loadMethod];
+            }
         }
         
         if (this.type === 'doc') {
@@ -90,7 +119,11 @@ class SubscriptionIO {
                 return;
             }
 
-            loadMethod = this.customLoadDocs[this.loadMethod];
+            if (typeof this.customLoadDocs === 'function') {
+                loadMethod = this.customLoadDocs;
+            } else {
+                loadMethod = this.customLoadDocs[this.loadMethod];
+            }
         }
 
         if (typeof loadMethod === 'function') {
@@ -115,16 +148,11 @@ class SubscriptionIO {
      * Load query data based on the filter and options.
      *
      * @async
-     * @param {boolean} [jumpCustom=false] - Whether to skip the custom load method.
      * @param {boolean} [preventSnapshot=false] - Whether to prevent sending a snapshot.
      * @returns {Promise<Object[]>} - The loaded query data.
      * @throws {Error} - Throws an error if the loading operation fails.
      */
-    async loadQuery(jumpCustom = false, preventSnapshot = false) {
-        if (!jumpCustom && this.customLoadMethod) {
-            return this.customLoadMethod();
-        }
-
+    async loadQuery(preventSnapshot = false) {
         try {
             const { sort, limit, page } = Object(this.options);
             const toLoad = CRUD.query({
@@ -159,16 +187,11 @@ class SubscriptionIO {
      * Load a document based on the filter or document UID.
      *
      * @async
-     * @param {boolean} [jumpCustom=false] - Whether to skip the custom load method.
      * @param {boolean} [preventSnapshot=false] - Whether to prevent sending a snapshot.
      * @returns {Promise<Object>} - The loaded document.
      * @throws {Error} - Throws an error if the loading operation fails.
      */
-    async loadDoc(jumpCustom = false, preventSnapshot = false) {
-        if (!jumpCustom && this.customLoadMethod) {
-            return this.customLoadMethod();
-        }
-
+    async loadDoc(preventSnapshot = false) {
         try {
             const toLoad = CRUD.getDoc({
                 collectionName: this.collection,
