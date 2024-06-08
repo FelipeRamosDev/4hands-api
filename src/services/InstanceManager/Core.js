@@ -7,15 +7,16 @@ const path = require('path');
 class Core extends InstanceBase {
     constructor(setup) {
         super(setup);
-        const { worker, threads = [] } = Object(setup);
+        const { worker, _threads = {}, threads = [] } = Object(setup);
 
         this._worker = () => worker || cluster.worker;
-        this._threads = {};
+        this._threads = {...this._threads, ..._threads};
         this.type = 'core';
         this.onlineThreads = 0;
-        this.isWorker = cluster.isWorker;
 
         if (this.isWorker) {
+            global._core = this;
+
             if (threads.length) {
                 threads.map(threadPath => {
                     try {
@@ -46,7 +47,13 @@ class Core extends InstanceBase {
             this.worker.on('exit', this.callbacks.onClose.bind(this));
             this.worker.on('error', this.callbacks.onError.bind(this));
             this.worker.on('errormessage', this.callbacks.onError.bind(this));
+        } else {
+            global._parentCore = this;
         }
+    }
+
+    get isWorker() {
+        return cluster.isWorker;
     }
 
     get corePath() {
@@ -68,7 +75,7 @@ class Core extends InstanceBase {
         if (this.isWorker) {
             return cluster.worker?.id;
         } else {
-            return this.worker.id;
+            return this.worker?.id;
         }
     }
 
