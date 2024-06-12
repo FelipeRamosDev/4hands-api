@@ -194,7 +194,7 @@ class Core extends InstanceBase {
                 const thread = this.getThread(dataMessage.targetThread);
 
                 if (thread) {
-                    thread.sendMe(dataMessage.from, dataMessage.data);
+                    thread.sendMe(dataMessage.from, dataMessage.data, dataMessage.route);
                 } else {
                     const route = this.getRoute(dataMessage.route);
 
@@ -205,7 +205,7 @@ class Core extends InstanceBase {
                     }
                 }
             } else {
-                this.sendToCluster(dataMessage.data);
+                this.sendToCluster(dataMessage);
             }
         }
     }

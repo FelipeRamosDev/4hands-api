@@ -37,6 +37,12 @@ class Thread extends InstanceBase {
         return this;
     }
 
+    get threadID() {
+        if (this.isThread) {
+            return this.worker?.threadId;
+        }
+    }
+
     get parentCore() {
         return this.getValue('parentCore');
     }

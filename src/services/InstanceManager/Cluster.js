@@ -56,7 +56,7 @@ class Cluster extends InstanceBase {
 
                 cluster.on('message', (worker, dataMsg, ...args) => {
                     const dataMessage = DataMessage.build(dataMsg);
-                    if (dataMessage.isToMaster) {
+                    if (dataMessage?.isToMaster) {
                         return this.callbacks.onData.call(this, dataMsg.from, dataMsg.data);
                     }
 
