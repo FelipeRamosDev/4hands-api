@@ -28,9 +28,9 @@ class SubscriptionIO {
         this.type = type;
         this.loadMethod = loadMethod;
         this.collection = collection;
+        this.filter = filter;
 
         if (type === 'query') {
-            this.filter = filter;
             this.options = options;
 
             if (typeof this.customLoadQueries === 'function') {
