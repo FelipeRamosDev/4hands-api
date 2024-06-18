@@ -84,6 +84,10 @@ class InstanceBase {
     getRoute(routePath) {
         return this._routes[routePath];
     }
+
+    triggerError(err) {
+        this.callbacks.onError(err);
+    }
 }
 
 module.exports = InstanceBase;
