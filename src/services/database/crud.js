@@ -153,6 +153,27 @@ async function update(setup) {
     }
 }
 
+async function updateMany(params, mongooseOptions) {
+    const { collectionName, filter, data } = Object(params);
+
+    try {
+        const queryFilter = helpers.treatFilter(filter);
+        const Collection = helpers.getCollectionModel(collectionName);
+        const updated = await Collection.updateMany(queryFilter, data, mongooseOptions);
+
+        if (updated.acknowledged) {
+            return { success: true };
+        }
+
+        return toError({
+            name: 'DB_UPDATE_MANY',
+            message: `The documents couldn't be updated! Error caugth when updating many at "CRUD.updateMany".`
+        });
+    } catch (err) {
+        throw logError(err);
+    }
+}
+
 /**
  * Deletes documents from the specified collection based on the provided filter and delete type.
  * @async
@@ -205,5 +226,6 @@ module.exports = {
     query,
     getDoc,
     update,
+    updateMany,
     del
 };
