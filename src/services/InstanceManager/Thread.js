@@ -16,7 +16,7 @@ class Thread extends InstanceBase {
         }
 
         if (!this.isThread) {
-            this.setValue('parentCore', this.parent?.cleanOut);
+            this.setValue('parentCore', this.parent?.getCleanOut());
             this.worker = new Worker(this.filePath, {
                 workerData: this.getAllValues()
             });
@@ -53,7 +53,11 @@ class Thread extends InstanceBase {
         }
     }
 
-    get cleanOut() {
+    clone() {
+        return new Thread(this);
+    }
+
+    getCleanOut() {
         return JSON.parse(JSON.stringify({
             ...this,
             parent: undefined

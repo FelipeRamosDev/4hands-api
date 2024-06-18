@@ -14,9 +14,8 @@ class Core extends InstanceBase {
         this.type = 'core';
         this.onlineThreads = 0;
 
+        global._core = this;
         if (this.isWorker) {
-            global._core = this;
-
             if (threads.length) {
                 threads.map(threadPath => {
                     try {
@@ -60,7 +59,7 @@ class Core extends InstanceBase {
         return `/${this.tagName}`;
     }
     
-    get cleanOut() {
+    getCleanOut() {
         return JSON.parse(JSON.stringify({
             ...this,
             parent: undefined
