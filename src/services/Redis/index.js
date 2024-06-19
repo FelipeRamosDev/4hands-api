@@ -390,6 +390,11 @@ class RedisService {
         }
     }
 
+    /**
+     * Retrieves a collection by its name from the collections object.
+     * @param {string} collectionName - The name of the collection to retrieve.
+     * @returns {Object|undefined} The collection object if found, or undefined if not found.
+     */
     getCollection(collectionName) {
         return this.collections[collectionName];
     }

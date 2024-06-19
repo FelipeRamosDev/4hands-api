@@ -153,6 +153,17 @@ async function update(setup) {
     }
 }
 
+/**
+ * Updates multiple documents in the specified collection.
+ * @async
+ * @param {Object} params - The parameters for the update operation.
+ * @param {string} params.collectionName - The name of the collection to update documents in.
+ * @param {Object} params.filter - The filter criteria to select documents for updating.
+ * @param {Object} params.data - The update data to be applied to the selected documents.
+ * @param {Object} [mongooseOptions] - Additional options for the Mongoose updateMany operation.
+ * @returns {Promise<Object>} An object indicating success or containing error information if the update fails.
+ * @throws {Error.Log} If an error occurs during the update operation.
+ */
 async function updateMany(params, mongooseOptions) {
     const { collectionName, filter, data } = Object(params);
 
