@@ -2,7 +2,14 @@ const { Worker, isMainThread, parentPort, workerData } = require('worker_threads
 const InstanceBase = require('./InstanceBase');
 const DataMessage = require('./DataMessage');
 
+/**
+ * Represents a thread in a multi-threaded environment, extending the capabilities of InstanceBase.
+ */
 class Thread extends InstanceBase {
+    /**
+     * Creates an instance of Thread.
+     * @param {Object} setup - The setup object for the Thread.
+     */
     constructor(setup) {
         super(setup);
 
@@ -10,6 +17,11 @@ class Thread extends InstanceBase {
         this.isThread = !isMainThread;
     }
 
+    /**
+     * Initializes the thread, setting up worker if it's the main thread or handling incoming messages if it's a worker thread.
+     * @param {InstanceBase} [parent] - The parent instance to associate with this thread.
+     * @returns {Thread} The initialized thread instance.
+     */
     init(parent) {
         if (parent) {
             this.setParent(parent);
@@ -37,26 +49,46 @@ class Thread extends InstanceBase {
         return this;
     }
 
+    /**
+     * Retrieves the thread ID if this is a worker thread.
+     * @returns {number|undefined} The thread ID or undefined if not a worker thread.
+     */
     get threadID() {
         if (this.isThread) {
             return this.worker?.threadId;
         }
     }
 
+    /**
+     * Retrieves the parent core value from the data store.
+     * @returns {Object} The parent core value.
+     */
     get parentCore() {
         return this.getValue('parentCore');
     }
 
+    /**
+     * Constructs the path for this thread based on its parent core and tag name.
+     * @returns {string|undefined} The constructed thread path or undefined if no parent core is present.
+     */
     get threadPath() {
         if (this.parentCore?.tagName) {
             return `/${this.parentCore.tagName}/${this.tagName}`;
         }
     }
 
+    /**
+     * Creates a clone of this Thread instance.
+     * @returns {Thread} A new Thread instance cloned from this one.
+     */
     clone() {
         return new Thread(this);
     }
 
+    /**
+     * Generates a clean output of this Thread instance without circular references or non-serializable values.
+     * @returns {Object} A clean representation of this Thread instance.
+     */
     getCleanOut() {
         return JSON.parse(JSON.stringify({
             ...this,
@@ -64,6 +96,11 @@ class Thread extends InstanceBase {
         }));
     }
 
+    /**
+     * Handles incoming data messages, processing them or forwarding them as needed.
+     * @param {Object} dataMsg - The incoming data message object.
+     * @param {...any} params - Additional parameters passed along with the data message.
+     */
     handleOnData(dataMsg, ...params) {
         const dataMessage = DataMessage.build(dataMsg);
 
@@ -94,12 +131,20 @@ class Thread extends InstanceBase {
 
     }
 
+    /**
+     * Posts data to this thread if it's the main thread.
+     * @param {...any} data - The data to post to the worker thread.
+     */
     postMe(...data) {
         if (!this.isThread) {
             this.worker.postMessage(...data);
         }
     }
 
+    /**
+     * Posts data to the parent port if this is a worker thread.
+     * @param {...any} data - The data to post to the parent port.
+     */
     parentPost(...data) {
         if (this.isThread) {
             const toSend = data.map(item => {
@@ -114,6 +159,12 @@ class Thread extends InstanceBase {
         }
     }
 
+    /**
+     * Sends a message from this thread to itself if it's the main thread, constructing a DataMessage object for it.
+     * @param {string} from - The origin of the message.
+     * @param {Object} data - The data to send in the message.
+     * @param {string} [route] - The route associated with the message, if any.
+     */
     sendMe(from, data, route) {
         if (!this.isThread) {
             const dataMessage = DataMessage.build({ target: this.threadPath, route, data, from });
@@ -123,6 +174,12 @@ class Thread extends InstanceBase {
         }
     }
 
+    /**
+     * Sends a message to a specified target, constructing a DataMessage object for it.
+     * @param {string} target - The target path to send the message to.
+     * @param {Object} data - The data to send in the message.
+     * @param {string} [route] - The route associated with the message, if any.
+     */
     sendTo(target, data, route) {
         if (this.isThread) {
             const dataMessage = DataMessage.build({ target, route, data, from: this.threadPath });
@@ -132,24 +189,39 @@ class Thread extends InstanceBase {
         }
     }
 
+    /**
+     * Sends a message to the core associated with this thread.
+     * @param {Object} data - The data to send in the message.
+     * @param {string} [route] - The route associated with the message, if any.
+     */
     sendToCore(data, route) {
         if (this.isThread) {
             this.sendTo('/' + this.parent.tagName, data, route);
         }
     }
 
+    /**
+     * Sends a message to the cluster, targeting the root path.
+     * @param {Object} data - The data to send in the message.
+     */
     sendToCluster(data) {
         if (this.isThread) {
             this.sendTo('/', data);
         }
     }
 
+    /**
+     * Restarts this thread if it's the main thread.
+     */
     restart() {
         if (!this.isThread) {
             this.terminate();
         }
     }
 
+    /**
+     * Terminates this thread if it's the main thread.
+     */
     terminate() {
         if (!this.isThread) {
             this.worker.terminate();

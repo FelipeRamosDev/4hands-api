@@ -115,6 +115,11 @@ class ServerIO {
         return this.serverIO.io;
     }
 
+    /**
+     * Creates an HTTPS server with SSL configuration.
+     * @returns {https.Server} The created HTTPS server.
+     * @throws {Error} If the SSL files are not found when paths are provided.
+     */
     createHttps() {
         const https = require('https');
         const FS = require('../FS');
