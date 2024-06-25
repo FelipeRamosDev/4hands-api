@@ -2,6 +2,8 @@ const { createClient } = require('redis');
 const crypto = require('crypto');
 const { buildKey, parseDocToSave, parseDocToRead } = require('./RedisHelpers');
 const RedisEventEmitters = require('./RedisEventEmitters');
+const { toError } = require('4hands-api/src/models/ErrorLog');
+const Collection = require('4hands-api/src/models/settings/Collection');
 
 /**
  * A class representing a Redis service for handling data operations.
@@ -12,14 +14,22 @@ class RedisService {
      * 
      * @constructor
      * @param {Object} setup - Configuration options for the Redis service.
+     * @param {Object} setup.clientOptions - The native 'redis' package options.
+     * @param {Collection[]} setup.collections - Project collections list used to create paralell with the database.
+     * @param {Object} setup.onConnect - Callback to when the client is connected to the Redis.
+     * @param {Object} setup.onReady - Callback to when the RedisService is ready to be used.
+     * @param {Object} setup.onEnd - Callback to when the client is closed.
+     * @param {Object} setup.onError - Callback to when the client got an error.
+     * @param {Object} setup.onReconnecting - Callback to when the client is reconnected to the Redis.
      * @param {Object} apiServer - An API server object.
      */
     constructor(setup, apiServer) {
-        const { clientOptions, onConnect, onReady, onEnd, onError, onReconnecting } = Object(setup);
+        const { clientOptions, collections = [], onConnect, onReady, onEnd, onError, onReconnecting } = Object(setup);
 
         try {
             this._apiServer = () => apiServer;
             this.client = createClient(clientOptions);
+            this.collections = collections;
             
             this.addListener('connect', onConnect);
             this.addListener('ready', onReady);
@@ -197,7 +207,7 @@ class RedisService {
 
         try {
             await new Promise((resolve, reject) => {
-                setup.collectionSet = this.apiServer.getCollectionSet(collection);
+                setup.collectionSet = this.getCollection(collection);
                 RedisEventEmitters.preCreate.call(setup, resolve, reject);
             });
 
@@ -219,17 +229,21 @@ class RedisService {
      * @throws {Error} Will throw an error if document update fails.
      */
     async updateDoc(setup) {
-        const { collection, uid, data } = Object(setup);
+        const { collection = '', uid = '', data = {} } = Object(setup);
 
         try {
             await new Promise((resolve, reject) => {
-                setup.collectionSet = this.apiServer.getCollectionSet(collection);
+                setup.collectionSet = this.getCollection(collection);
                 RedisEventEmitters.preUpdate.call(setup, resolve, reject);
             });
 
-            const updated = await this.setDoc({ collection, uid, data });
-            RedisEventEmitters.postUpdate.call(setup);
-            return updated;
+            const ready = await this.setDoc({ collection, uid, data });
+            if (!ready || ready.error) {
+                throw toError(ready)
+            }
+
+            RedisEventEmitters.postUpdate.call({ ...setup, data });
+            return data;
         } catch (err) {
             throw logError(err);
         }
@@ -267,7 +281,7 @@ class RedisService {
                 collection = prefixName || '';
                 parsedValue = parseDocToSave(null, data);
             } else {
-                parsedValue = parseDocToSave(this.apiServer.getCollectionSet(collection), data);
+                parsedValue = parseDocToSave(this.getCollection(collection), data);
             }
 
             Object.keys(parsedValue).map(key => {
@@ -294,19 +308,13 @@ class RedisService {
         const { prefixName, collection, uid } = Object(setup);
 
         try {
-            await new Promise((resolve, reject) => {
-                setup.collectionSet = this.apiServer.getCollectionSet(collection);
-                RedisEventEmitters.preRead.call(setup, resolve, reject);
-            });
-
             const doc = await this.client.hGetAll(buildKey(collection || prefixName, uid));
 
             if (!Object.keys(doc).length) {
                 return;
             }
 
-            RedisEventEmitters.postRead.call(setup);
-            return parseDocToRead(this.apiServer.getCollectionSet(collection), doc);
+            return parseDocToRead(this.getCollection(collection), doc);
         } catch (err) {
             throw logError(err);
         }
@@ -366,7 +374,7 @@ class RedisService {
         try {
             const keys = await this.client.hKeys(key);
             await new Promise((resolve, reject) => {
-                setup.collectionSet = this.apiServer.getCollectionSet(collection);
+                setup.collectionSet = this.getCollection(collection);
                 RedisEventEmitters.preDelete.call(setup, resolve, reject);
             });
 
@@ -380,6 +388,15 @@ class RedisService {
         } catch (err) {
             throw logError(err);
         }
+    }
+
+    /**
+     * Retrieves a collection by its name from the collections object.
+     * @param {string} collectionName - The name of the collection to retrieve.
+     * @returns {Object|undefined} The collection object if found, or undefined if not found.
+     */
+    getCollection(collectionName) {
+        return this.collections[collectionName];
     }
 }
 
