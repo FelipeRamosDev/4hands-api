@@ -60,7 +60,7 @@ class DatabaseServer {
      * @param {Function} callbacks.error - The error callback function to be executed if the database connection fails.
      * @returns {DatabaseServer} The DatabaseServer instance.
      */
-    init({ success, error }) {
+    init({ success = () => {}, error = () => {} }) {
         mongoose.set('strictQuery', false);
         mongoose.connect(this.HOST, {
             useNewUrlParser: true,

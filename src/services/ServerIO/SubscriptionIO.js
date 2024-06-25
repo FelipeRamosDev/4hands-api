@@ -28,17 +28,42 @@ class SubscriptionIO {
         this.type = type;
         this.loadMethod = loadMethod;
         this.collection = collection;
+        this.filter = filter;
 
         if (type === 'query') {
-            this.filter = filter;
             this.options = options;
 
-            this.loadQuery();
+            if (typeof this.customLoadQueries === 'function') {
+                this.customLoadQueries.call(this);
+            } else if (typeof this.customLoadQueries === 'object' && !Array.isArray(this.customLoadQueries)) {
+                const customMethod = this.customLoadQueries[this.loadMethod];
+
+                if (typeof customMethod === 'function') {
+                    customMethod.call(this);
+                } else {
+                    this.loadQuery();
+                }
+            } else {
+                this.loadQuery();
+            }
         }
 
         if (type === 'doc') {
             this.docUID = docUID;
-            this.loadDoc();
+
+            if (typeof this.customLoadDocs === 'function') {
+                this.customLoadDocs.call(this);
+            } else if (typeof this.customLoadDocs === 'object' && !Array.isArray(this.customLoadDocs)) {
+                const customMethod = this.customLoadDocs[this.loadMethod];
+
+                if (typeof customMethod === 'function') {
+                    customMethod.call(this);
+                } else {
+                    this.loadDoc();
+                }
+            } else {
+                this.loadDoc();
+            }
         }
     }
 
@@ -82,7 +107,11 @@ class SubscriptionIO {
                 return;
             }
 
-            loadMethod = this.customLoadQueries[this.loadMethod];
+            if (typeof this.customLoadQueries === 'function') {
+                loadMethod = this.customLoadQueries;
+            } else {
+                loadMethod = this.customLoadQueries[this.loadMethod];
+            }
         }
         
         if (this.type === 'doc') {
@@ -90,7 +119,11 @@ class SubscriptionIO {
                 return;
             }
 
-            loadMethod = this.customLoadDocs[this.loadMethod];
+            if (typeof this.customLoadDocs === 'function') {
+                loadMethod = this.customLoadDocs;
+            } else {
+                loadMethod = this.customLoadDocs[this.loadMethod];
+            }
         }
 
         if (typeof loadMethod === 'function') {
@@ -115,16 +148,11 @@ class SubscriptionIO {
      * Load query data based on the filter and options.
      *
      * @async
-     * @param {boolean} [jumpCustom=false] - Whether to skip the custom load method.
      * @param {boolean} [preventSnapshot=false] - Whether to prevent sending a snapshot.
      * @returns {Promise<Object[]>} - The loaded query data.
      * @throws {Error} - Throws an error if the loading operation fails.
      */
-    async loadQuery(jumpCustom = false, preventSnapshot = false) {
-        if (!jumpCustom && this.customLoadMethod) {
-            return this.customLoadMethod();
-        }
-
+    async loadQuery(preventSnapshot = false) {
         try {
             const { sort, limit, page } = Object(this.options);
             const toLoad = CRUD.query({
@@ -159,16 +187,11 @@ class SubscriptionIO {
      * Load a document based on the filter or document UID.
      *
      * @async
-     * @param {boolean} [jumpCustom=false] - Whether to skip the custom load method.
      * @param {boolean} [preventSnapshot=false] - Whether to prevent sending a snapshot.
      * @returns {Promise<Object>} - The loaded document.
      * @throws {Error} - Throws an error if the loading operation fails.
      */
-    async loadDoc(jumpCustom = false, preventSnapshot = false) {
-        if (!jumpCustom && this.customLoadMethod) {
-            return this.customLoadMethod();
-        }
-
+    async loadDoc(preventSnapshot = false) {
         try {
             const toLoad = CRUD.getDoc({
                 collectionName: this.collection,
@@ -209,6 +232,10 @@ class SubscriptionIO {
      */
     async exec(eventType, docSnapshot) {
         const { id } = Object(docSnapshot);
+        const sortOpt = this.options?.sort;
+        const limitOpt = this.options?.limit;
+        const sortOptKeys = sortOpt && Object.keys(sortOpt);
+        const hasSortOpt = sortOptKeys?.length;
 
         switch (eventType) {
             case 'save': {
@@ -221,10 +248,11 @@ class SubscriptionIO {
                     if (isMatch) {
                         this.lastQueryLoaded.push(isMatch);
 
-                        if (Object.keys(this.options?.sort).length) {
-                            const key = Object.keys(this.options.sort)[0];
+                        if (hasSortOpt) {
+                            const key = sortOptKeys[0];
+
                             this.lastQueryLoaded = this.lastQueryLoaded.sort((a, b) => {
-                                if (this.options?.sort[key] === -1) {
+                                if (sortOpt[key] === -1) {
                                     return b[key] - a[key];
                                 } else {
                                     return a[key] - b[key];
@@ -232,8 +260,8 @@ class SubscriptionIO {
                             });
                         }
 
-                        if (this.options?.limit) {
-                            this.lastQueryLoaded = this.lastQueryLoaded.splice(0, this.options.limit);
+                        if (limitOpt) {
+                            this.lastQueryLoaded = this.lastQueryLoaded.splice(0, limitOpt);
                         }
 
                         this.sendSnapshot(this.lastQueryLoaded);
@@ -245,12 +273,22 @@ class SubscriptionIO {
             case 'update': {
                 if (this.type === 'query') {
                     if (this.uidString && this.uidString.indexOf(id) > -1) {
-                        this.loadQuery();
+                        // Updating the changed document
+                        this.lastQueryLoaded = this.lastQueryLoaded.map((item, i) => {
+                            if (item.id === docSnapshot._id) {
+                                item = docSnapshot;
+                            }
+
+                            return item;
+                        });
+
+                        this.sendSnapshot(this.lastQueryLoaded);
                     }
                 }
 
                 if (this.type === 'doc') {
-                    this.loadDoc();
+                    this.lastDocLoaded = docSnapshot;
+                    this.sendSnapshot(docSnapshot);
                 }
 
                 return;

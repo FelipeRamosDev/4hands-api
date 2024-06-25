@@ -17,7 +17,7 @@ class User extends _Global {
     /**
      * Creates a new instance of the User class.
      * @param {Object} setup - The setup object containing user details.
-     * @throws {Error.Log} If setup parameters are missing or invalid.
+     * @throws {Error} If setup parameters are missing or invalid.
      */
     constructor(setup, parent) {
         super(setup, parent);

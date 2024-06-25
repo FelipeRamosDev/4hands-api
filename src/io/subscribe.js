@@ -31,7 +31,7 @@ module.exports = SubscriberIO.buildSubscriber({
         }
         
         if (type === 'doc') {
-            subscription = this.subscribeDoc(socket.id, collection, docUID);
+            subscription = this.subscribeDoc(socket.id, collection, docUID, filter, options);
         }
 
         if (subscription) {
@@ -53,7 +53,8 @@ module.exports = SubscriberIO.buildSubscriber({
             querySubscriptions.map(sub => sub.exec('update', docSnapshot));
         }
 
-        const docSubscriptions = this.getDocSubscriptions(collection, docSnapshot.id);
+        const docUID = docSnapshot.id || docSnapshot.UID || docSnapshot._id;
+        const docSubscriptions = this.getDocSubscriptions(collection, docUID.toString());
         if (Array.isArray(docSubscriptions)) {
             docSubscriptions.map(sub => sub.exec('update', docSnapshot));
         }
