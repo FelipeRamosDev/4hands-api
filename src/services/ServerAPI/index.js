@@ -45,7 +45,7 @@ class ServerAPI {
      * @param {boolean} setup.useSockets - If true, it will start a sockets server. Default is false.
      * @param {number} setup.SOCKET_PORT - The port number on which the SOCKET server will listen.
      */
-    constructor (setup) {
+    constructor (setup, _4handsInstance) {
         const {
             projectName,
             databaseConfig,
@@ -72,6 +72,12 @@ class ServerAPI {
             redisURL = 'redis://localhost:6379',
             corsOrigin = ['http://localhost', 'https://localhost']
         } = Object(setup);
+
+        /**
+         * The main 4hands-api instance.
+         * @type {Object}
+         */
+        this._4handsInstance = () => _4handsInstance;
 
         this.projectName = projectName;
         this.app_queue = [];
@@ -180,6 +186,18 @@ class ServerAPI {
         }
     }
 
+    /**
+     * The main 4hands-api instance.
+     * @property {Object}
+     */
+    get parent() {
+        return this._4handsInstance();
+    }
+
+    /**
+     * The project path on local.
+     * @property {string}
+     */
     get projectPath() {
         return path.normalize(__dirname.replace(path.normalize('/node_modules/4hands-api/src/services/ServerAPI'), '/'));
     }
