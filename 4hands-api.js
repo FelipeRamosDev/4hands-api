@@ -6,6 +6,7 @@ class _4HandsAPI {
    /**
     * @constructor
     * @param {Object} setup - Constructor params
+    * @param {string} [setup.id="4hands-api"] - the id of the instance.
     * @param {Collection[]} setup.collections - Array of Collection objects with the collections declared.
     * @param {DatabaseServer} setup.database - The database configurations.
     * @param {ServerAPI} setup.serverAPI - The server HTTP configurations.
@@ -20,14 +21,30 @@ class _4HandsAPI {
          redis,
          socketIO,
          emailService,
+         id = '4hands-api',
+         onReady = () => {},
+         onError = (err) => { throw err; },
          collections = []
       } = Object(setup);
 
       /**
-       * The collections for the instance.
-       * @property {Collection[]}
+       * The instance name.
+       * @type {string}
        */
-      this.collections = collections;
+      this.id = id;
+
+      /**
+       * The collections for the instance.
+       * @type {Map}
+       */
+      this.collections = new Map;
+      collections.map(item => this.collections.set(item.name, item));
+
+      /**
+       * Array with all async functions to init the services.
+       * @type {Function[]}
+       */
+      this.toInit = [];
 
       if (redis) {
          this.createRedis(redis);
@@ -48,21 +65,36 @@ class _4HandsAPI {
       if (socketIO) {
          this.createSocketServer(socketIO);
       }
+
+      Promise.all(this.toInit).then(() => {
+         onReady.call(this, this);
+      }).catch(err => {
+         onError.call(this, err);
+      }).finally(() => {
+         delete this.toInit;
+      });
    }
 
-   createDatabase(configs, success, error) {
+   createDatabase(configs) {
       const Database = require('./src/services/database/DatabaseServer');
 
       /**
        * The database instance.
-       * @property {Database}
+       * @type {Database}
        */
       this.DB = new Database({
          collections: this.collections,
          ...configs
       }, this);
 
-      this.DB.init({ success, error });
+      if (this.toInit) {
+         this.toInit.push(async () => {
+            return await new Promise((resolve, reject) => {
+               this.DB.init({ success: resolve, error: reject });
+            });
+         });
+      }
+
       return this.DB;
    }
 
@@ -82,11 +114,14 @@ class _4HandsAPI {
       
       /**
        * The server api instance.
-       * @property {ServerAPI}
+       * @type {ServerAPI}
        */
       this.API = new ServerAPI(configs, this);
 
-      this.API.init();
+      if (this.toInit) {
+         this.toInit.push(this.API.init);
+      }
+
       return this.API;
    }
 
@@ -95,12 +130,16 @@ class _4HandsAPI {
 
       /**
        * The Redis service instance.
-       * @property {RedisService}
+       * @type {RedisService}
        */
       this.Redis = new RedisService({
          collections: this.collections,
          ...configs
       }, this);
+
+      if (this.toInit) {
+         this.toInit.push(this.Redis.connect);
+      }
 
       return this.Redis;
    }
@@ -110,7 +149,7 @@ class _4HandsAPI {
 
       /**
        * The socket server instance.
-       * @property {SocketIO}
+       * @type {SocketIO}
        */
       this.IO = new SocketIO({
          _4handsInstance: this,
@@ -118,6 +157,14 @@ class _4HandsAPI {
       }, this);
 
       return this.IO;
+   }
+
+   /**
+    * Prints to the console with the instance id tag as prefixer.
+    * @param  {...any} args 
+    */
+   toConsole(...args) {
+      console.log(`[${this.id}]`, ...args);
    }
 }
 
