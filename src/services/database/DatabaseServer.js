@@ -16,8 +16,14 @@ class DatabaseServer {
      * @param {string} [setup.HOST='mongodb://0.0.0.0:27017/'] - The host URL for the MongoDB server.
      * @param {Array} [setup.collections] - Additional collections to be initialized along with the default ones.
      */
-    constructor(setup) {
-        const { dbName, HOST, collections } = Object(setup);
+    constructor(setup, _4handsInstance) {
+        const { dbName, HOST, collections, onReady, onError } = Object(setup);
+
+        /**
+         * The main 4hands-api instance.
+         * @type {Object}
+         */
+        this._4handsInstance = () => _4handsInstance;
 
         /**
          * The host URL for the MongoDB server.
@@ -43,6 +49,26 @@ class DatabaseServer {
          */
         this.collections = [];
 
+        /**
+         * Callback for when the database is connected.
+         * @type {Function}
+         */
+        this._onReady = (...args) => {
+            if (typeof onReady === 'function') {
+                onReady.call(this, ...args);
+            }
+        }
+
+        /**
+         * Callback for when the database get an error on connection.
+         * @type {Function}
+         */
+        this._onError = (err, ...args) => {
+            if (typeof onError === 'function') {
+                onError.call(this, err, ...args);
+            }
+        }
+
         // Initialize default collections
         this.collections.push(counters.init(this));
         this.collections.push(safe_values.init(this));
@@ -51,6 +77,14 @@ class DatabaseServer {
         if (Array.isArray(collections)) {
             collections.map(collection => this.collections.push(collection.init(this)));
         }
+    }
+
+    /**
+     * The main 4hands-api instance.
+     * @property {Object}
+     */
+    get parent() {
+        return this._4handsInstance();
     }
 
     /**
@@ -71,9 +105,10 @@ class DatabaseServer {
 
             this.DBServer = connectedDB;
             success(connectedDB);
+            this._onReady(connectedDB);
         }).catch(err => {
             console.error('An error occurred while connecting to the database: ', JSON.stringify(err, null, 2));
-            error(err);
+            this._onError(err);
         });
 
         return this;
