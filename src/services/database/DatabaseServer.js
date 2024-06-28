@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const counters = require('4hands-api/src/collections/counters');
 const safe_values = require('4hands-api/src/collections/safe_values');
+const CollectionBucket = require('../CollectionBucket');
 
 /**
  * Represents a database server with specified configurations and collections.
@@ -17,7 +18,7 @@ class DatabaseServer {
      * @param {Array} [setup.collections] - Additional collections to be initialized along with the default ones.
      */
     constructor(setup, _4handsInstance) {
-        const { dbName, HOST, collections, onReady, onError } = Object(setup);
+        const { dbName, HOST, collections = [], onReady, onError } = Object(setup);
 
         /**
          * The main 4hands-api instance.
@@ -44,10 +45,14 @@ class DatabaseServer {
         this.DBServer;
 
         /**
-         * An array containing the initialized collections.
-         * @type {Array}
+         * A Map containing the initialized collections.
+         * @type {CollectionBucket}
          */
-        this.collections = [];
+        this.collections = new CollectionBucket([
+            counters,
+            safe_values,
+            ...collections
+        ], this);
 
         /**
          * Callback for when the database is connected.
@@ -69,14 +74,7 @@ class DatabaseServer {
             }
         }
 
-        // Initialize default collections
-        this.collections.push(counters.init(this));
-        this.collections.push(safe_values.init(this));
-
-        // Initialize additional collections, if provided
-        if (Array.isArray(collections)) {
-            collections.map(collection => this.collections.push(collection.init(this)));
-        }
+        this.collections.initDB();
     }
 
     /**

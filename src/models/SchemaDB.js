@@ -81,19 +81,17 @@ class SchemaDB {
      * @returns {SchemaDB} - The initialized SchemaDB instance.
      * @throws {Error} If initialization fails.
      */
-    init(server) {
+    initDB() {
         try {
             if (this.name !== configs.database.counterCollection) dbHelpers.createCounter(this);
 
             const isDup = mongoose.modelNames().find(key => key === this.name);
-            const isDupSymbol = server.collections.find(item => item.symbol === this.symbol);
 
-            if (!isDup && !isDupSymbol) {
+            if (!isDup) {
                 this.DB = mongoose.model(this.name, this.schema);
             } else {
                 const error = logError('database.duplicated_schema', this.name, this.symbol);
                 if (isDup) error.append('database.duplicated_schema_name', this.name);
-                if (isDupSymbol) error.append('database.duplicated_schema_symbol', this.symbol);
                 throw error;
             }
 
@@ -105,7 +103,6 @@ class SchemaDB {
 
     /**
      * Initializes queries for the schema.
-     * @private
      * @throws {Error} If query initialization fails.
      */
     initQueries() {
@@ -132,7 +129,6 @@ class SchemaDB {
 
     /**
      * Initializes events for the schema.
-     * @private
      * @throws {Error} If event initialization fails.
      */
     initEvents() {
@@ -165,7 +161,6 @@ class SchemaDB {
 
     /**
      * Initializes redis events for the schema.
-     * @private
      * @throws {Error} If event initialization fails.
      */
     initRedisEvents() {
@@ -210,7 +205,6 @@ class SchemaDB {
 
     /**
      * Initializes custom classes for the schema.
-     * @private
      * @throws {Error} If class initialization fails.
      */
     initClasses() {

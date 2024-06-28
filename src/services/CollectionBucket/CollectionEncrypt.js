@@ -1,4 +1,4 @@
-const CollectionField = require('4hands-api/src/models/settings/CollectionField');
+const CollectionField = require('4hands-api/src/services/CollectionBucket/CollectionField');
 
 /**
  * Represents a collection field that references encrypted data stored in the 'safe_values' collection.
