@@ -76,7 +76,7 @@ class _4HandsAPI {
    }
 
    createDatabase(configs) {
-      const Database = require('./src/services/database/DatabaseServer');
+      const Database = require('4hands-api/src/services/Database/DatabaseServer');
 
       /**
        * The database instance.

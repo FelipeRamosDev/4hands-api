@@ -9,7 +9,7 @@ const cors = require('cors');
 const https = require('https');
 const path = require('path');
 const FS = require('../FS');
-const Database = require('../database/DatabaseServer');
+const Database = require('4hands-api/src/services/Database');
 
 /**
  * @class ServerAPI
