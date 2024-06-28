@@ -1,4 +1,4 @@
-const CRUD = require('4hands-api/src/services/database/crud');
+const CRUD = require('4hands-api/src/services/Database/CRUD');
 
 /**
  * Model to set the events that will trigger actions throughout the app.

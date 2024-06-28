@@ -1,4 +1,4 @@
-const CRUD = require('4hands-api/src/services/database/crud');
+const CRUD = require('4hands-api/src/services/Database/CRUD');
 
 class GlobalClass {
     initialize() {
@@ -12,32 +12,6 @@ class GlobalClass {
                 return this;
             }
         } catch(err) {
-            throw logError(err);
-        }
-    }
-
-    async defaultPopulate() {
-        try {
-            const docQuery = CRUD.getDoc({collectionName: this.collection.collectionName, filter: this.id });
-            
-            if (docQuery.defaultPopulate) {
-                const docPopulated = await docQuery.defaultPopulate();
-                if (docPopulated.error) {
-                    throw docPopulated;
-                }
-
-                if (docPopulated) {
-                    return docPopulated;
-                } else {
-                    return null;
-                }
-            } else {
-                return logError({
-                    name: 'MONGOOSE-QUERY-NOT-FOUND',
-                    message: `The mongoose custom query "defaultPopulate" don't exist!`
-                });
-            }
-        } catch (err) {
             throw logError(err);
         }
     }

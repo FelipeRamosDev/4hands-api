@@ -1,14 +1,15 @@
 const mongoose = require('mongoose');
 const counters = require('4hands-api/src/collections/counters');
 const safe_values = require('4hands-api/src/collections/safe_values');
-const CollectionBucket = require('../CollectionBucket');
+const CollectionBucket = require('4hands-api/src/services/CollectionBucket');
+const CRUD = require('4hands-api/src/services/Database/CRUD');
 
 /**
  * Represents a database server with specified configurations and collections.
- * @module DatabaseServer
+ * @module Database
  * @namespace Services
  */
-class DatabaseServer {
+class Database {
     /**
      * Creates an instance of DatabaseServer.
      * @constructor
@@ -53,6 +54,12 @@ class DatabaseServer {
             safe_values,
             ...collections
         ], this);
+
+        /**
+         * A Map containing the initialized collections.
+         * @type {CRUD}
+         */
+        this.CRUD = new CRUD(this);
 
         /**
          * Callback for when the database is connected.
@@ -111,6 +118,10 @@ class DatabaseServer {
 
         return this;
     }
+
+    getCollection(name) {
+        return this.collections.getCollection(name);
+    }
 }
 
-module.exports = DatabaseServer;
+module.exports = Database;
