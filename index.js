@@ -1,5 +1,5 @@
 const collections = require('./src/collections');
-const DatabaseServer = require('./src/services/database/DatabaseServer');
+const DatabaseServer = require('4hands-api/src/services/Database');
 const ServerAPI = require('./src/services/ServerAPI');
 const ServerIO = require('./src/services/ServerIO');
 const FS = require('./src/services/FS');
@@ -8,7 +8,7 @@ const SocketServer = require('./src/services/SocketServer');
 const SocketClient = require('./src/services/SocketClient');
 const Collection = require('./src/services/CollectionBucket/Collection');
 const Endpoint = require('./src/models/settings/Endpoint');
-const CRUD = require('./src/services/database/crud');
+const CRUD = require('4hands-api/src/services/Database/CRUD');
 const helpers = require('./src/helpers');
 const interface = require('./src/interface');
 const middlewares = require('./src/middlewares');
