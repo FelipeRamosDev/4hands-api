@@ -1,6 +1,7 @@
 const { dbHelpers } = require('4hands-api/src/helpers/database');
 
 /**
+ * Instance to make CRUD operations (create, read, update, delete)
  * @class CRUD
  */
 class CRUD {

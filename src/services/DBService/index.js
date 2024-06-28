@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
-const counters = require('4hands-api/src/collections/counters');
-const safe_values = require('4hands-api/src/collections/safe_values');
-const CollectionBucket = require('4hands-api/src/services/CollectionBucket');
-const CRUD = require('4hands-api/src/services/Database/CRUD');
+const counters = require('../../collections/counters');
+const safe_values = require('../../collections/safe_values');
+const CollectionBucket = require('../CollectionBucket');
+const CRUD = require('./CRUD');
 
 /**
  * Represents a database server with specified configurations and collections.
@@ -113,6 +113,7 @@ class DBService {
             this._onReady(connectedDB);
         }).catch(err => {
             console.error('An error occurred while connecting to the database: ', JSON.stringify(err, null, 2));
+            error(err);
             this._onError(err);
         });
 
