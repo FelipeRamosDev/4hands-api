@@ -1,4 +1,4 @@
-const Collection = require('4hands-api/src/models/settings/Collection');
+const Collection = require('4hands-api/src/services/CollectionBucket/Collection');
 const Config = require('4hands-api/configs/project');
 const collectionName = Config.database.counterCollection;
 

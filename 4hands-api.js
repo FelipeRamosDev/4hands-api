@@ -6,7 +6,7 @@ class _4HandsAPI {
    /**
     * @constructor
     * @param {Object} setup - Constructor params
-    * @param {string} [setup.id="4hands-api"] - the id of the instance.
+    * @param {string} [setup.id="4hands-api"] - the id for the instance.
     * @param {Collection[]} setup.collections - Array of Collection objects with the collections declared.
     * @param {DatabaseServer} setup.database - The database configurations.
     * @param {ServerAPI} setup.serverAPI - The server HTTP configurations.
