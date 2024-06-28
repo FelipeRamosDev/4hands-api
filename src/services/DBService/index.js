@@ -6,10 +6,10 @@ const CRUD = require('4hands-api/src/services/Database/CRUD');
 
 /**
  * Represents a database server with specified configurations and collections.
- * @module Database
+ * @module DBService
  * @namespace Services
  */
-class Database {
+class DBService {
     /**
      * Creates an instance of DatabaseServer.
      * @constructor
@@ -124,4 +124,4 @@ class Database {
     }
 }
 
-module.exports = Database;
+module.exports = DBService;
