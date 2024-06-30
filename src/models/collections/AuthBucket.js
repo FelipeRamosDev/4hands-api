@@ -85,6 +85,8 @@ class AuthBucket extends _Global {
      * @throws {Error.Log} If there is an error during the AuthBucket creation process.
      */
     static async draft(user) {
+        const CRUD = global?._4handsAPI?.CRUD;
+
         try {
             const auth = await CRUD.create('auth_buckets', {
                 user: user.id,

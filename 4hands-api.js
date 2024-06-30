@@ -11,6 +11,7 @@ class _4HandsAPI {
    /**
     * @constructor
     * @param {Object} setup - Constructor params
+    * @param {boolean} setup.declareGlobal - If true it will declare the instance as a global._4handsAPI
     * @param {string} [setup.id="4hands-api"] - the id for the instance.
     * @param {Collection[]} setup.collections - Array of Collection objects with the collections declared.
     * @param {Object} setup.database - The database configurations.
@@ -30,11 +31,18 @@ class _4HandsAPI {
          redis,
          socketIO,
          emailService,
+         declareGlobal,
          id = '4hands-api',
          onReady = () => {},
          onError = (err) => { throw err; },
          collections = []
       } = Object(setup);
+
+      // Declaring globals
+      require('4hands-api/src/global/index');
+      if (declareGlobal) {
+         global._4handsAPI = this;
+      }
 
       /**
        * The instance name.
@@ -43,8 +51,14 @@ class _4HandsAPI {
       this.id = id;
 
       /**
+       * is declared as a global.
+       * @type {boolean}
+       */
+      this.declareGlobal = declareGlobal;
+
+      /**
        * The collections for the instance.
-       * @type {Map}
+       * @type {CollectionBucket}
        */
       this.collections = new CollectionBucket([
          auth_buckets,
@@ -87,7 +101,7 @@ class _4HandsAPI {
          }).finally(() => {
             delete this.toInit;
          });
-      })()
+      })();
    }
 
    /**

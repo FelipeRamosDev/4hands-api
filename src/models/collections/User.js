@@ -292,6 +292,8 @@ class User extends _Global {
      * @throws {Error.Log} If there is an error during user retrieval.
      */
     static async getUser(filter) {
+        const CRUD = global._4handsAPI?.CRUD;
+
         try {
             const userDOC = await CRUD.getDoc({ collectionName: 'users', filter }).defaultPopulate();
 
@@ -368,6 +370,8 @@ class User extends _Global {
      * @throws {Error.Log} If there is an error during user creation.
      */
     static async create(setup, options) {
+        const CRUD = global._4handsAPI?.CRUD;
+
         try {
             const { userName, email } = Object(setup);
             const { confirmationEmail } = Object(options);
@@ -399,10 +403,12 @@ class User extends _Global {
      * Static method to sign in a user.
      * @param {string} userName - The username of the user to sign in.
      * @param {string} password - The user's password.
-     * @returns {Promise<User|Error.Log>} - A promise resolving to the signed-in user object, or an error object if sign-in fails.
+     * @returns {Promise<User|Error>} - A promise resolving to the signed-in user object, or an error object if sign-in fails.
      * @throws {Error.Log} If there is an error during sign-in.
      */
-    static async signIn(userName, password) {
+    static async signIn(userName, password, preventEmailConfirm) {
+        const CRUD = global._4handsAPI?.CRUD;
+
         try {
             const userDOC = await CRUD.getDoc({ collectionName: 'users', filter: { email: userName }}).defaultPopulate();
 
@@ -410,7 +416,7 @@ class User extends _Global {
                 return logError('auth.user_not_found', userName);
             }
 
-            if (!userDOC.isEmailConfirmed) {
+            if (!preventEmailConfirm && !userDOC.isEmailConfirmed) {
                 return logError({
                     code: 401,
                     name: 'USER_EMAIL_NOT_CONFIRMED',

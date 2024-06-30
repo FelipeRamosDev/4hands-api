@@ -110,7 +110,7 @@ class SchemaDB {
             // Adding global and custom queries
             if (FS.isExist(this.nativeQueriesPath)) {
                 const nativeQueries = require(this.nativeQueriesPath);
-                this.nativeQueries = { ...this.nativeQueries, ...nativeQueries };
+                this.queries = { ...this.nativeQueries, ...nativeQueries };
             }
 
             if (FS.isExist(this.projectQueriesPath)) {

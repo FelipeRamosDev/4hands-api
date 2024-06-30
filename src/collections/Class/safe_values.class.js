@@ -52,13 +52,18 @@ class SafeValueClass {
      * @instance
      */
     get encrypt() {
+        const API = global._4handsAPI?.API;
         if (!this?.raw?.rawValue) {
             return;
         }
 
+        if (!process.env.API_SECRET && !API?.API_SECRET) {
+            throw logError('common.missing_params');
+        }
+
         const authService = new AuthService();
         const salt = authService.generateRandom();
-        const derivatedKey = authService.generateKey(process.env.API_SECRET || global?.API?.API_SECRET, salt);
+        const derivatedKey = authService.generateKey(process.env.API_SECRET || API?.API_SECRET, salt);
         const { iv, encryptedToken } = authService.encryptToken(this.raw.rawValue, derivatedKey);
 
         return {
