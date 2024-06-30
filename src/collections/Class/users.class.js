@@ -1,8 +1,13 @@
 const User = require('4hands-api/src/models/collections/User');
 const AuthBucket = require('4hands-api/src/models/collections/AuthBucket');
+const _Global = require('./_globals.class');
 
-class UsersClass {
+class UsersClass extends _Global {
     static Model = User;
+
+    constructor (setup) {
+        super(setup);
+    }
 
     /**
      * Gets the AuthService instance associated with this user.
@@ -12,6 +17,14 @@ class UsersClass {
         if (this.auth) {
             const auth = this.auth.initialize();
             return auth.service;
+        }
+    }
+
+    toModel() {
+        if (UsersClass.Model) {
+            return new UsersClass.Model(this.toObject());
+        } else {
+            return new UsersClass(this);
         }
     }
 

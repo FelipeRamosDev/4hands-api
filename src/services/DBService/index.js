@@ -107,7 +107,7 @@ class DBService {
             useUnifiedTopology: true,
             dbName: this.dbName
         }).then(async (connectedDB) => {
-            console.log(`>> Database ${this.dbName}: "${this.hostURL}"`);
+            this.parent.toConsole(`Database "${this.dbName}" is connected on: "${this.hostURL}"`);
 
             this.DBServer = connectedDB;
             success(connectedDB);
