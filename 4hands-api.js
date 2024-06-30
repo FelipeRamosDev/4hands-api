@@ -1,3 +1,6 @@
+// Declaring globals
+require('./src/global/index');
+
 const CollectionBucket = require('./src/services/CollectionBucket');
 const auth_buckets = require('./src/collections/auth_buckets');
 const safe_values = require('./src/collections/safe_values');
@@ -11,13 +14,26 @@ class _4HandsAPI {
    /**
     * @constructor
     * @param {Object} setup - Constructor params
-    * @param {boolean} setup.declareGlobal - If true it will declare the instance as a global._4handsAPI
+    * @param {boolean} [setup.declareGlobal=false] - If true it will declare the instance as a global._4handsAPI
     * @param {string} [setup.id="4hands-api"] - the id for the instance.
     * @param {Collection[]} setup.collections - Array of Collection objects with the collections declared.
     * @param {Object} setup.database - The database configurations.
-    * @param {string} setup.database.dbName - The database name.
-    * @param {string} [setup.database.hostURL='mongodb://0.0.0.0:27017/'] - The HOST url. Default is 'mongodb://0.0.0.0:27017/'.
-    * @param {ServerAPI} setup.serverAPI - The server HTTP configurations.
+     * @param {string} setup.database.dbName - The database name.
+     * @param {string} [setup.database.hostURL='mongodb://0.0.0.0:27017/'] - The HOST url. Default is 'mongodb://0.0.0.0:27017/'.
+    * @param {Object} setup.serverAPI - The server HTTP configurations.
+     * @param {string} setup.serverAPI.API_SECRET - The API secret key for session encryption.
+     * @param {number} setup.serverAPI.sessionCookiesMaxAge - Maximum age of session cookies in milliseconds. Default is 86400000.
+     * @param {string} setup.serverAPI.staticPath - The path to static files.
+     * @param {Function} setup.serverAPI.listenCallback - Callback function to be executed when the server starts listening.
+     * @param {string} setup.serverAPI.jsonLimit - Limit of JSON requests. Default is '10mb'.
+     * @param {boolean} setup.serverAPI.sessionResave - Flag indicating whether to save session data back to the session store. Default is true.
+     * @param {boolean} setup.serverAPI.sessionSaveUninitialized - Flag indicating whether to save uninitialized sessions to the session store. Default is true.
+     * @param {string} setup.serverAPI.keySSLPath - The path to the SSL key file.
+     * @param {string} setup.serverAPI.certSSLPath - The path to the SSL certificate file.
+     * @param {string} setup.serverAPI.FE_ORIGIN - The front-end host URL.
+     * @param {number} setup.serverAPI.PORT - The port number on which the server will listen. Default is 80.
+     * @param {string[]} setup.serverAPI.corsOrigin - Array with the allowed domains for CORS configuration. Default is ['http://localhost', 'https://localhost'].
+     * @param {string[]} setup.serverAPI.httpEndpoints - The path to the endpoints to be created on initialization.
     * @param {RedisService} setup.redis - The redis database configurations.
     * @param {SocketIO} setup.socketIO - The socket server configurations.
     * @param {MailService} setup.emailService - The email service configurations.
@@ -31,15 +47,13 @@ class _4HandsAPI {
          redis,
          socketIO,
          emailService,
-         declareGlobal,
+         declareGlobal = false,
          id = '4hands-api',
          onReady = () => {},
          onError = (err) => { throw err; },
          collections = []
       } = Object(setup);
 
-      // Declaring globals
-      require('4hands-api/src/global/index');
       if (declareGlobal) {
          global._4handsAPI = this;
       }
@@ -113,7 +127,7 @@ class _4HandsAPI {
    }
 
    async createDatabase(configs) {
-      const DBService = require('4hands-api/src/services/DBService');
+      const DBService = require('./src/services/DBService');
       const { onSuccess = () => {}, onError = (err) => { throw err } } = Object(configs);
 
       /**
@@ -184,13 +198,13 @@ class _4HandsAPI {
    }
 
    createSocketServer(configs) {
-      const SocketIO = require('./src/services/ServerIO');
+      const ServerIO = require('./src/services/ServerIO');
 
       /**
        * The socket server instance.
-       * @type {SocketIO}
+       * @type {ServerIO}
        */
-      this.IO = new SocketIO({
+      this.IO = new ServerIO({
          _4handsInstance: this,
          ...configs
       }, this);
