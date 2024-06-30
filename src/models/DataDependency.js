@@ -1,5 +1,3 @@
-const CRUD = require('4hands-api/src/services/Database/CRUD');
-
 /**
  * Represents a data dependency used to manage real-time data updates and rendering in a parent component.
  * @namespace Models

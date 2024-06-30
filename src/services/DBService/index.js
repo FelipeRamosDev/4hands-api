@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const counters = require('../../collections/counters');
-const safe_values = require('../../collections/safe_values');
 const CollectionBucket = require('../CollectionBucket');
 const CRUD = require('./CRUD');
 
@@ -19,7 +18,13 @@ class DBService {
      * @param {Array} [setup.collections] - Additional collections to be initialized along with the default ones.
      */
     constructor(setup, _4handsInstance) {
-        const { dbName, HOST, collections = [], onReady, onError } = Object(setup);
+        const {
+            dbName,
+            onReady,
+            onError,
+            HOST = 'mongodb://0.0.0.0:27017/',
+            collections = [],
+        } = Object(setup);
 
         /**
          * The main 4hands-api instance.
@@ -31,7 +36,7 @@ class DBService {
          * The host URL for the MongoDB server.
          * @type {string}
          */
-        this.HOST = HOST || 'mongodb://0.0.0.0:27017/';
+        this.HOST = HOST;
 
         /**
          * The name of the database.
@@ -49,11 +54,7 @@ class DBService {
          * A Map containing the initialized collections.
          * @type {CollectionBucket}
          */
-        this.collections = new CollectionBucket([
-            counters,
-            safe_values,
-            ...collections
-        ], this);
+        this.collections = new CollectionBucket([ counters, ...collections ], this);
 
         /**
          * A Map containing the initialized collections.

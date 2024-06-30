@@ -64,8 +64,6 @@ class SafeValue extends _Global {
      * @static
      */
     static async createEncrypt(rawValue) {
-        const CRUD = require('4hands-api/src/services/Database/CRUD');
-
         return await CRUD.create('safe_values', {
             type: 'encrypt',
             rawValue

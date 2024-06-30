@@ -1,5 +1,4 @@
 const crypto = require('crypto');
-const CRUD = require('4hands-api/src/services/Database/CRUD');
 
 /**
  * Class representing a SubscriptionIO for managing query and document subscriptions.
