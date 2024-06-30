@@ -1,3 +1,8 @@
+const CollectionBucket = require('./src/services/CollectionBucket');
+const auth_buckets = require('./src/collections/auth_buckets');
+const safe_values = require('./src/collections/safe_values');
+const users = require('./src/collections/users');
+
 /**
  * The main class to be declared to use the 4hands-api.
  * @class _4HandsAPI
@@ -8,11 +13,15 @@ class _4HandsAPI {
     * @param {Object} setup - Constructor params
     * @param {string} [setup.id="4hands-api"] - the id for the instance.
     * @param {Collection[]} setup.collections - Array of Collection objects with the collections declared.
-    * @param {DatabaseServer} setup.database - The database configurations.
+    * @param {Object} setup.database - The database configurations.
+    * @param {string} setup.database.dbName - The database name.
+    * @param {string} [setup.database.hostURL='mongodb://0.0.0.0:27017/'] - The HOST url. Default is 'mongodb://0.0.0.0:27017/'.
     * @param {ServerAPI} setup.serverAPI - The server HTTP configurations.
     * @param {RedisService} setup.redis - The redis database configurations.
     * @param {SocketIO} setup.socketIO - The socket server configurations.
     * @param {MailService} setup.emailService - The email service configurations.
+    * @param {Function} setup.onReady - A callback function for when the intane is ready.
+    * @param {Function} setup.onError - A callback function for when the intane has error.
     */
    constructor(setup) {
       const {
@@ -37,8 +46,12 @@ class _4HandsAPI {
        * The collections for the instance.
        * @type {Map}
        */
-      this.collections = new Map;
-      collections.map(item => this.collections.set(item.name, item));
+      this.collections = new CollectionBucket([
+         auth_buckets,
+         safe_values,
+         users,
+         ...collections
+      ]);
 
       /**
        * Array with all async functions to init the services.
@@ -46,44 +59,55 @@ class _4HandsAPI {
        */
       this.toInit = [];
 
-      if (redis) {
-         this.createRedis(redis);
-      }
-
-      if (emailService) {
-         this.createEmailService(emailService);
-      }
-
-      if (database) {
-         this.createDatabase(database);
-      }
-
-      if (serverAPI) {
-         this.createServerAPI(serverAPI);
-      }
-
-      if (socketIO) {
-         this.createSocketServer(socketIO);
-      }
-
-      Promise.all(this.toInit).then(() => {
-         onReady.call(this, this);
-      }).catch(err => {
-         onError.call(this, err);
-      }).finally(() => {
-         delete this.toInit;
-      });
+      (async () => {
+         if (redis) {
+            this.createRedis(redis);
+         }
+   
+         if (emailService) {
+            this.createEmailService(emailService);
+         }
+   
+         if (database) {
+            await this.createDatabase(database);
+         }
+   
+         if (serverAPI) {
+            this.createServerAPI(serverAPI);
+         }
+   
+         if (socketIO) {
+            this.createSocketServer(socketIO);
+         }
+   
+         Promise.all(this.toInit).then(() => {
+            onReady.call(this);
+         }).catch(err => {
+            onError.call(this, err);
+         }).finally(() => {
+            delete this.toInit;
+         });
+      })()
    }
 
-   createDatabase(configs) {
-      const Database = require('4hands-api/src/services/Database/DatabaseServer');
+   /**
+    * The CRUD object.
+    * @type {CRUD}
+    */
+   get CRUD() {
+      return this.DB.CRUD;
+   }
+
+   async createDatabase(configs) {
+      const DBService = require('4hands-api/src/services/DBService');
+      const { onSuccess = () => {}, onError = (err) => { throw err } } = Object(configs);
 
       /**
        * The database instance.
-       * @type {Database}
+       * @type {DBService}
        */
-      this.DB = new Database({
-         collections: this.collections,
+      this.DB = new DBService({
+         collections: this.collections.toArray(),
          ...configs
       }, this);
 
@@ -95,6 +119,7 @@ class _4HandsAPI {
          });
       }
 
+      await this.DB.init({ success: onSuccess.bind(this.DB), error: onError.bind(this.DB) });
       return this.DB;
    }
 
