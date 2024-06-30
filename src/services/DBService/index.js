@@ -14,7 +14,7 @@ class DBService {
      * @constructor
      * @param {Object} setup - The configuration setup for the database server.
      * @param {string} setup.dbName - The name of the database.
-     * @param {string} [setup.HOST='mongodb://0.0.0.0:27017/'] - The host URL for the MongoDB server.
+     * @param {string} [setup.hostURL='mongodb://0.0.0.0:27017/'] - The host URL for the MongoDB server.
      * @param {Array} [setup.collections] - Additional collections to be initialized along with the default ones.
      */
     constructor(setup, _4handsInstance) {
@@ -22,7 +22,7 @@ class DBService {
             dbName,
             onReady,
             onError,
-            HOST = 'mongodb://0.0.0.0:27017/',
+            hostURL = 'mongodb://0.0.0.0:27017/',
             collections = [],
         } = Object(setup);
 
@@ -36,7 +36,7 @@ class DBService {
          * The host URL for the MongoDB server.
          * @type {string}
          */
-        this.HOST = HOST;
+        this.hostURL = hostURL;
 
         /**
          * The name of the database.
@@ -102,12 +102,12 @@ class DBService {
      */
     init({ success = () => {}, error = () => {} }) {
         mongoose.set('strictQuery', false);
-        mongoose.connect(this.HOST, {
+        mongoose.connect(this.hostURL, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
             dbName: this.dbName
         }).then(async (connectedDB) => {
-            console.log(`>> Database ${this.dbName}: "${this.HOST}"`);
+            console.log(`>> Database ${this.dbName}: "${this.hostURL}"`);
 
             this.DBServer = connectedDB;
             success(connectedDB);
