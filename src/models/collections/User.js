@@ -1,7 +1,6 @@
 const _Global = require('../maps/_Global');
 const AuthBucket = require('./AuthBucket');
 const AuthService = require('../../services/Auth');
-const CRUD = require('4hands-api/src/services/Database/CRUD');
 const dbHelpers = require('4hands-api/src/helpers/database/dbHelpers');
 const FS = require('4hands-api/src/services/FS');
 const config = require('4hands-api/configs/project');

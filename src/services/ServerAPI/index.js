@@ -2,14 +2,13 @@
 require('../../global');
 
 const express = require('express');
-const { execSync } = require('child_process');
 const session = require('express-session');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const https = require('https');
 const path = require('path');
 const FS = require('../FS');
-const Database = require('4hands-api/src/services/Database');
+const DBService = require('4hands-api/src/services/DBService');
 
 /**
  * @class ServerAPI
@@ -23,7 +22,7 @@ class ServerAPI {
      * @description Creates an instance of ServerAPI.
      * @param {Object} setup - Configuration options for the server.
      * @param {string} setup.projectName - The name of the project.
-     * @param {Database} setup.databaseConfig - Configuration options for the Database.
+     * @param {DBService} setup.databaseConfig - Configuration options for the DBService.
      * @param {string} setup.API_SECRET - The API secret key for session encryption.
      * @param {number} setup.sessionCookiesMaxAge - Maximum age of session cookies in milliseconds. Default is 86400000.
      * @param {string} setup.staticPath - The path to static files.
@@ -173,7 +172,7 @@ class ServerAPI {
         }
 
         if (databaseConfig) {
-            this.database = new Database({ ...databaseConfig }).init({
+            this.database = new DBService({ ...databaseConfig }).init({
                 success: this.init.bind(this),
                 error: (err) => {
                     throw err;

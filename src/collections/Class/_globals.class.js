@@ -1,5 +1,3 @@
-const CRUD = require('4hands-api/src/services/Database/CRUD');
-
 class GlobalClass {
     initialize() {
         try {
