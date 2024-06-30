@@ -41,7 +41,15 @@ class _4HandsAPI {
      * @param {Function} setup.redis.onEnd - Callback to when the client is closed.
      * @param {Function} setup.redis.onError - Callback to when the client got an error.
      * @param {Function} setup.redis.onReconnecting - Callback to when the client is reconnected to the Redis.
-    * @param {SocketIO} setup.socketIO - The socket server configurations.
+    * @param {Object} setup.socketIO - The socket server configurations.
+     * @param {string} setup.socketIO.path - The namespace path.
+     * @param {number} setup.socketIO.port - The server port.
+     * @param {Object} setup.socketIO._4handsInstance - The main 4hands-api instance.
+     * @param {Function[]} setup.socketIO.middlewares - The server/namespace middlewares.
+     * @param {Function} setup.socketIO.onConnect - The callback for when the socket connection is concluded with success.
+     * @param {Function} setup.socketIO.onData - The callback for when an 'message' event arrives.
+     * @param {Function} setup.socketIO.onDisconnect - The callback for when the client disconnected.
+     * @param {Function} setup.socketIO.onError - The callback for when an error is caught.
     * @param {MailService} setup.emailService - The email service configurations.
     * @param {Function} setup.onReady - A callback function for when the intane is ready.
     * @param {Function} setup.onError - A callback function for when the intane has error.
@@ -217,8 +225,13 @@ class _4HandsAPI {
        */
       this.IO = new ServerIO({
          _4handsInstance: this,
+         corsOrigin: this.API.corsOrigin,
+         ssl: {
+            keyPath: this.API.keySSLPath,
+            certPath: this.API.certSSLPath
+         },
          ...configs
-      }, this);
+      });
 
       return this.IO;
    }
