@@ -2,8 +2,8 @@ const { createClient } = require('redis');
 const crypto = require('crypto');
 const { buildKey, parseDocToSave, parseDocToRead } = require('./RedisHelpers');
 const RedisEventEmitters = require('./RedisEventEmitters');
-const { toError } = require('4hands-api/src/models/ErrorLog');
-const Collection = require('4hands-api/src/models/settings/Collection');
+const { toError } = require('../../models/ErrorLog');
+const Collection = require('../CollectionBucket/Collection');
 
 /**
  * A class representing a Redis service for handling data operations.
@@ -23,22 +23,27 @@ class RedisService {
      * @param {Object} setup.onReconnecting - Callback to when the client is reconnected to the Redis.
      * @param {Object} apiServer - An API server object.
      */
-    constructor(setup, apiServer) {
-        const { clientOptions, collections = [], onConnect, onReady, onEnd, onError, onReconnecting } = Object(setup);
+    constructor(setup, _4handsAPI) {
+        const { clientOptions, collections = [], onConnect, onReady, onEnd, onError, onReconnecting, apiServer } = Object(setup);
 
         try {
             this._apiServer = () => apiServer;
+            this._4handsAPI = () => _4handsAPI;
             this.client = createClient(clientOptions);
             this.collections = collections;
             
-            this.addListener('connect', onConnect);
-            this.addListener('ready', onReady);
-            this.addListener('end', onEnd);
-            this.addListener('error', onError);
-            this.addListener('reconnecting', onReconnecting);
+            this.addListener('connect', (...args) => onConnect.call(this, this.instance, ...args));
+            this.addListener('ready', (...args) => onReady.call(this, this.instance, ...args));
+            this.addListener('end', (...args) => onEnd.call(this, this.instance, ...args));
+            this.addListener('error', (err, ...args) => onError.call(this, err, this.instance, ...args));
+            this.addListener('reconnecting', (...args) => onReconnecting.call(this, this.instance, ...args));
         } catch (err) {
             throw logError(err);
         }
+    }
+
+    get instance() {
+        return this._4handsAPI();
     }
 
     get apiServer() {

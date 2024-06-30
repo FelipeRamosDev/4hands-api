@@ -25,7 +25,7 @@ class ServerAPI {
      * @param {string} setup.API_SECRET - The API secret key for session encryption.
      * @param {number} setup.sessionCookiesMaxAge - Maximum age of session cookies in milliseconds. Default is 86400000.
      * @param {string} setup.staticPath - The path to static files.
-     * @param {Function} setup.listenCallback - Callback function to be executed when the server starts listening.
+     * @param {Function} setup.onReady - Callback function to be executed when the server starts listening.
      * @param {boolean} setup.compileFE - Flag indicating whether to compile frontend code. Default is false.
      * @param {string} setup.jsonLimit - Limit of JSON requests. Default is '10mb'.
      * @param {boolean} setup.sessionResave - Flag indicating whether to save session data back to the session store. Default is true.
@@ -36,9 +36,6 @@ class ServerAPI {
      * @param {number} setup.PORT - The port number on which the server will listen. Default is 80.
      * @param {string[]} setup.corsOrigin - Array with the allowed domains for CORS configuration. Default is ['http://localhost', 'https://localhost'].
      * @param {string[]} setup.httpEndpoints - The path to the endpoints to be created on initialization.
-     * @param {boolean} setup.noServer - If true, it doesn't start the server. Default is false.
-     * @param {boolean} setup.noRedisServer - If true, it doesn't start the Redis server. Default is false.
-     * @param {boolean} setup.useSockets - If true, it will start a sockets server. Default is false.
      * @param {number} setup.SOCKET_PORT - The port number on which the SOCKET server will listen.
      */
     constructor (setup, _4handsInstance) {
@@ -46,21 +43,17 @@ class ServerAPI {
             projectName,
             API_SECRET,
             staticPath,
-            listenCallback,
             sessionResave,
             sessionSaveUninitialized,
             keySSLPath,
             certSSLPath,
             FE_ORIGIN,
-            SOCKET_PORT,
-            useSockets,
             
             // Defaults
             PORT = 80,
             jsonLimit = '10mb',
-            noServer = false,
+            onReady = () => {},
             httpEndpoints = [],
-            noRedisServer = false,
             defaultMaxListeners = 20,
             sessionCookiesMaxAge = 86400000,
             redisURL = 'redis://localhost:6379',
@@ -83,17 +76,13 @@ class ServerAPI {
         this.jsonLimit = jsonLimit;
         this.sessionResave = (sessionResave !== undefined) ? sessionResave : true;
         this.sessionSaveUninitialized = (sessionSaveUninitialized !== undefined) ? sessionSaveUninitialized : true;
-        this.listenCallback = listenCallback;
+        this.onReady = onReady;
         this.FE_ORIGIN = FE_ORIGIN;
         this.PORT = PORT || 80;
-        this.SOCKET_PORT = SOCKET_PORT;
         this.httpEndpoints = httpEndpoints;
-        this.noServer = noServer;
-        this.noRedisServer = noRedisServer;
         this.defaultMaxListeners = defaultMaxListeners;
-        this.useSockets = useSockets;
         
-        console.log(`[${this.projectName || '4hands-api'}] Starting Server API...`)
+        this.parent.toConsole('Starting Server API...');
         if (this.defaultMaxListeners) {
             require('events').EventEmitter.defaultMaxListeners = this.defaultMaxListeners;
         }
@@ -111,7 +100,7 @@ class ServerAPI {
                 this.runAppQueue();
                 this.isListen = true;
                 this.serverState = 'online';
-                typeof listenCallback === 'function' && listenCallback.call(this);
+                this.onReady.call(this);
                 typeof customCallback === 'function' && customCallback.call(this);
             } catch (err) {
                 throw err;
@@ -127,26 +116,22 @@ class ServerAPI {
             }
         }
 
-        if (!this.noServer) {
-            // 4hands-api native endpoints
-            this.createEndpoint(require('4hands-api/src/controllers/api/health-check'));
-            this.createEndpoint(require('4hands-api/src/controllers/api/read-logs'));
-            this.createEndpoint(require('4hands-api/src/controllers/auth/login'));
-            this.createEndpoint(require('4hands-api/src/controllers/auth/register'));
-            this.createEndpoint(require('4hands-api/src/controllers/auth/signout'));
-            this.createEndpoint(require('4hands-api/src/controllers/auth/confirm-email'));
-            this.createEndpoint(require('4hands-api/src/controllers/auth/send-email-confirm'));
-            this.createEndpoint(require('4hands-api/src/controllers/auth/reset-password/send-email'));
-            this.createEndpoint(require('4hands-api/src/controllers/auth/reset-password/create-new'));
-            this.createEndpoint(require('4hands-api/src/controllers/collection/create'));
-            this.createEndpoint(require('4hands-api/src/controllers/collection/delete'));
-            this.createEndpoint(require('4hands-api/src/controllers/collection/get/doc'));
-            this.createEndpoint(require('4hands-api/src/controllers/collection/get/query'));
-            this.createEndpoint(require('4hands-api/src/controllers/collection/update/document'));
+        this.createEndpoint(require('4hands-api/src/controllers/api/health-check'));
+        this.createEndpoint(require('4hands-api/src/controllers/api/read-logs'));
+        this.createEndpoint(require('4hands-api/src/controllers/auth/login'));
+        this.createEndpoint(require('4hands-api/src/controllers/auth/register'));
+        this.createEndpoint(require('4hands-api/src/controllers/auth/signout'));
+        this.createEndpoint(require('4hands-api/src/controllers/auth/confirm-email'));
+        this.createEndpoint(require('4hands-api/src/controllers/auth/send-email-confirm'));
+        this.createEndpoint(require('4hands-api/src/controllers/auth/reset-password/send-email'));
+        this.createEndpoint(require('4hands-api/src/controllers/auth/reset-password/create-new'));
+        this.createEndpoint(require('4hands-api/src/controllers/collection/create'));
+        this.createEndpoint(require('4hands-api/src/controllers/collection/delete'));
+        this.createEndpoint(require('4hands-api/src/controllers/collection/get/doc'));
+        this.createEndpoint(require('4hands-api/src/controllers/collection/get/query'));
+        this.createEndpoint(require('4hands-api/src/controllers/collection/update/document'));
 
-            this.httpEndpoints.map(endpoint => this.createEndpoint(endpoint));
-        }
-
+        this.httpEndpoints.map(endpoint => this.createEndpoint(endpoint));
         this.init().catch(err => {
             throw err;
         });

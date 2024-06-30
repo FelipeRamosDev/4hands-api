@@ -24,7 +24,7 @@ class _4HandsAPI {
      * @param {string} setup.serverAPI.API_SECRET - The API secret key for session encryption.
      * @param {number} setup.serverAPI.sessionCookiesMaxAge - Maximum age of session cookies in milliseconds. Default is 86400000.
      * @param {string} setup.serverAPI.staticPath - The path to static files.
-     * @param {Function} setup.serverAPI.listenCallback - Callback function to be executed when the server starts listening.
+     * @param {Function} setup.serverAPI.onReady - Callback function to be executed when the server starts listening.
      * @param {string} setup.serverAPI.jsonLimit - Limit of JSON requests. Default is '10mb'.
      * @param {boolean} setup.serverAPI.sessionResave - Flag indicating whether to save session data back to the session store. Default is true.
      * @param {boolean} setup.serverAPI.sessionSaveUninitialized - Flag indicating whether to save uninitialized sessions to the session store. Default is true.
@@ -34,7 +34,13 @@ class _4HandsAPI {
      * @param {number} setup.serverAPI.PORT - The port number on which the server will listen. Default is 80.
      * @param {string[]} setup.serverAPI.corsOrigin - Array with the allowed domains for CORS configuration. Default is ['http://localhost', 'https://localhost'].
      * @param {string[]} setup.serverAPI.httpEndpoints - The path to the endpoints to be created on initialization.
-    * @param {RedisService} setup.redis - The redis database configurations.
+    * @param {Object} setup.redis - The redis database configurations.
+     * @param {Object} setup.redis.clientOptions - The native 'redis' package options.
+     * @param {Function} setup.redis.onConnect - Callback to when the client is connected to the Redis.
+     * @param {Function} setup.redis.onReady - Callback to when the RedisService is ready to be used.
+     * @param {Function} setup.redis.onEnd - Callback to when the client is closed.
+     * @param {Function} setup.redis.onError - Callback to when the client got an error.
+     * @param {Function} setup.redis.onReconnecting - Callback to when the client is reconnected to the Redis.
     * @param {SocketIO} setup.socketIO - The socket server configurations.
     * @param {MailService} setup.emailService - The email service configurations.
     * @param {Function} setup.onReady - A callback function for when the intane is ready.
@@ -87,35 +93,39 @@ class _4HandsAPI {
        */
       this.toInit = [];
 
-      (async () => {
-         if (redis) {
-            this.createRedis(redis);
-         }
-   
-         if (emailService) {
-            this.createEmailService(emailService);
-         }
-   
-         if (database) {
-            await this.createDatabase(database);
-         }
-   
-         if (serverAPI) {
-            this.createServerAPI(serverAPI);
-         }
-   
-         if (socketIO) {
-            this.createSocketServer(socketIO);
-         }
-   
-         Promise.all(this.toInit).then(() => {
-            onReady.call(this);
-         }).catch(err => {
-            onError.call(this, err);
-         }).finally(() => {
-            delete this.toInit;
-         });
-      })();
+      try {
+         (async () => {
+            if (redis) {
+               await this.createRedis(redis);
+            }
+      
+            if (emailService) {
+               this.createEmailService(emailService);
+            }
+      
+            if (database) {
+               await this.createDatabase(database);
+            }
+      
+            if (serverAPI) {
+               this.createServerAPI(serverAPI);
+            }
+      
+            if (socketIO) {
+               this.createSocketServer(socketIO);
+            }
+      
+            Promise.all(this.toInit).then(() => {
+               onReady.call(this);
+            }).catch(err => {
+               onError.call(this, err);
+            }).finally(() => {
+               delete this.toInit;
+            });
+         })();  
+      } catch (err) {
+         onError.call(this, err);
+      }
    }
 
    /**
@@ -169,7 +179,10 @@ class _4HandsAPI {
        * The server api instance.
        * @type {ServerAPI}
        */
-      this.API = new ServerAPI(configs, this);
+      this.API = new ServerAPI({
+         projectName: this.id,
+         ...configs
+      }, this);
 
       if (this.toInit) {
          this.toInit.push(this.API.init);
@@ -178,7 +191,7 @@ class _4HandsAPI {
       return this.API;
    }
 
-   createRedis(configs) {
+   async createRedis(configs) {
       const RedisService = require('./src/services/Redis');
 
       /**
@@ -186,14 +199,12 @@ class _4HandsAPI {
        * @type {RedisService}
        */
       this.Redis = new RedisService({
-         collections: this.collections,
+         collections: this.collections.toArray(),
+         apiServer: this.API,
          ...configs
       }, this);
 
-      if (this.toInit) {
-         this.toInit.push(this.Redis.connect);
-      }
-
+      await this.Redis.connect();
       return this.Redis;
    }
 
