@@ -23,7 +23,7 @@ class CRUD {
      * @param {Object} [options] - Additional options for document creation.
      * @param {boolean} [options.isDraft] - Indicates if the document is a draft.
      * @returns {Promise<Object>} The created document or a draft object, if specified.
-     * @throws {Error.Log} If an error occurs during document creation.
+     * @throws {Error} If an error occurs during document creation.
      */
     async create(collectionName, data, options) {
         const { isDraft } = Object(options);
@@ -53,7 +53,7 @@ class CRUD {
      * @param {number} setup.limit - The limit value for the search.
      * @param {number} setup.page - The page number.
      * @returns {Query} The query result.
-     * @throws {Error.Log} If the specified collection schema is not found or an error occurs during querying.
+     * @throws {Error} If the specified collection schema is not found or an error occurs during querying.
      */
     query(setup) {
         try {
@@ -88,7 +88,7 @@ class CRUD {
      * @param {string} setup.collectionName - The name of the collection to retrieve the document from.
      * @param {Object} [setup.filter] - The filter criteria for retrieving the document.
      * @returns {Object|null} The retrieved document or null if no document is found.
-     * @throws {Error.Log} If the specified collection schema is not found or an error occurs during document retrieval.
+     * @throws {Error} If the specified collection schema is not found or an error occurs during document retrieval.
      */
     getDoc(setup) {
         const { collectionName, filter } = Object(setup);
@@ -121,7 +121,7 @@ class CRUD {
      * @param {boolean} [setup.options.returnDocs] - Indicates whether to return the updated documents.
      * @param {Object} [setup.options.mongooseOpt] - Mongoose options for the update operation.
      * @returns {Promise<Object|Array<Object>>} The updated document(s) or success status, based on the update type and options.
-     * @throws {Error.Log} If an error occurs during document update.
+     * @throws {Error} If an error occurs during document update.
      */
     async update(setup) {
         const {type, collectionName, filter, data, options} = Object(setup);
@@ -173,7 +173,7 @@ class CRUD {
      * @param {Object} params.data - The update data to be applied to the selected documents.
      * @param {Object} [mongooseOptions] - Additional options for the Mongoose updateMany operation.
      * @returns {Promise<Object>} An object indicating success or containing error information if the update fails.
-     * @throws {Error.Log} If an error occurs during the update operation.
+     * @throws {Error} If an error occurs during the update operation.
      */
     async updateMany(params, mongooseOptions) {
         const { collectionName, filter, data } = Object(params);
@@ -205,7 +205,7 @@ class CRUD {
      * @param {string|Object} setup.filter - The filter criteria for deleting documents.
      * @param {Object} [setup.options] - Additional options for the delete operation.
      * @returns {Promise<Object>} The delete result.
-     * @throws {Error.Log} If an error occurs during document deletion.
+     * @throws {Error} If an error occurs during document deletion.
      */
     async del(setup) {
         const {
