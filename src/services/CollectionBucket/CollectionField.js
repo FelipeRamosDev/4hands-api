@@ -1,4 +1,4 @@
-const SchemaRefConfig = require('./SchemaRefConfig');
+const SchemaRefConfig = require('4hands-api/src/models/settings/SchemaRefConfig');
 
 /**
  * Represents a field in a collection.

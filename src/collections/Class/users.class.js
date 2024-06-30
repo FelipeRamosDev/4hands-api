@@ -4,6 +4,17 @@ const AuthBucket = require('4hands-api/src/models/collections/AuthBucket');
 class UsersClass {
     static Model = User;
 
+    /**
+     * Gets the AuthService instance associated with this user.
+     * @returns {AuthService} - The AuthService instance.
+     */
+    get authService() {
+        if (this.auth) {
+            const auth = this.auth.initialize();
+            return auth.service;
+        }
+    }
+
     async signUp() {
         try {
             if (this.isNew) {

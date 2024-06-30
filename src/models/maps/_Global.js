@@ -1,4 +1,3 @@
-const CRUD = require('../../services/database/crud');
 const { isObjectID } = require('../../helpers/database/relationalFields');
 
 /**
@@ -75,10 +74,8 @@ class GlobalMap {
      * @throws {Error} If there is an error during the saving process.
      */
     async saveDB(collectionName) {
-        const CRUDDB = require('4hands-api/src/services/database/crud');
-
         try {
-            const created = await CRUDDB.create(collectionName || this.collectionName, {...this});
+            const created = await CRUD.create(collectionName || this.collectionName, {...this});
 
             if (created.error) {
                 return logError(created);
@@ -129,14 +126,13 @@ class GlobalMap {
      * @throws {Error} If there is an error during the update process.
      */
     async updateDB({collectionName, filter, data}) {
-        const crud = require('../../services/database/crud');
         const collection = collectionName || this.collectionName;
 
         try {
             if (!collection) throw logError('database.missing_params', 'collectionName', '_Global.updateDB');
 
             const filterParse = filter || this.UID || this._id;
-            const loaded = await crud.update({
+            const loaded = await CRUD.update({
                 collectionName: collection,
                 filter: filterParse,
                 data: data || { ...this },
@@ -273,8 +269,6 @@ class GlobalMap {
     }
 
     static async createDocCache(collection, uid) {
-        const CRUD = require('4hands-api/src/services/database/crud');;
-
         try {
             const docQuery = CRUD.getDoc({ collectionName: collection, filter: uid });
             let docResult;

@@ -12,7 +12,7 @@ This is a API framework to create a backend for your applications.
 Proceed with the following steps to install the framework.
 
 ### Requirements
-- **Node Version:** `16.20.2`
+- **Node Version:** `20.13.1`
 - **Database:** MongoDB Community ([Install MongoDB](https://www.mongodb.com/docs/manual/administration/install-community/))
 - **Redis:** The Redis is used to store sessions and other needs you have on your project. Please follow the link to install the Redis, it's required to create a Server API. ([Install Redis](https://redis.io/docs/install/install-redis/))
 

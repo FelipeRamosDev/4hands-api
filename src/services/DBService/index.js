@@ -1,23 +1,30 @@
 const mongoose = require('mongoose');
-const counters = require('4hands-api/src/collections/counters');
-const safe_values = require('4hands-api/src/collections/safe_values');
+const counters = require('../../collections/counters');
+const CollectionBucket = require('../CollectionBucket');
+const CRUD = require('./CRUD');
 
 /**
  * Represents a database server with specified configurations and collections.
- * @module DatabaseServer
+ * @module DBService
  * @namespace Services
  */
-class DatabaseServer {
+class DBService {
     /**
      * Creates an instance of DatabaseServer.
      * @constructor
      * @param {Object} setup - The configuration setup for the database server.
      * @param {string} setup.dbName - The name of the database.
-     * @param {string} [setup.HOST='mongodb://0.0.0.0:27017/'] - The host URL for the MongoDB server.
+     * @param {string} [setup.hostURL='mongodb://0.0.0.0:27017/'] - The host URL for the MongoDB server.
      * @param {Array} [setup.collections] - Additional collections to be initialized along with the default ones.
      */
     constructor(setup, _4handsInstance) {
-        const { dbName, HOST, collections, onReady, onError } = Object(setup);
+        const {
+            dbName,
+            onReady,
+            onError,
+            hostURL = 'mongodb://0.0.0.0:27017/',
+            collections = [],
+        } = Object(setup);
 
         /**
          * The main 4hands-api instance.
@@ -29,7 +36,7 @@ class DatabaseServer {
          * The host URL for the MongoDB server.
          * @type {string}
          */
-        this.HOST = HOST || 'mongodb://0.0.0.0:27017/';
+        this.hostURL = hostURL;
 
         /**
          * The name of the database.
@@ -44,10 +51,16 @@ class DatabaseServer {
         this.DBServer;
 
         /**
-         * An array containing the initialized collections.
-         * @type {Array}
+         * A Map containing the initialized collections.
+         * @type {CollectionBucket}
          */
-        this.collections = [];
+        this.collections = new CollectionBucket([ counters, ...collections ], this);
+
+        /**
+         * A Map containing the initialized collections.
+         * @type {CRUD}
+         */
+        this.CRUD = new CRUD(this);
 
         /**
          * Callback for when the database is connected.
@@ -69,14 +82,7 @@ class DatabaseServer {
             }
         }
 
-        // Initialize default collections
-        this.collections.push(counters.init(this));
-        this.collections.push(safe_values.init(this));
-
-        // Initialize additional collections, if provided
-        if (Array.isArray(collections)) {
-            collections.map(collection => this.collections.push(collection.init(this)));
-        }
+        this.collections.initDB();
     }
 
     /**
@@ -96,23 +102,28 @@ class DatabaseServer {
      */
     init({ success = () => {}, error = () => {} }) {
         mongoose.set('strictQuery', false);
-        mongoose.connect(this.HOST, {
+        mongoose.connect(this.hostURL, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
             dbName: this.dbName
         }).then(async (connectedDB) => {
-            console.log(`>> Database ${this.dbName}: "${this.HOST}"`);
+            console.log(`>> Database ${this.dbName}: "${this.hostURL}"`);
 
             this.DBServer = connectedDB;
             success(connectedDB);
             this._onReady(connectedDB);
         }).catch(err => {
             console.error('An error occurred while connecting to the database: ', JSON.stringify(err, null, 2));
+            error(err);
             this._onError(err);
         });
 
         return this;
     }
+
+    getCollection(name) {
+        return this.collections.getCollection(name);
+    }
 }
 
-module.exports = DatabaseServer;
+module.exports = DBService;
