@@ -91,6 +91,8 @@ class _Global {
     }
 
     async defaultPopulate() {
+        const CRUD = global._4handsAPI?.CRUD;
+
         try {
             const docQuery = CRUD.getDoc({collectionName: this.collection.collectionName, filter: this.id });
             
@@ -122,7 +124,8 @@ class _Global {
      * @throws {Error} If there is an error during the retrieval process.
      */
     async getCurrentUser() {
-        const User = require('4hands-api/src/models/collections/User');
+        const CRUD = global._4handsAPI?.CRUD;
+        const User = require('./users.model');
         const UID = User.currentUser();
         const user = await CRUD.getDoc({
             collectionName: 'users',
@@ -139,6 +142,8 @@ class _Global {
      * @throws {Error} If there is an error during the saving process.
      */
     async saveDB(collectionName) {
+        const CRUD = global._4handsAPI?.CRUD;
+
         try {
             const created = await CRUD.create(collectionName || this.collectionName, {...this});
 

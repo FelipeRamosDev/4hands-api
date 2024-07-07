@@ -22,6 +22,7 @@ class ToolsCLI {
      * @param {string} [addHeader] - The optional header to be added to the message.
      */
     print(txt, addHeader) {
+        const API = global._4handsAPI?.API;
         console.log(`${addHeader ? `[${addHeader}]` : '[LOG]'}[${API.projectName.toUpperCase()}] -> ${txt}`);
     }
 
@@ -30,6 +31,7 @@ class ToolsCLI {
      * @param {Error} err - The error object to be printed.
      */
     printError(err) {
+        const API = global._4handsAPI?.API;
         console.error(`[ERROR][${global.API ? API.projectName.toUpperCase() : 'API'}][${err.name}] -> ${err.message}\nERROR-STACK:\n${err.stack}`);
     }
 

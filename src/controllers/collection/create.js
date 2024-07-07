@@ -18,6 +18,8 @@ module.exports = new Endpoint({
         options: { type: Object, default: {} }
     },
     controller: async (req, res) => {
+        const CRUD = global._4handsAPI?.CRUD;
+
         try {
             const body = req.body;
     

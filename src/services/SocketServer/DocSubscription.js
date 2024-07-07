@@ -73,6 +73,7 @@ class DocSubscription extends SocketSubscription {
      * @throws Will throw an error if the document retrieval or initialization fails.
      */
     async handler() {
+        const CRUD = global._4handsAPI?.CRUD;
         const { collectionName, filter } = Object(this);
 
         try {

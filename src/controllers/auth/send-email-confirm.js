@@ -1,6 +1,6 @@
-const User = require('4hands-api/src/collections/Models/users.model');
-const Endpoint = require('4hands-api/src/models/settings/Endpoint');
-const AuthService = require('4hands-api/src/services/Auth');
+const User = require('../../collections/Models/users.model');
+const Endpoint = require('../../models/settings/Endpoint');
+const AuthService = require('../../services/Auth');
 
 /**
  * Represents a controller endpoint to send the confirmation email to the user.
