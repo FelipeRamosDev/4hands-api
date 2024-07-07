@@ -41,6 +41,8 @@ module.exports = new Endpoint({
         }
     },
     controller: async (req, res) => {
+        const CRUD = global._4handsAPI?.CRUD;
+
         try {
             const body = req.body;
             const {populate, select} = body.options || {};

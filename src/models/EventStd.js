@@ -111,6 +111,7 @@ class EventStd {
      * @throws {Error} - Throws an error if target population fails.
      */
     async populateTarget(target) {
+        const CRUD = global._4handsAPI?.CRUD;
         let collectionName = Object(target).getSafe('_collection.collectionName');
     
         try {

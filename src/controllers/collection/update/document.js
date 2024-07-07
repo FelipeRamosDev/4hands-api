@@ -40,6 +40,7 @@ module.exports = new Endpoint({
         }
     },
     controller: async (req, res) => {
+        const CRUD = global._4handsAPI?.CRUD;
         const body = req.body;
     
         try {
