@@ -1,54 +1,119 @@
-const { isObjectID } = require('../../helpers/database/relationalFields');
+class _Global {
+    constructor (setup, parent) {
+        const { UID, _id, id, index, author, cod, createdAt, modifiedAt } = Object(setup);
+        this._parent = () => parent;
 
-/**
- * Represents a global map in the application, extending the ValidateSchema class.
- * @module GlobalMap
- * @namespace Models
- */
-class GlobalMap {
-    /**
-     * Creates a new instance of the GlobalMap class.
-     * @param {Object} setup - The setup object.
-     * @param {Object} parent - The parent object.
-     * @throws {Error} If the creation of GlobalMap fails.
-     */
-    constructor(setup, parent) {
-        const { _id, UID, index, author, cod, createdAt, modifiedAt, collectionName } = Object(setup);
-        if (isObjectID(setup)) return;
+        this._id = _id;
+        this.id = id;
+        this._UID = UID;
+        this.index = index;
+        this.author = author;
+        this.cod = cod;
+        this.createdAt = createdAt && new Date(createdAt);
+        this.modifiedAt = modifiedAt && new Date(modifiedAt);
+    }
 
-        try {
-            this.getParent = () => parent;
+    get UID() {
+        if (typeof this._UID === 'string') {
+            return this._UID;
+        }
 
-            this.collectionName = collectionName;
-            this._id = _id && _id.toString();
-            this.UID = this._id || UID?.toString();
-            this.index = index;
-            this.author = author;
-            this.cod = cod;
-            this.createdAt = createdAt && new Date(createdAt).toLocaleString();
-            this.modifiedAt = modifiedAt && new Date(modifiedAt).toLocaleString();
-            this.isConstructed = true;
-        } catch (err) {
-            throw logError(err);
+        if (this.id instanceof Buffer) {
+            return this.id.toString('hex');
+        }
+
+        if (typeof this.id === 'string') {
+            return this.id;
+        }
+
+        if (typeof this._id?.toString === 'function') {
+            return this._id.toString();
         }
     }
 
-    /**
-     * Returns the parent object of the GlobalMap instance.
-     * @returns {Object} - The parent object.
-     */
     get parent() {
-        if (typeof this.getParent === 'function') {
-            return this.getParent();
+        if (this._parent) {
+            return this._parent();
         }
     }
 
+    get collectionName() {
+        return this.collection?.collectionName;
+    }
+    
+    /**
+     * @readonly
+     * @returns {boolean} Return if the document is fully loaded
+     */
+    get isComplete() {
+        return true;
+    }
+
+    /**
+     * @readonly
+     * @returns {string[]} The fields that needs to save as encrypted buffer.
+     */
+    get encryptedFields() {
+        const result = [];
+
+        Object.keys(this.schema.obj).map(key => {
+            const curr = this.schema.obj[key];
+
+            if (curr.isEncrypt) {
+                result.push(key);
+            }
+        });
+
+        return result;
+    }
+    
     /**
      * Returns the string representation of the index property.
      * @returns {string} - The string representation of the index property.
      */
     get stringIndex() {
         return String(this.index);
+    }
+
+    initialize() {
+        try {
+            const Model = this.BSModel || this?.schema?.statics?.BSModel;
+
+            if (Model) {
+                const builded = new Model(this.toObject());
+                return builded;
+            } else {
+                return this;
+            }
+        } catch(err) {
+            throw logError(err);
+        }
+    }
+
+    async defaultPopulate() {
+        try {
+            const docQuery = CRUD.getDoc({collectionName: this.collection.collectionName, filter: this.id });
+            
+            if (docQuery.defaultPopulate) {
+                const docPopulated = await docQuery.defaultPopulate();
+                if (docPopulated.error) {
+                    throw docPopulated;
+                }
+
+                if (docPopulated) {
+                    return docPopulated;
+                } else {
+                    return null;
+                }
+            } else {
+                return logError({
+                    name: 'MONGOOSE-QUERY-NOT-FOUND',
+                    message: `The mongoose custom query "defaultPopulate" don't exist!`
+                });
+            }
+        } catch (err) {
+            throw logError(err);
+        }
     }
 
     /**
@@ -102,6 +167,8 @@ class GlobalMap {
      * @throws {Error} If there is an error during the loading process.
      */
     async loadDB(collectionName) {
+        const CRUD = global._4handsAPI?.CRUD;
+
         if (!collectionName) {
             collectionName = this.collectionName;
         }
@@ -126,6 +193,7 @@ class GlobalMap {
      * @throws {Error} If there is an error during the update process.
      */
     async updateDB({collectionName, filter, data}) {
+        const CRUD = global._4handsAPI?.CRUD;
         const collection = collectionName || this.collectionName;
 
         try {
@@ -156,6 +224,8 @@ class GlobalMap {
      * @throws {Error} If there is an error during the deletion process.
      */
     async deleteDB(collectionName, filter) {
+        const CRUD = global._4handsAPI?.CRUD;
+
         try {
             const deleted = await CRUD.del({
                 collectionName: collectionName || this.collectionName,
@@ -214,7 +284,7 @@ class GlobalMap {
      * @async
      */
     async setEncryptField(fieldName, value) {
-        const SafeValue = require('4hands-api/src/models/collections/SafeValue');
+        const SafeValue = require('./safe_values.model');
 
         if (!value) {
             throw logError({ name: `It's required to have a value to proceed on setting a safe value!`});
@@ -233,8 +303,10 @@ class GlobalMap {
     }
 
     async createCache(data) {
+        const API = global._4handsAPI?.API;
+
         try {
-            const created = await API.redisServ.createDoc({ collection: this.collectionName, uid: this.UID, data: data || {...this} });
+            const created = await API.Redis.createDoc({ collection: this.collectionName, uid: this.UID, data: data || {...this} });
             return created;
         } catch (err) {
             throw logError(err);
@@ -242,8 +314,10 @@ class GlobalMap {
     }
 
     async getCache() {
+        const API = global._4handsAPI?.API;
+
         try {
-            const cache = await API.redisServ.getDoc({ collection: this.collectionName, uid: this.UID });
+            const cache = await API.Redis.getDoc({ collection: this.collectionName, uid: this.UID });
             return cache;
         } catch (err) {
             throw logError(err);
@@ -251,8 +325,10 @@ class GlobalMap {
     }
 
     async updateCache(data) {
+        const API = global._4handsAPI?.API;
+
         try {
-            const updated = await API.redisServ.updateDoc({ collection: this.collectionName, uid: this.UID || this._id, data: data || {...this} });
+            const updated = await API.Redis.updateDoc({ collection: this.collectionName, uid: this.UID || this._id, data: data || {...this} });
             return updated;
         } catch (err) {
             throw logError(err);
@@ -260,8 +336,10 @@ class GlobalMap {
     }
 
     async clearCache() {
+        const API = global._4handsAPI?.API;
+
         try {
-            const deleted = await API.redisServ.deleteDoc({ collection: this.collectionName, uid: this.UID });
+            const deleted = await API.Redis.deleteDoc({ collection: this.collectionName, uid: this.UID });
             return deleted;
         } catch (err) {
             throw logError(err);
@@ -290,8 +368,10 @@ class GlobalMap {
     }
 
     static async getCache(collection, uid) {
+        const API = global._4handsAPI?.API;
+
         try {
-            const cacheDoc = await API.redisServ.getDoc({ collection, uid });
+            const cacheDoc = await API.Redis.getDoc({ collection, uid });
             return cacheDoc;
         } catch (err) {
             throw logError(err);
@@ -299,4 +379,4 @@ class GlobalMap {
     }
 }
 
-module.exports = GlobalMap;
+module.exports = _Global;

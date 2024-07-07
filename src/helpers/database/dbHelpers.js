@@ -242,7 +242,7 @@ function findRelFields(schema, exclude, levels, currentLevel) {
  * @async
  */
 async function createEncryptFields(context) {
-    const SafeValue = require('4hands-api/src/models/collections/SafeValue');
+    const SafeValue = require('4hands-api/src/collections/Models/safe_values.model');
 
     for (let key of context.encryptedFields) {
         const rawValue = context.raw['_' + key];

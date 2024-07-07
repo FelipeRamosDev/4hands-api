@@ -1,4 +1,3 @@
-const User = require('4hands-api/src/models/collections/User');
 const Endpoint = require('4hands-api/src/models/settings/Endpoint');
 
 /**
