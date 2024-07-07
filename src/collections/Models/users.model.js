@@ -276,6 +276,44 @@ class User extends _Global {
             throw logError(err);
         }
     }
+
+    /**
+     * Static method to sign in a user.
+     * @param {string} userName - The username of the user to sign in.
+     * @param {string} password - The user's password.
+     * @returns {Promise<User|Error>} - A promise resolving to the signed-in user object, or an error object if sign-in fails.
+     * @throws {Error.Log} If there is an error during sign-in.
+     */
+     static async signIn(userName, password, preventEmailConfirm) {
+        const CRUD = global._4handsAPI?.CRUD;
+
+        try {
+            const userDOC = await CRUD.getDoc({ collectionName: 'users', filter: { email: userName }}).defaultPopulate();
+
+            if (!userDOC) {
+                return logError('auth.user_not_found', userName);
+            }
+
+            if (!preventEmailConfirm && !userDOC.isEmailConfirmed) {
+                return logError({
+                    code: 401,
+                    name: 'USER_EMAIL_NOT_CONFIRMED',
+                    message: `The user needs to confirm his email before login!`
+                });
+            }
+
+            const user = userDOC.initialize();
+            const signedIn = await user.authService.signIn(password);
+
+            if (signedIn.success) {
+                return user;
+            } else {
+                return signedIn;
+            }
+        } catch (err) {
+            throw logError(err);
+        }
+    }
 }
 
 module.exports = User;
