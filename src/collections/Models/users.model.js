@@ -5,14 +5,6 @@ const dbHelpers = require('../../helpers/database/dbHelpers');
 class User extends _Global {
     constructor (setup, parent) {
         super(setup, parent);
-        const { auth } = Object(setup);
-
-        /**
-         * The AuthBucket instance associated with this user.
-         * @private
-         * @property {AuthBucket}
-         */
-        this.auth = () => new AuthBucket(auth, this);
     }
 
     /**
@@ -28,19 +20,11 @@ class User extends _Global {
      * @returns {string} - The user token.
      */
     get token() {
-        return this.authService.createUserToken();
+        return this.authService?.createUserToken();
     }
 
     get authService() {
         return this.auth?.service;
-    }
-
-    toModel() {
-        if (User.Model) {
-            return new User.Model(this.toObject());
-        } else {
-            return new User(this);
-        }
     }
 
     async signUp() {

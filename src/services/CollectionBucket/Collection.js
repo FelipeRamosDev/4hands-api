@@ -26,14 +26,14 @@ class Collection extends SchemaDB {
      * @param {string} setup.singularLabel - The singular label of the collection.
      * @param {string[]} setup.excludeGlobals - Globals to be excluded from the collection.
      * @param {CollectionField[]} setup.fieldsSet - The fields of the collection.
-     * @param {object} setup.Model - The collection's model.
+     * @param {object} setup.CustomModel - The collection's model.
      * @throws {Error} If collection setup fails.
      */
     constructor(setup) {
         super(setup);
 
         try {
-            const { name, symbol, displayName, pluralLabel, singularLabel, excludeGlobals, fieldsSet, Model } = Object(setup);
+            const { name, symbol, displayName, pluralLabel, singularLabel, excludeGlobals, fieldsSet, CustomModel } = Object(setup);
 
             /**
              * The symbol of the collection.
@@ -72,10 +72,10 @@ class Collection extends SchemaDB {
             this.excludeGlobals = excludeGlobals;
 
             /**
-             * The collection's model.
+             * The collection's custom model.
              * @property {object}
              */
-            this.Model = Model;
+            this.CustomModel = CustomModel;
 
             /**
              * The fields of the collection.

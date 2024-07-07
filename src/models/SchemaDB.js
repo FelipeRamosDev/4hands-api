@@ -214,11 +214,11 @@ class SchemaDB {
 
             // Loading the schema custom classe
             if (FS.isExist(this.projectClassesPath)) {
-                const ProjectClass = require(this.projectClassesPath);
-                this.schema.loadClass(ProjectClass);
+                this.DefaultModel = require(this.projectClassesPath);
+                this.schema.loadClass(this.DefaultModel);
             } else if (FS.isExist(this.nativeClassesPath)) {
-                const NativeClass = require(this.nativeClassesPath);
-                this.schema.loadClass(NativeClass);
+                this.DefaultModel = require(this.nativeClassesPath);
+                this.schema.loadClass(this.DefaultModel);
             }
 
             this.schema.set('toObject', {virtuals: true});
