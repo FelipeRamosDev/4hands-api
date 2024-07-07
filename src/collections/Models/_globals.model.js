@@ -1,8 +1,9 @@
 class _Global {
     constructor (setup, parent) {
-        const { UID, _id, id, index, author, cod, createdAt, modifiedAt } = Object(setup);
+        const { UID, _id, id, index, author, cod, createdAt, modifiedAt, collection } = Object(setup);
         this._parent = () => parent;
 
+        this._collectionName = collection?.collectionName;
         this._id = _id;
         this.id = id;
         this._UID = UID;
@@ -11,6 +12,30 @@ class _Global {
         this.cod = cod;
         this.createdAt = createdAt && new Date(createdAt);
         this.modifiedAt = modifiedAt && new Date(modifiedAt);
+
+        if (typeof setup === 'object') {
+            const obj = this.getCollection(setup.collection.collectionName);
+
+            obj.fieldsSet.map(field => {
+                let value = setup[field.fieldName];
+
+                if (typeof value === 'object' && !Array.isArray(value)) {
+                    value._parent = () => this;
+                }
+
+                if (Array.isArray(value)) {
+                    value = value.map(item => {
+                        if (typeof value === 'object' && !Array.isArray(value)) {
+                            item._parent = () => this;
+                        }
+
+                        return item;
+                    });
+                }
+
+                this[field.fieldName] = value;
+            });
+        }
     }
 
     get UID() {
@@ -38,7 +63,11 @@ class _Global {
     }
 
     get collectionName() {
-        return this.collection?.collectionName;
+        if (this._collectionName) {
+            return this._collectionName;
+        } else {
+            return this.collection?.collectionName;
+        }
     }
     
     /**
@@ -75,16 +104,28 @@ class _Global {
         return String(this.index);
     }
 
+    getCollection(collectionName) {
+        return global._4handsAPI?.collections?.getCollection(collectionName || this.collectionName);
+    }
+
+    toModel(OtherModel) {
+        const collection = this.getCollection();
+
+        if (collection) {
+            const { DefaultModel, CustomModel } = Object(collection);
+            const parent = (typeof this._parent === 'function') ? this._parent() : undefined;
+
+            const Model = OtherModel || CustomModel || DefaultModel;
+            if (Model) {
+                return new Model(this, parent);
+            }
+        }
+    }
+
     initialize() {
         try {
-            const Model = this.BSModel || this?.schema?.statics?.BSModel;
-
-            if (Model) {
-                const builded = new Model(this.toObject());
-                return builded;
-            } else {
-                return this;
-            }
+            const CustomModel = this.CustomModel || this?.schema?.statics?.CustomModel;
+            return this.toModel(CustomModel);
         } catch(err) {
             throw logError(err);
         }
