@@ -1,31 +1,11 @@
-const _Global = require('4hands-api/src/models/maps/_Global');
 const AuthService = require('4hands-api/src/services/Auth');
+const _Global = require('4hands-api/src/collections/Models/_globals.model');
 
-/**
- * Represents an authentication bucket associated with a user.
- * @module AuthBucket
- * @extends _Global
- * @namespace Models
- */
 class AuthBucket extends _Global {
-    /**
-     * Creates a new instance of the AuthBucket class.
-     * @param {Object} setup - The setup object containing authentication details.
-     * @param {string} setup.password - The hashed password associated with the user.
-     * @param {Object} setup.user - The user object containing user-specific details.
-     * @param {Object} parent - The parent object to which this AuthBucket belongs.
-     * @throws {Error.Log} If setup parameters are missing or invalid.
-     */
-    constructor(setup, parent) {
+    constructor (setup, parent) {
         super(setup, parent);
-        const { password, user } = Object(setup);
-        const self = this;
 
-        /**
-         * The AuthService instance associated with this AuthBucket.
-         * @property {AuthService}
-         */
-        this.service = new AuthService({ parent: self });
+        const { password, user } = Object(setup);
 
         /**
          * The hashed password associated with the user.
@@ -37,7 +17,15 @@ class AuthBucket extends _Global {
          * The user object containing user-specific details.
          * @property {Object}
          */
-        this.user = user ? user.oid(true) : {};
+        this.user = user;
+    }
+
+    /**
+     * The AuthService instance associated with this AuthBucket.
+     * @property {AuthService}
+     */
+    get service() {
+        return new AuthService({ parent: this });
     }
 
     /**
@@ -45,7 +33,7 @@ class AuthBucket extends _Global {
      * @returns {string} - The username.
      */
     get userName() {
-        return this.parent.getSafe('userName');
+        return this?.user?.email;
     }
     
     /**
@@ -53,23 +41,12 @@ class AuthBucket extends _Global {
      * @returns {Object} - The user's unique identifier.
      */
     get userUID() {
-        return this.user;
+        return this?.user?.UID;
     }
-
-    /**
-     * Change the user's password.
-     * @async
-     * @param {string} newPassword The new password string. 
-     * @returns {object} 
-     */
+ 
     async changePassword(newPassword) {
         try {
-            const updated = await this.updateDB({ data: { password: newPassword }});
-
-            if (updated.error) {
-                throw updated;
-            }
-
+            await this.updateDB({ data: { password: newPassword }});
             return { success: true };
         } catch (err) {
             throw logError(err);
@@ -85,12 +62,11 @@ class AuthBucket extends _Global {
      * @throws {Error.Log} If there is an error during the AuthBucket creation process.
      */
     static async draft(user) {
-        const CRUD = global?._4handsAPI?.CRUD;
+        const CRUD = global._4handsAPI?.CRUD;
 
         try {
             const auth = await CRUD.create('auth_buckets', {
                 user: user.id,
-                rule: user.raw.rule,
                 password: user.raw.password
             });
 

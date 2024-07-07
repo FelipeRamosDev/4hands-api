@@ -2,9 +2,6 @@ const Success = require('4hands-api/src/models/Success');
 const bcrypt = require('bcrypt');
 const JWT = require('jsonwebtoken');
 const crypto = require('crypto');
-const FS = require('4hands-api/src/services/FS');
-const config = require('4hands-api/configs/project');
-const sessionCLI = FS.isExist(config.sessionPath) && require('4hands-api/sessionCLI.json') || {};
 
 /**
  * Class representing an authentication service for handling user authentication and authorization.
@@ -32,7 +29,7 @@ class AuthService {
      * @type {string|undefined}
      */
     get userUID() {
-        return this.getSafe('parentBucket.userUID');
+        return this.parentBucket?.userUID;
     }
 
     /**
@@ -111,7 +108,6 @@ class AuthService {
 
     /**
      * Generates a salt for password hashing.
-     * @async
      * @param {number} [length=8] - The length of the generated salt. Default is 8.
      * @returns {string} The generated salt.
      */
@@ -126,7 +122,6 @@ class AuthService {
 
     /**
      * Creates a password hash using the provided password and salt length.
-     * @async
      * @param {string} password - The password to be hashed.
      * @param {number} [saltLength=8] - The length of the salt for password hashing.
      * @returns {string} The hashed password.
@@ -134,7 +129,7 @@ class AuthService {
     async createHash(password, saltLength) {
         try {
             const salt = await this.genSalt(saltLength);
-            const hash = await bcrypt.hash(password, salt);
+            const hash = bcrypt.hash(password, salt);
             return hash;
         } catch (err) {
             throw logError(err);
@@ -147,10 +142,10 @@ class AuthService {
      */
     createUserToken() {
         try {
-            const userName = this.getSafe('parentBucket.userName');
-            const userUID = this.getSafe('parentBucket.userUID');
-            const password = this.getSafe('parentBucket.password');
-            const authBucketUID = this.getSafe('parentBucket._id');
+            const userName = this.parentBucket?.userName;
+            const userUID = this.parentBucket?.userUID;
+            const password = this.parentBucket?.password;
+            const authBucketUID = this.parentBucket?._id;
             const token = JWT.sign({userName, password, userUID, authBucketUID}, this.secretKey, {expiresIn: Date.now() + 80000000});
 
             return token;
@@ -235,31 +230,6 @@ class AuthService {
         try {
             const isMatch = await bcrypt.compare(password, this.parentBucket.password.toString());
             return isMatch;
-        } catch (err) {
-            throw logError(err);
-        }
-    }
-
-    /**
-     * Signs out the user and deletes the corresponding session.
-     * @async
-     * @param {string} token - The JWT token representing the user's session.
-     * @returns {boolean} True if the session is successfully deleted, false otherwise.
-     * @throws {Error.Log} If an error occurs during sign-out.
-     */
-    async signOut(token) {
-        try {
-            const userData = this.validateToken(token);
-
-            if (userData.error) {
-                throw userData;
-            }
-
-            delete sessionCLI[userData.userUID];
-            sessionCLI.currentUser = '';
-
-            const sessionUpdated = await FS.writeJSON(config.sessionPath, sessionCLI);
-            return sessionUpdated;
         } catch (err) {
             throw logError(err);
         }

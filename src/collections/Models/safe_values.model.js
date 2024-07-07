@@ -1,5 +1,6 @@
-const SafeValue = require('4hands-api/src/models/collections/SafeValue');
+const _Global = require('4hands-api/src/collections/Models/_globals.model');
 const AuthService = require('4hands-api/src/services/Auth');
+const AuthBucket = require('./auth_buckets.model');
 
 /**
  * Represents a utility class providing encryption and decryption methods for sensitive data.
@@ -7,19 +8,26 @@ const AuthService = require('4hands-api/src/services/Auth');
  *
  * @class
  */
-class SafeValueClass {
-    /**
-     * The SafeValue class used for encryption and decryption operations.
-     * @type {SafeValue}
-     * @static
-     */
-    static BSModel = SafeValue;
+class SafeValue extends _Global {
+    constructor (setup, parent) {
+        super(setup, parent);
+        const {
+            auth
+        } = Object(setup);
+
+        /**
+         * The AuthBucket instance associated with this user.
+         * @private
+         * @property {AuthBucket}
+         */
+        this._auth = () => auth && new AuthBucket(auth, this);
+    }
 
     /**
      * Retrieves a masked version of the decrypted data for display purposes.
      *
      * @returns {string|undefined} The masked version of the decrypted data or undefined if not encrypted.
-     * @memberof SafeValueClass
+     * @memberof SafeValue
      * @instance
      */
     get displayValue() {
@@ -48,22 +56,17 @@ class SafeValueClass {
      *
      * @returns {Object|undefined} An object containing encryption details (salt, derivatedKey, iv, encrypted),
      * or undefined if raw value is missing.
-     * @memberof SafeValueClass
+     * @memberof SafeValue
      * @instance
      */
     get encrypt() {
-        const API = global._4handsAPI?.API;
         if (!this?.raw?.rawValue) {
             return;
         }
 
-        if (!process.env.API_SECRET && !API?.API_SECRET) {
-            throw logError('common.missing_params');
-        }
-
         const authService = new AuthService();
         const salt = authService.generateRandom();
-        const derivatedKey = authService.generateKey(process.env.API_SECRET || API?.API_SECRET, salt);
+        const derivatedKey = authService.generateKey(process.env.API_SECRET || global?.API?.API_SECRET, salt);
         const { iv, encryptedToken } = authService.encryptToken(this.raw.rawValue, derivatedKey);
 
         return {
@@ -75,4 +78,4 @@ class SafeValueClass {
     }
 }
 
-module.exports = SafeValueClass;
+module.exports = SafeValue;

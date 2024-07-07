@@ -4,9 +4,6 @@ const { ObjectId } = Collection.Types;
 module.exports = new Collection({
     name: 'auth_buckets',
     symbol: 'AUTH',
-    displayName: 'Auth Butckets',
-    pluralLabel: 'Auth Butckets',
-    singularLabel: 'Auth Butcket',
     fieldsSet: [
         {
             fieldName: 'password',

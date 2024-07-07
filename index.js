@@ -1,4 +1,3 @@
-const collections = require('./src/collections');
 const DBService = require('4hands-api/src/services/DBService');
 const ServerAPI = require('./src/services/ServerAPI');
 const ServerIO = require('./src/services/ServerIO');
@@ -70,7 +69,6 @@ exports.Endpoint = Endpoint;
  */
 exports.Collection = Collection;
 
-exports.collections = collections;
 exports.helpers = helpers;
 exports.interface = interface;
 exports.middlewares = middlewares;

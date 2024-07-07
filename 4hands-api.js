@@ -225,10 +225,10 @@ class _4HandsAPI {
        */
       this.IO = new ServerIO({
          _4handsInstance: this,
-         corsOrigin: this.API.corsOrigin,
+         corsOrigin: this.API?.corsOrigin,
          ssl: {
-            keyPath: this.API.keySSLPath,
-            certPath: this.API.certSSLPath
+            keyPath: this.API?.keySSLPath,
+            certPath: this.API?.certSSLPath
          },
          ...configs
       });

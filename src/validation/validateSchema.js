@@ -9,6 +9,7 @@ class ValidateSchema {
      * @throws {Error} - Throws an error if the provided rules are invalid or the collection name is not found.
      */
     constructor(rules) {
+        const API = global._4handsAPI?.API;
         const {Schema} = require('mongoose');
         const schemas = API.database.collections;
 

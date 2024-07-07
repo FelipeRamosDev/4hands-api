@@ -3,7 +3,7 @@ const { getGlobalSchema } = require('4hands-api/src/collections/_globals');
 const RefConfig = require('./settings/SchemaRefConfig');
 const { database: { dbHelpers }} = require('4hands-api/src/helpers');
 const configs = require('4hands-api/configs/project');
-const GlobalClass = require('4hands-api/src/collections/Class/_globals.class');
+const GlobalClass = require('4hands-api/src/collections/Models/_globals.model');
 const FS = require('4hands-api/src/services/FS');
 const path = require('path');
 
@@ -31,8 +31,8 @@ class SchemaDB {
             this.projectRedisEventsPath = path.normalize(`${this.projectPath}src/collections/redisEvents/${this.name}.event.js`);
             this.nativeQueriesPath = path.normalize(`${__dirname.replace(path.normalize('/models'), '/collections')}/queries/${this.name}.query.js`);
             this.nativeEventsPath = path.normalize(`${__dirname.replace(path.normalize('/models'), '/collections')}/events/${this.name}.event.js`);
-            this.nativeClassesPath = path.normalize(`${__dirname.replace(path.normalize('/models'), '/collections')}/Class/${this.name}.class.js`);
-            this.projectClassesPath = path.normalize(`${this.projectPath}src/collections/Class/${this.name}.class.js`);
+            this.nativeClassesPath = path.normalize(`${__dirname.replace(path.normalize('/models'), '/collections')}/Models/${this.name}.model.js`);
+            this.projectClassesPath = path.normalize(`${this.projectPath}src/collections/Models/${this.name}.model.js`);
             this.symbol = symbol;
             this.DB = null;
             this.globalEvents = globalEvents;
