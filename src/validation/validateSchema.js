@@ -11,7 +11,7 @@ class ValidateSchema {
     constructor(rules) {
         const API = global._4handsAPI?.API;
         const {Schema} = require('mongoose');
-        const schemas = API.database.collections;
+        const schemas = API.database.collections.toArray();
 
         // Initializing the schema
         if (Boolean.isValid(rules).stringFilled()) {

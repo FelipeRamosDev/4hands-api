@@ -43,12 +43,10 @@ class ServerAPI {
             projectName,
             API_SECRET,
             staticPath,
-            sessionResave,
-            sessionSaveUninitialized,
             keySSLPath,
             certSSLPath,
             FE_ORIGIN,
-            
+
             // Defaults
             PORT = 80,
             jsonLimit = '10mb',
@@ -56,6 +54,8 @@ class ServerAPI {
             httpEndpoints = [],
             defaultMaxListeners = 20,
             sessionCookiesMaxAge = 86400000,
+            sessionResave = true,
+            sessionSaveUninitialized = true,
             redisURL = 'redis://localhost:6379',
             corsOrigin = ['http://localhost', 'https://localhost']
         } = Object(setup);

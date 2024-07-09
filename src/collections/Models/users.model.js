@@ -178,12 +178,6 @@ class User extends _Global {
             }
 
             const initialized = userDOC.initialize();
-            if (!initialized.gitHub && initialized.auth.gitHubToken) {
-                await initialized.updateDB({data: {
-                    gitHub: await initialized.loadGitHubData()
-                }});
-            } 
-
             return initialized;
         } catch (err) {
             throw logError(err);

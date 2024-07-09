@@ -216,7 +216,9 @@ class SchemaDB {
             if (FS.isExist(this.projectClassesPath)) {
                 this.DefaultModel = require(this.projectClassesPath);
                 this.schema.loadClass(this.DefaultModel);
-            } else if (FS.isExist(this.nativeClassesPath)) {
+            }
+            
+            if (FS.isExist(this.nativeClassesPath)) {
                 this.DefaultModel = require(this.nativeClassesPath);
                 this.schema.loadClass(this.DefaultModel);
             }

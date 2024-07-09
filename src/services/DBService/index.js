@@ -14,6 +14,8 @@ class DBService {
      * @constructor
      * @param {Object} setup - The configuration setup for the database server.
      * @param {string} setup.dbName - The name of the database.
+     * @param {Function} setup.onReady - On ready callback.
+     * @param {Function} setup.onError - On error callback.
      * @param {string} [setup.hostURL='mongodb://0.0.0.0:27017/'] - The host URL for the MongoDB server.
      * @param {Array} [setup.collections] - Additional collections to be initialized along with the default ones.
      */
@@ -103,8 +105,6 @@ class DBService {
     init({ success = () => {}, error = () => {} }) {
         mongoose.set('strictQuery', false);
         mongoose.connect(this.hostURL, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
             dbName: this.dbName
         }).then(async (connectedDB) => {
             this.parent.toConsole(`Database "${this.dbName}" is connected on: "${this.hostURL}"`);
