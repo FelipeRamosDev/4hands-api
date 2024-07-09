@@ -78,6 +78,18 @@ class CollectionBucket extends Map {
 
       return result;
    }
+   
+   toBlend(collections) {
+      collections.map(coll => {
+         const collection = this.getCollection(coll.name);
+
+         if (collection) {
+            collection.blend(coll);
+         } else {
+            this.setCollection(coll);
+         }
+      });
+   }
 }
 
 module.exports = CollectionBucket;
