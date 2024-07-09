@@ -21,7 +21,7 @@ class CollectionEncrypt extends CollectionField {
         super(setup);
 
         try {
-            const Collection = require('4hands-api/src/models/settings/Collection');
+            const Collection = require('4hands-api/services/CollectionBucket').Collection;
             const { ObjectId } = Collection.Types;
 
             this.type = ObjectId;
