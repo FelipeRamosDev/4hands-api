@@ -42,10 +42,18 @@ class RedisService {
         }
     }
 
+    /**
+     * The 4HandsAPI instance that this Redis is under.
+     * @readonly
+     */
     get instance() {
         return this._4handsAPI();
     }
 
+    /**
+     * The ServerAPI instance that this Redis is associated, if it have one.
+     * @readonly
+     */
     get apiServer() {
         return this._apiServer();
     }

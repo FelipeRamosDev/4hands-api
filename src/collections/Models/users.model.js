@@ -1,4 +1,4 @@
-const _Global = require('4hands-api/src/collections/Models/_globals.model');
+const _Global = require('./_globals.model');
 const AuthBucket = require('./auth_buckets.model');
 const dbHelpers = require('../../helpers/database/dbHelpers');
 
@@ -23,10 +23,20 @@ class User extends _Global {
         return this.authService?.createUserToken();
     }
 
+    /**
+     * The Auth Service instance.
+     * @returns {AuthService}
+     */
     get authService() {
         return this.auth?.service;
     }
 
+    /**
+     * Signs up a new user.
+     * @async
+     * @returns {Promise<AuthBucket>} - A promise resolving to the auth bucket.
+     * @throws {Error.Log} If there is an error during sign-up.
+     */
     async signUp() {
         try {
             if (this.isNew) {
@@ -47,7 +57,7 @@ class User extends _Global {
     }
     
     /**
-     * To generate a confimation token to be used in a confirmation URL.
+     * Generates a confirmation token to be used in a confirmation URL.
      * @returns {string} - The confirmation token.
      */
     generateConfirmationToken() {
@@ -57,6 +67,13 @@ class User extends _Global {
         }
     }
 
+    /**
+     * Sends a reset password email to the user.
+     * @async
+     * @param {Object} req - The request object containing headers and session information.
+     * @returns {Promise} - A promise resolving to the email sending status.
+     * @throws {Error.Log} If there is an error during email sending.
+     */
     async sendResetPassEmail(req) {
         const API = global._4handsAPI?.API;
 
@@ -67,10 +84,24 @@ class User extends _Global {
         }
     }
 
+    /**
+     * Generates a session token for the user.
+     * @async
+     * @param {Object} session - The session object.
+     * @returns {Promise<string>} - A promise resolving to the session token.
+     * @throws {Error.Log} If there is an error during token generation.
+     */
     async sessionToken(session) {
         return await this.authService.createSessionToken(session);
     }
 
+    /**
+     * Generates a reset password link for the user.
+     * @async
+     * @param {Object} req - The request object containing headers and session information.
+     * @returns {Promise<string>} - A promise resolving to the reset password link.
+     * @throws {Error.Log} If there is an error during link generation.
+     */
     async genResetPassLink(req) {
         const { headers, session } = Object(req);
         const feOrigin = headers.origin;
@@ -83,6 +114,13 @@ class User extends _Global {
         return url.toString();
     }
 
+    /**
+     * Generates a reset password token for the user.
+     * @async
+     * @param {string} sessionID - The session ID.
+     * @returns {Promise<string>} - A promise resolving to the reset password token.
+     * @throws {Error.Log} If there is an error during token generation.
+     */
     async genResetPassToken(sessionID) {
         return this.authService.createResetToken(sessionID, this.email);
     }
@@ -90,7 +128,7 @@ class User extends _Global {
     /**
      * Signs out the user.
      * @async
-     * @returns {Promise} - A promise resolving to the sign-out status.
+     * @returns {Promise<boolean>} - A promise resolving to the sign-out status.
      * @throws {Error.Log} If there is an error during the sign-out process.
      */
     async signOut() {
@@ -98,17 +136,16 @@ class User extends _Global {
             const signedOut = await this.authService.signOut(this.userSession.token);
             return signedOut;
         } catch (err) {
-            /**
-             * Thrown if there is an error during the sign-out process.
-             * @throws {Error.Log}
-             */
             throw logError(err);
         }
     }
 
     /**
      * Converts the user information to a session object.
-     * @returns {Object} - The session object representing the user information.
+     * @async
+     * @param {Object} session - The session object.
+     * @returns {Promise<Object>} - A promise resolving to the session object.
+     * @throws {Error.Log} If there is an error during conversion.
      */
     async toSession(session) {
         return {
@@ -138,8 +175,10 @@ class User extends _Global {
     }
 
     /**
-     * Sends a confirmation e-mail to user's e-mail.
-     * @returns {object}
+     * Sends a confirmation email to the user's email.
+     * @async
+     * @returns {Promise<Object>} - A promise resolving to the email sending status.
+     * @throws {Error.Log} If there is an error during email sending.
      */
     async sendConfirmationEmail() {
         const API = global._4handsAPI?.API;
@@ -162,7 +201,9 @@ class User extends _Global {
     }
 
     /**
-     * Static method to retrieve user information based on the provided filter.
+     * Retrieves user information based on the provided filter.
+     * @static
+     * @async
      * @param {Object} filter - The filter object to use for user retrieval.
      * @returns {Promise<User>} - A promise resolving to the user object.
      * @throws {Error.Log} If there is an error during user retrieval.
@@ -184,13 +225,22 @@ class User extends _Global {
         }
     }
 
+    /**
+     * Retrieves a cached user document based on the user ID.
+     * @static
+     * @async
+     * @param {string} uid - The user ID.
+     * @returns {Promise<User>} - A promise resolving to the cached user document.
+     */
     static async getDocCache(uid) {
         return getCacheModel('users', uid, User);
     }
 
     /**
-     * Static method to check if a user with the given username exists.
-     * @param {string} userName - The username to check for existence.
+     * Checks if a user with the given email exists.
+     * @static
+     * @async
+     * @param {string} email - The email to check for existence.
      * @param {boolean} returnUID - Indicates whether to return the user ID if the user exists.
      * @returns {Promise<boolean|string>} - A promise resolving to `true` if the user exists, or the user ID if `returnUID` is `true`.
      * @throws {Error.Log} If there is an error during the existence check.

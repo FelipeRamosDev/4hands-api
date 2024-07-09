@@ -5,12 +5,14 @@ const { dbHelpers } = require('4hands-api/src/helpers/database');
  * @class CRUD
  */
 class CRUD {
-    constructor (database, options) {
-        const {  } = Object(options);
-
+    constructor (database) {
         this._database = () => database;
     }
 
+    /**
+     * Get the database service associated
+     * @readonly
+     */
     get database() {
         return this._database();
     }
