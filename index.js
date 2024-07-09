@@ -19,6 +19,8 @@ class _4HandsAPI {
     * @param {Collection[]} setup.collections - Array of Collection objects with the collections declared.
     * @param {Object} setup.database - The database configurations.
      * @param {string} setup.database.dbName - The database name.
+     * @param {Function} setup.database.onReady - On ready callback.
+     * @param {Function} setup.database.onError - On error callback.
      * @param {string} [setup.database.hostURL='mongodb://0.0.0.0:27017/'] - The HOST url. Default is 'mongodb://0.0.0.0:27017/'.
     * @param {Object} setup.serverAPI - The server HTTP configurations.
      * @param {string} setup.serverAPI.API_SECRET - The API secret key for session encryption.
@@ -73,7 +75,7 @@ class _4HandsAPI {
       }
 
       /**
-       * The instance name.
+       * The instance name id.
        * @type {string}
        */
       this.id = id;
@@ -89,9 +91,9 @@ class _4HandsAPI {
        * @type {CollectionBucket}
        */
       this.collections = new CollectionBucket([
-         auth_buckets,
+         // auth_buckets,
          safe_values,
-         users,
+         // users,
          ...collections
       ]);
 
@@ -103,6 +105,14 @@ class _4HandsAPI {
 
       try {
          (async () => {
+            if (database) {
+               await this.createDatabase(database);
+
+               if (this.declareGlobal) {
+                  global.CRUD = this.CRUD;
+               }
+            }
+
             if (redis) {
                await this.createRedis(redis);
             }
@@ -111,12 +121,12 @@ class _4HandsAPI {
                this.createEmailService(emailService);
             }
       
-            if (database) {
-               await this.createDatabase(database);
-            }
-      
             if (serverAPI) {
                this.createServerAPI(serverAPI);
+
+               if (this.declareGlobal) {
+                  global.API = this.API;
+               }
             }
       
             if (socketIO) {
@@ -141,7 +151,7 @@ class _4HandsAPI {
     * @type {CRUD}
     */
    get CRUD() {
-      return this.DB.CRUD;
+      return this.DB?.CRUD;
    }
 
    async createDatabase(configs) {
@@ -201,6 +211,10 @@ class _4HandsAPI {
 
    async createRedis(configs) {
       const RedisService = require('./src/services/Redis');
+
+      if (typeof configs === 'boolean' && configs) {
+         configs = {};
+      }
 
       /**
        * The Redis service instance.

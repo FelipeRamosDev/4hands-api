@@ -14,12 +14,18 @@ class _Global {
         this.modifiedAt = modifiedAt && new Date(modifiedAt);
 
         if (typeof setup === 'object') {
-            const obj = this.getCollection(setup.collection.collectionName);
+            const obj = this.getCollection(setup?.collection?.collectionName);
+            if (!obj) return;
 
             obj.fieldsSet.map(field => {
+                const descriptor = Object.getOwnPropertyDescriptor(this, field.fieldName);
+                if (descriptor && typeof descriptor.get === 'function') {
+                    return;
+                }
+
                 let value = setup[field.fieldName];
 
-                if (typeof value === 'object' && !Array.isArray(value)) {
+                if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
                     value._parent = () => this;
                 }
 
@@ -33,7 +39,11 @@ class _Global {
                     });
                 }
 
-                this[field.fieldName] = value;
+                try {
+                    this[field.fieldName] = value;
+                } catch (err) {
+                    return;
+                }
             });
         }
     }

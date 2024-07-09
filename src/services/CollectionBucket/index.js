@@ -1,6 +1,8 @@
 const Collection = require('./Collection');
 
 class CollectionBucket extends Map {
+   static Collection = Collection;
+
    constructor (collections = [], database) {
       super();
 

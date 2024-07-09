@@ -40,7 +40,7 @@ class CRUD {
             const savedDoc = await newDoc.save(options);
             return savedDoc;
         } catch(err) {
-            throw logError(err);
+            return toError(err);
         }
     }
     

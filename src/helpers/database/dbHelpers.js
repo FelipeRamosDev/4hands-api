@@ -100,6 +100,13 @@ async function increaseCounter(collection) {
         const Counters = mongoose.model(configs.database.counterCollection);
         const counter = await Counters.findByIdAndUpdate(collection, { $inc: { value: 1 }});
 
+        if (!counter) {
+            throw logError({
+                name: 'COUNTER_COLLECTION_NOT_FOUND',
+                message: 'The counter collection does not exist!'
+            });
+        }
+
         return counter.toObject();
     } catch(err) {
         throw logError(err);

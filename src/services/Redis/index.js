@@ -24,7 +24,7 @@ class RedisService {
      * @param {Object} apiServer - An API server object.
      */
     constructor(setup, _4handsAPI) {
-        const { clientOptions, collections = [], onConnect, onReady, onEnd, onError, onReconnecting, apiServer } = Object(setup);
+        const { clientOptions, collections = [], onConnect = () => {}, onReady = () => {}, onEnd = () => {}, onError = () => {}, onReconnecting = () => {}, apiServer } = Object(setup);
 
         try {
             this._apiServer = () => apiServer;

@@ -102,7 +102,7 @@ class AuthService {
      * @returns {string} The decrypted string of the value.
      */
     decryptToken(encryptedToken, iv, derivatedKey) {
-        const decipher = crypto.createDecipheriv(this.algorithm, derivatedKey, Buffer.from(iv, 'hex'));
+        const decipher = crypto.createDecipheriv(this.algorithm, new Int8Array(derivatedKey), Buffer.from(iv, 'hex'));
         return decipher.update(encryptedToken, 'hex', 'utf8') + decipher.final('utf8');
     }
 
