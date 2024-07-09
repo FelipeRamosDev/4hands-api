@@ -1,7 +1,11 @@
 const Collection = require('./Collection');
+const CollectionEncrypt = require('./CollectionEncrypt');
+const CollectionField = require('./CollectionField');
 
 class CollectionBucket extends Map {
    static Collection = Collection;
+   static CollectionEncrypt = CollectionEncrypt;
+   static CollectionField = CollectionField;
 
    constructor (collections = [], database) {
       super();
