@@ -1,7 +1,4 @@
-const models = require('4hands-api/src/models');
-const routeModels = models.routes.collection.Create;
 const Endpoint = require('4hands-api/src/models/settings/Endpoint');
-const Response = routeModels.response;
 
 /**
  * Represents a controller endpoint for creating a document in a collection.
@@ -27,7 +24,7 @@ module.exports = new Endpoint({
             const doc = await CRUD.create(body.collectionName, body.data, body.options);
     
             if (!doc.errors) {
-                return res.status(200).json(new Response(doc));
+                return res.status(200).send({ success: true, doc });
             } else {
                 const error = logError(doc);
                 return res.status(500).send(error);

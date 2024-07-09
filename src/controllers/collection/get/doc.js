@@ -1,7 +1,4 @@
 const mongoose = require('mongoose');
-const models = require('4hands-api/src/models');
-const GetDoc = models.routes.collection.GetDoc;
-const Response = GetDoc.response;
 const Endpoint = require('4hands-api/src/models/settings/Endpoint');
 
 /**
@@ -47,17 +44,15 @@ module.exports = new Endpoint({
             const body = req.body;
             const {populate, select} = body.options || {};
             const queryDoc = CRUD.getDoc(body);
-    
+
             if (populate) {
                 queryDoc.populateAll(populate);
             }
 
             queryDoc.select(select);
-    
-            const execute = await queryDoc.exec();
-            const response = new Response(execute, body);
-    
-            return res.status(200).json(response);
+
+            const doc = await queryDoc.exec();
+            return res.status(200).send({ success: true, doc });
         } catch(err) {
             const error = logError(err);
             res.status(500).send(error);
