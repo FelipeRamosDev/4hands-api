@@ -116,7 +116,17 @@ class Collection extends SchemaDB {
      * @param {CollectionField} config - The configuration object for the new field.
      */
     addNewField(config) {
-        this.fieldsSet.push(new CollectionField(config).toObject());
+        if (!this.fieldsSet.find(item => item.fieldName === config.fieldName)) {
+            this.fieldsSet.push(new CollectionField(config).toObject());
+        }
+    }
+
+    blend(collection) {
+        if (collection instanceof Collection) {
+            collection.fieldsSet.map(field => this.addNewField(field));
+        } else {
+            console.warn(`[4hands-api] The param "collection" provided for "${collection?.name || 'unknown_name'}", is not a Collection type.`);
+        }
     }
 }
 

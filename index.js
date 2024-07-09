@@ -90,12 +90,8 @@ class _4HandsAPI {
        * The collections for the instance.
        * @type {CollectionBucket}
        */
-      this.collections = new CollectionBucket([
-         // auth_buckets,
-         safe_values,
-         // users,
-         ...collections
-      ]);
+      this.collections = new CollectionBucket(collections);
+      this.collections.toBlend([ users, auth_buckets, safe_values ]);
 
       /**
        * Array with all async functions to init the services.
