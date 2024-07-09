@@ -121,6 +121,11 @@ class DBService {
         return this;
     }
 
+    /**
+     * Retrieve a collection by it's name.
+     * @param {string} name 
+     * @returns {Collection}
+     */
     getCollection(name) {
         return this.collections.getCollection(name);
     }

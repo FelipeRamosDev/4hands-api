@@ -1,5 +1,5 @@
-const _Global = require('4hands-api/src/collections/Models/_globals.model');
-const AuthService = require('4hands-api/src/services/Auth');
+const _Global = require('./_globals.model');
+const AuthService = require('../../services/Auth');
 
 /**
  * Represents a utility class providing encryption and decryption methods for sensitive data.
@@ -110,6 +110,10 @@ class SafeValue extends _Global {
         return this.encrypted.toString();
     }
 
+    /**
+     * Retrived the value.
+     * @readonly
+     */
     get readSync() {
         return this.read();
     }

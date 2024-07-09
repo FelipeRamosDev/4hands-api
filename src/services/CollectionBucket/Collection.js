@@ -121,6 +121,10 @@ class Collection extends SchemaDB {
         }
     }
 
+    /**
+     * To blend the provided collection with an existent one in this context
+     * @param {Collection} collection 
+     */
     blend(collection) {
         if (collection instanceof Collection) {
             collection.fieldsSet.map(field => this.addNewField(field));

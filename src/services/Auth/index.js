@@ -20,6 +20,9 @@ class AuthService {
         this._parentBucket = () => parent;
     }
 
+    /**
+     * The parent object: master account, slot, position, etc.
+     */
     get parentBucket() {
         return this._parentBucket && this._parentBucket();
     }

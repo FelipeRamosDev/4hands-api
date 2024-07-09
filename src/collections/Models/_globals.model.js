@@ -1,4 +1,9 @@
 class _Global {
+    /**
+     * Constructs a new _Global instance.
+     * @param {Object} setup - The setup object containing initial values for the instance.
+     * @param {Object} parent - The parent object of this instance.
+     */
     constructor (setup, parent) {
         const { UID, _id, id, index, author, cod, createdAt, modifiedAt, collection } = Object(setup);
         this._parent = () => parent;
@@ -48,6 +53,11 @@ class _Global {
         }
     }
 
+    /**
+     * Retrieves the unique identifier (UID) of the instance.
+     * @readonly
+     * @returns {string} - The UID of the instance.
+     */
     get UID() {
         if (typeof this._UID === 'string') {
             return this._UID;
@@ -66,12 +76,22 @@ class _Global {
         }
     }
 
+    /**
+     * Retrieves the parent object of the instance.
+     * @readonly
+     * @returns {Object} - The parent object.
+     */
     get parent() {
         if (this._parent) {
             return this._parent();
         }
     }
 
+    /**
+     * Retrieves the collection name associated with the instance.
+     * @readonly
+     * @returns {string} - The collection name.
+     */
     get collectionName() {
         if (this._collectionName) {
             return this._collectionName;
@@ -114,10 +134,21 @@ class _Global {
         return String(this.index);
     }
 
+    /**
+     * Retrieves the collection object for a given collection name.
+     * @param {string} collectionName - The name of the collection.
+     * @returns {Object} - The collection object.
+     */
+
     getCollection(collectionName) {
         return global._4handsAPI?.collections?.getCollection(collectionName || this.collectionName);
     }
 
+    /**
+     * Converts the instance to a model instance.
+     * @param {Function} OtherModel - The model constructor to convert to.
+     * @returns {Object} - The model instance.
+     */
     toModel(OtherModel) {
         const collection = this.getCollection();
 
@@ -132,6 +163,11 @@ class _Global {
         }
     }
 
+    /**
+     * Initializes the instance by converting it to a custom model if available.
+     * @returns {Object} - The initialized model instance.
+     * @throws {Error} - If an error occurs during initialization.
+     */
     initialize() {
         try {
             const CustomModel = this.CustomModel || this?.schema?.statics?.CustomModel;
@@ -141,6 +177,11 @@ class _Global {
         }
     }
 
+    /**
+     * Asynchronously populates the instance with default values.
+     * @returns {Promise<Object>} - The populated document.
+     * @throws {Error} - If an error occurs during population.
+     */
     async defaultPopulate() {
         const CRUD = global._4handsAPI?.CRUD;
 
@@ -358,6 +399,12 @@ class _Global {
         return { success: true, message: 'New safe value created!', data: newSafeValue };
     }
 
+    /**
+     * Creates a cache for the current instance in Redis.
+     * @param {Object} data - The data to cache. Defaults to the current instance data if not provided.
+     * @returns {Promise<Object>} - The created cache document.
+     * @throws {Error} - If there is an error during the cache creation process.
+     */
     async createCache(data) {
         const API = global._4handsAPI?.API;
 
@@ -369,6 +416,11 @@ class _Global {
         }
     }
 
+    /**
+     * Retrieves the cache for the current instance from Redis.
+     * @returns {Promise<Object>} - The cached document.
+     * @throws {Error} - If there is an error during the cache retrieval process.
+     */
     async getCache() {
         const API = global._4handsAPI?.API;
 
@@ -380,6 +432,12 @@ class _Global {
         }
     }
 
+    /**
+     * Updates the cache for the current instance in Redis.
+     * @param {Object} data - The data to update in the cache. Defaults to the current instance data if not provided.
+     * @returns {Promise<Object>} - The updated cache document.
+     * @throws {Error} - If there is an error during the cache update process.
+     */
     async updateCache(data) {
         const API = global._4handsAPI?.API;
 
@@ -391,6 +449,11 @@ class _Global {
         }
     }
 
+    /**
+     * Clears the cache for the current instance in Redis.
+     * @returns {Promise<Object>} - The deleted cache document.
+     * @throws {Error} - If there is an error during the cache deletion process.
+     */
     async clearCache() {
         const API = global._4handsAPI?.API;
 
@@ -402,6 +465,13 @@ class _Global {
         }
     }
 
+    /**
+     * Creates a cache for a document in a specified collection.
+     * @param {string} collection - The name of the collection.
+     * @param {string} uid - The unique identifier of the document.
+     * @returns {Promise<Object>} - The created cache document.
+     * @throws {Error} - If there is an error during the cache creation process.
+     */
     static async createDocCache(collection, uid) {
         const CRUD = global._4handsAPI?.CRUD;
 
@@ -423,6 +493,13 @@ class _Global {
         }
     }
 
+    /**
+     * Retrieves the cache for a document in a specified collection.
+     * @param {string} collection - The name of the collection.
+     * @param {string} uid - The unique identifier of the document.
+     * @returns {Promise<Object>} - The cached document.
+     * @throws {Error} - If there is an error during the cache retrieval process.
+     */
     static async getCache(collection, uid) {
         const API = global._4handsAPI?.API;
 
