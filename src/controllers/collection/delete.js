@@ -1,9 +1,5 @@
 const mongoose = require('mongoose');
-const models = require('../../models');
-const CRUD = require('4hands-api/src/services/database/crud');
-const Delete = models.routes.collection.Delete;
 const Endpoint = require('4hands-api/src/models/settings/Endpoint');
-const Response = Delete.response;
 
 /**
  * Represents a controller endpoint for deleting a document in a collection.
@@ -21,13 +17,14 @@ module.exports = new Endpoint({
         options: { type: Object, default: {} } // mongoose options
     },
     controller: async (req, res) => {
+        const CRUD = global._4handsAPI?.CRUD;
         const body = req.body;
     
         try {
             const deleted = await CRUD.del(body);
     
             if (deleted){
-                return res.status(200).json(new Response(deleted));
+                return res.status(200).json({ success: true, deletedFilter: body.filter });
             } else {
                 const error = logError('apiResponse.collection.delete');
                 return res.status(500).send(error);

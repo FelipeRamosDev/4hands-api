@@ -1,4 +1,4 @@
-const Collection = require('4hands-api/src/models/settings/Collection');
+const Collection = require('../CollectionBucket/Collection');
 
 class RedisHelpers {
     static buildKey(collection, uid) {

@@ -11,6 +11,7 @@ class ServerIO {
      * @param {string} setup.path - The namespace path.
      * @param {number} setup.port - The server port.
      * @param {Object} setup.ssl - The server SSL certificate configurations.
+     * @param {Object} setup._4handsInstance - The main 4hands-api instance.
      * @param {string} setup.ssl.key - The SSL key file content.
      * @param {string} setup.ssl.cert - The SSL certificate file content.
      * @param {string} setup.ssl.keyPath - The SSL key file path.
@@ -26,8 +27,9 @@ class ServerIO {
     constructor(setup, serverIO) {
         const {
             path,
-            port = 8888,
             ssl,
+            _4handsInstance,
+            port = 8888,
             corsOrigin = ['http://localhost', 'https://localhost'],
             middlewares = [],
             onConnect = () => {},
@@ -40,6 +42,8 @@ class ServerIO {
         let { toCreateNamespaces = [] } = Object(setup);
 
         this._serverIO = () => serverIO;
+        this._4handsInstance = () => _4handsInstance;
+
         this.isSubscriber = false;
         this.path = path;
         this.ssl = ssl;

@@ -1,5 +1,5 @@
 const Endpoint = require('4hands-api/src/models/settings/Endpoint');
-const User = require('4hands-api/src/models/collections/User');
+const User = require('4hands-api/src/collections/Models/users.model');
 const AuthService = require('4hands-api/src/services/Auth');
 
 /**

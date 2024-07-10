@@ -1,4 +1,4 @@
-const User = require('4hands-api/src/models/collections/User');
+const User = require('4hands-api/src/collections/Models/users.model');
 const Endpoint = require('4hands-api/src/models/settings/Endpoint');
 
 /**
@@ -33,7 +33,7 @@ module.exports = new Endpoint({
             req.sessionStore.destroy(req.sessionID);
             res.status(200).send({ success: true });
         } catch(err) {
-            return res.status(500).send(logError(err));
+            return res.status(500).send(toError(err));
         }
     }
 });

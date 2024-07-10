@@ -3,7 +3,7 @@ const { getGlobalSchema } = require('4hands-api/src/collections/_globals');
 const RefConfig = require('./settings/SchemaRefConfig');
 const { database: { dbHelpers }} = require('4hands-api/src/helpers');
 const configs = require('4hands-api/configs/project');
-const GlobalClass = require('4hands-api/src/collections/Class/_globals.class');
+const GlobalClass = require('4hands-api/src/collections/Models/_globals.model');
 const FS = require('4hands-api/src/services/FS');
 const path = require('path');
 
@@ -31,8 +31,8 @@ class SchemaDB {
             this.projectRedisEventsPath = path.normalize(`${this.projectPath}src/collections/redisEvents/${this.name}.event.js`);
             this.nativeQueriesPath = path.normalize(`${__dirname.replace(path.normalize('/models'), '/collections')}/queries/${this.name}.query.js`);
             this.nativeEventsPath = path.normalize(`${__dirname.replace(path.normalize('/models'), '/collections')}/events/${this.name}.event.js`);
-            this.nativeClassesPath = path.normalize(`${__dirname.replace(path.normalize('/models'), '/collections')}/Class/${this.name}.class.js`);
-            this.projectClassesPath = path.normalize(`${this.projectPath}src/collections/Class/${this.name}.class.js`);
+            this.nativeClassesPath = path.normalize(`${__dirname.replace(path.normalize('/models'), '/collections')}/Models/${this.name}.model.js`);
+            this.projectClassesPath = path.normalize(`${this.projectPath}src/collections/Models/${this.name}.model.js`);
             this.symbol = symbol;
             this.DB = null;
             this.globalEvents = globalEvents;
@@ -81,19 +81,17 @@ class SchemaDB {
      * @returns {SchemaDB} - The initialized SchemaDB instance.
      * @throws {Error} If initialization fails.
      */
-    init(server) {
+    initDB() {
         try {
             if (this.name !== configs.database.counterCollection) dbHelpers.createCounter(this);
 
             const isDup = mongoose.modelNames().find(key => key === this.name);
-            const isDupSymbol = server.collections.find(item => item.symbol === this.symbol);
 
-            if (!isDup && !isDupSymbol) {
+            if (!isDup) {
                 this.DB = mongoose.model(this.name, this.schema);
             } else {
                 const error = logError('database.duplicated_schema', this.name, this.symbol);
                 if (isDup) error.append('database.duplicated_schema_name', this.name);
-                if (isDupSymbol) error.append('database.duplicated_schema_symbol', this.symbol);
                 throw error;
             }
 
@@ -105,7 +103,6 @@ class SchemaDB {
 
     /**
      * Initializes queries for the schema.
-     * @private
      * @throws {Error} If query initialization fails.
      */
     initQueries() {
@@ -113,7 +110,7 @@ class SchemaDB {
             // Adding global and custom queries
             if (FS.isExist(this.nativeQueriesPath)) {
                 const nativeQueries = require(this.nativeQueriesPath);
-                this.nativeQueries = { ...this.nativeQueries, ...nativeQueries };
+                this.queries = { ...this.nativeQueries, ...nativeQueries };
             }
 
             if (FS.isExist(this.projectQueriesPath)) {
@@ -132,7 +129,6 @@ class SchemaDB {
 
     /**
      * Initializes events for the schema.
-     * @private
      * @throws {Error} If event initialization fails.
      */
     initEvents() {
@@ -165,7 +161,6 @@ class SchemaDB {
 
     /**
      * Initializes redis events for the schema.
-     * @private
      * @throws {Error} If event initialization fails.
      */
     initRedisEvents() {
@@ -210,7 +205,6 @@ class SchemaDB {
 
     /**
      * Initializes custom classes for the schema.
-     * @private
      * @throws {Error} If class initialization fails.
      */
     initClasses() {
@@ -220,11 +214,13 @@ class SchemaDB {
 
             // Loading the schema custom classe
             if (FS.isExist(this.projectClassesPath)) {
-                const ProjectClass = require(this.projectClassesPath);
-                this.schema.loadClass(ProjectClass);
-            } else if (FS.isExist(this.nativeClassesPath)) {
-                const NativeClass = require(this.nativeClassesPath);
-                this.schema.loadClass(NativeClass);
+                this.DefaultModel = require(this.projectClassesPath);
+                this.schema.loadClass(this.DefaultModel);
+            }
+            
+            if (FS.isExist(this.nativeClassesPath)) {
+                this.DefaultModel = require(this.nativeClassesPath);
+                this.schema.loadClass(this.DefaultModel);
             }
 
             this.schema.set('toObject', {virtuals: true});
