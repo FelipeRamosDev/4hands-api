@@ -1,8 +1,8 @@
 const Endpoint = require('4hands-api/src/models/settings/Endpoint');
 const FS = require('4hands-api/src/services/FS');
 const PATHS = {
-    'console-log': 'output.log',
-    'console-error': 'errors.log',
+    'console-log': 'console.log',
+    'errors': 'errors.log',
 }
 
 /**
@@ -13,24 +13,29 @@ const PATHS = {
 module.exports = new Endpoint({
     method: 'GET',
     routePath: '/api/read-logs',
-    bodySchema: { type: { type: String }},
+    bodySchema: { type: { type: String, default: 'console-log' }},
     controller: async (req, res) => {
-        const { type } = Object(req.body);
-        const path = PATHS[type];
-        const isLogFileExist = FS.isExist(path);
-        if (!isLogFileExist) {
-            res.status(404).send(logError({
-                name: 'LOGS_FILE_NOT_FOUND',
-                message: `The logs fole wasn't found on the server.`
-            }));
+        try {
+            const { type } = Object(req.body);
+            const path = PATHS[type];
+            const isLogFileExist = FS.isExist(path);
+
+            if (!isLogFileExist) {
+                return res.status(404).send(toError({
+                    name: 'LOGS_FILE_NOT_FOUND',
+                    message: `The logs fole wasn't found on the server.`
+                }));
+            }
+    
+            const logs = await FS.readFile(path);
+            const logsString = logs.toString('utf-8');
+    
+            return res.status(200).send({
+                success: true,
+                content: logsString
+            });
+        } catch (err) {
+            return res.status(500).send(toError(err));
         }
-
-        const logs = await FS.readFile(path);
-        const logsString = logs.toString('utf-8');
-
-        res.status(200).send({
-            success: true,
-            content: logsString
-        });
     }
 });
