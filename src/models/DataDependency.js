@@ -1,5 +1,3 @@
-const CRUD = require('4hands-api/src/services/database/crud');
-
 /**
  * Represents a data dependency used to manage real-time data updates and rendering in a parent component.
  * @namespace Models
@@ -75,6 +73,8 @@ class DataDependency {
      * @throws {Error} - Throws an error if the data loading fails.
      */
     async load() {
+        const CRUD = global._4handsAPI?.CRUD;
+
         try {
             if (this.type === 'doc') {
                 const docQuery = await CRUD.getDoc({ collectionName: this.collectionName, filter: this.filter }).defaultPopulate();

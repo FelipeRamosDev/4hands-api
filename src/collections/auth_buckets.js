@@ -1,12 +1,9 @@
-const Collection = require('4hands-api/src/models/settings/Collection');
+const Collection = require('4hands-api/src/services/CollectionBucket/Collection');
 const { ObjectId } = Collection.Types;
 
 module.exports = new Collection({
     name: 'auth_buckets',
     symbol: 'AUTH',
-    displayName: 'Auth Butckets',
-    pluralLabel: 'Auth Butckets',
-    singularLabel: 'Auth Butcket',
     fieldsSet: [
         {
             fieldName: 'password',

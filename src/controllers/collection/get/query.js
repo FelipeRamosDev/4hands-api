@@ -1,9 +1,5 @@
 const mongoose = require('mongoose');
-const models = require('4hands-api/src/models');
-const CRUD = require('4hands-api/src/services/database/crud');
-const GetQueryCollection = models.routes.collection.GetQueryCollection;
 const Endpoint = require('4hands-api/src/models/settings/Endpoint');
-const Response = GetQueryCollection.response;
 
 /**
  * Represents a controller endpoint for listing documents in a collection.
@@ -32,6 +28,8 @@ module.exports = new Endpoint({
         }
     },
     controller: async function (req, res) {
+        const CRUD = global._4handsAPI?.CRUD;
+
         try {
             const body = req.body;
             const {paginate, populate, readable, select} = Object(body.options);
@@ -54,7 +52,7 @@ module.exports = new Endpoint({
                 result = await query.exec();
             }
     
-            return res.status(200).json(new Response(result, body));
+            return res.status(200).send({ success: true });
         } catch(err) {
             const error = logError(err);
             res.status(500).send(error);

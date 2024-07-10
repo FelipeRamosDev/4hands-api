@@ -2,14 +2,13 @@
 require('../../global');
 
 const express = require('express');
-const { execSync } = require('child_process');
 const session = require('express-session');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const https = require('https');
 const path = require('path');
 const FS = require('../FS');
-const Database = require('../database/DatabaseServer');
+const DBService = require('4hands-api/src/services/DBService');
 
 /**
  * @class ServerAPI
@@ -23,12 +22,10 @@ class ServerAPI {
      * @description Creates an instance of ServerAPI.
      * @param {Object} setup - Configuration options for the server.
      * @param {string} setup.projectName - The name of the project.
-     * @param {Database} setup.databaseConfig - Configuration options for the Database.
      * @param {string} setup.API_SECRET - The API secret key for session encryption.
      * @param {number} setup.sessionCookiesMaxAge - Maximum age of session cookies in milliseconds. Default is 86400000.
      * @param {string} setup.staticPath - The path to static files.
-     * @param {string} setup.redisURL - The Redis database URL. Default is "redis://localhost:6379".
-     * @param {Function} setup.listenCallback - Callback function to be executed when the server starts listening.
+     * @param {Function} setup.onReady - Callback function to be executed when the server starts listening.
      * @param {boolean} setup.compileFE - Flag indicating whether to compile frontend code. Default is false.
      * @param {string} setup.jsonLimit - Limit of JSON requests. Default is '10mb'.
      * @param {boolean} setup.sessionResave - Flag indicating whether to save session data back to the session store. Default is true.
@@ -37,41 +34,37 @@ class ServerAPI {
      * @param {string} setup.certSSLPath - The path to the SSL certificate file.
      * @param {string} setup.FE_ORIGIN - The front-end host URL.
      * @param {number} setup.PORT - The port number on which the server will listen. Default is 80.
-     * @param {Object} setup.emailConfig - Configurations for the MailService.
      * @param {string[]} setup.corsOrigin - Array with the allowed domains for CORS configuration. Default is ['http://localhost', 'https://localhost'].
      * @param {string[]} setup.httpEndpoints - The path to the endpoints to be created on initialization.
-     * @param {boolean} setup.noServer - If true, it doesn't start the server. Default is false.
-     * @param {boolean} setup.noRedisServer - If true, it doesn't start the Redis server. Default is false.
-     * @param {boolean} setup.useSockets - If true, it will start a sockets server. Default is false.
      * @param {number} setup.SOCKET_PORT - The port number on which the SOCKET server will listen.
      */
-    constructor (setup) {
+    constructor (setup, _4handsInstance) {
         const {
             projectName,
-            databaseConfig,
             API_SECRET,
             staticPath,
-            listenCallback,
-            sessionResave,
-            sessionSaveUninitialized,
             keySSLPath,
             certSSLPath,
             FE_ORIGIN,
-            emailConfig,
-            SOCKET_PORT,
-            useSockets,
-            
+
             // Defaults
             PORT = 80,
             jsonLimit = '10mb',
-            noServer = false,
+            onReady = () => {},
             httpEndpoints = [],
-            noRedisServer = false,
             defaultMaxListeners = 20,
             sessionCookiesMaxAge = 86400000,
+            sessionResave = true,
+            sessionSaveUninitialized = true,
             redisURL = 'redis://localhost:6379',
             corsOrigin = ['http://localhost', 'https://localhost']
         } = Object(setup);
+
+        /**
+         * The main 4hands-api instance.
+         * @type {Object}
+         */
+        this._4handsInstance = () => _4handsInstance;
 
         this.projectName = projectName;
         this.app_queue = [];
@@ -83,17 +76,13 @@ class ServerAPI {
         this.jsonLimit = jsonLimit;
         this.sessionResave = (sessionResave !== undefined) ? sessionResave : true;
         this.sessionSaveUninitialized = (sessionSaveUninitialized !== undefined) ? sessionSaveUninitialized : true;
-        this.listenCallback = listenCallback;
+        this.onReady = onReady;
         this.FE_ORIGIN = FE_ORIGIN;
         this.PORT = PORT || 80;
-        this.SOCKET_PORT = SOCKET_PORT;
         this.httpEndpoints = httpEndpoints;
-        this.noServer = noServer;
-        this.noRedisServer = noRedisServer;
         this.defaultMaxListeners = defaultMaxListeners;
-        this.useSockets = useSockets;
         
-        console.log(`[${this.projectName || '4hands-api'}] Starting Server API...`)
+        this.parent.toConsole('Starting Server API...');
         if (this.defaultMaxListeners) {
             require('events').EventEmitter.defaultMaxListeners = this.defaultMaxListeners;
         }
@@ -106,17 +95,12 @@ class ServerAPI {
             this.certSSLPath = path.normalize(this.projectPath + certSSLPath);
         }
 
-        if (emailConfig) {
-            const MailService = require('../Mail');
-            this.mailService = new MailService(emailConfig);
-        }
-
         this.isSuccess = (customCallback) => {
             try {
                 this.runAppQueue();
                 this.isListen = true;
                 this.serverState = 'online';
-                typeof listenCallback === 'function' && listenCallback.call(this);
+                this.onReady.call(this);
                 typeof customCallback === 'function' && customCallback.call(this);
             } catch (err) {
                 throw err;
@@ -132,54 +116,71 @@ class ServerAPI {
             }
         }
 
-        // Initializing the Socket server
-        if (this.useSockets) {
-            const ServerIO = require('4hands-api/src/services/ServerIO');
+        this.createEndpoint(require('4hands-api/src/controllers/api/health-check'));
+        this.createEndpoint(require('4hands-api/src/controllers/api/read-logs'));
+        this.createEndpoint(require('4hands-api/src/controllers/auth/login'));
+        this.createEndpoint(require('4hands-api/src/controllers/auth/register'));
+        this.createEndpoint(require('4hands-api/src/controllers/auth/signout'));
+        this.createEndpoint(require('4hands-api/src/controllers/auth/confirm-email'));
+        this.createEndpoint(require('4hands-api/src/controllers/auth/send-email-confirm'));
+        this.createEndpoint(require('4hands-api/src/controllers/auth/reset-password/send-email'));
+        this.createEndpoint(require('4hands-api/src/controllers/auth/reset-password/create-new'));
+        this.createEndpoint(require('4hands-api/src/controllers/collection/create'));
+        this.createEndpoint(require('4hands-api/src/controllers/collection/delete'));
+        this.createEndpoint(require('4hands-api/src/controllers/collection/get/doc'));
+        this.createEndpoint(require('4hands-api/src/controllers/collection/get/query'));
+        this.createEndpoint(require('4hands-api/src/controllers/collection/update/document'));
 
-            this.socketIO = new ServerIO({
-                port: this.SOCKET_PORT,
-                corsOrigin: this.corsOrigin,
-                ssl: {
-                    keyPath: this.keySSLPath,
-                    certPath: this.certSSLPath
-                }
-            });
-        }
-
-        if (!this.noServer) {
-            // 4hands-api native endpoints
-            this.createEndpoint(require('4hands-api/src/controllers/api/health-check'));
-            this.createEndpoint(require('4hands-api/src/controllers/api/read-logs'));
-            this.createEndpoint(require('4hands-api/src/controllers/auth/login'));
-            this.createEndpoint(require('4hands-api/src/controllers/auth/register'));
-            this.createEndpoint(require('4hands-api/src/controllers/auth/signout'));
-            this.createEndpoint(require('4hands-api/src/controllers/auth/confirm-email'));
-            this.createEndpoint(require('4hands-api/src/controllers/auth/send-email-confirm'));
-            this.createEndpoint(require('4hands-api/src/controllers/auth/reset-password/send-email'));
-            this.createEndpoint(require('4hands-api/src/controllers/auth/reset-password/create-new'));
-            this.createEndpoint(require('4hands-api/src/controllers/collection/create'));
-            this.createEndpoint(require('4hands-api/src/controllers/collection/delete'));
-            this.createEndpoint(require('4hands-api/src/controllers/collection/get/doc'));
-            this.createEndpoint(require('4hands-api/src/controllers/collection/get/query'));
-            this.createEndpoint(require('4hands-api/src/controllers/collection/update/document'));
-
-            this.httpEndpoints.map(endpoint => this.createEndpoint(endpoint));
-        }
-
-        if (databaseConfig) {
-            this.database = new Database({ ...databaseConfig }).init({
-                success: this.init.bind(this),
-                error: (err) => {
-                    throw err;
-                }
-            });
-        } else {
-            this.init().catch(err => {
-                throw err;
-            });
-        }
+        this.httpEndpoints.map(endpoint => this.createEndpoint(endpoint));
+        this.init().catch(err => {
+            throw err;
+        });
     }
 
+    /**
+     * The DBService object.
+     * @type {DBService}
+     */
+    get database() {
+        return this.parent?.DB;
+    }
+
+    /**
+     * The MailService object.
+     * @type {MailService}
+     */
+    get mailService() {
+        return this.parent?.emailService;
+    }
+
+    /**
+     * The MailService object.
+     * @type {ServerIO}
+     */
+    get socketIO() {
+        return this.parent?.IO;
+    }
+
+    /**
+     * The RedisService object.
+     * @type {RedisService}
+     */
+    get redisServ() {
+        return this.parent?.Redis;
+    }
+
+    /**
+     * The main 4hands-api instance.
+     * @property {Object}
+     */
+    get parent() {
+        return this._4handsInstance();
+    }
+
+    /**
+     * The project path on local.
+     * @property {string}
+     */
     get projectPath() {
         return path.normalize(__dirname.replace(path.normalize('/node_modules/4hands-api/src/services/ServerAPI'), '/'));
     }
@@ -191,58 +192,41 @@ class ServerAPI {
         this.rootPath = path.normalize(__dirname.replace(path.normalize('/node_modules/4hands-api/src/services'), '/'));
         this.app = express();
         this.serverState = 'loading';
-
-        if (!this.noRedisServer || !this.noServer) {
-            const RedisService = require('4hands-api/src/services/Redis');
-            this.redisServ = new RedisService({
-                collections: this.database.collections,
-                url: this.redisURL,
-                onError: (err) => {
-                    throw logError(err);
-                }
-            }, this);
-    
-            await this.redisServ.connect();
-        }
         
-        // Configuring server
-        if (!this.noServer) {
-            // Initializing the Redis DB
-            const RedisStore = require('connect-redis').default;
-            this.app.use(cors({
-                origin: this.corsOrigin,
-                credentials: true
+
+        // Initializing the Redis DB
+        const RedisStore = require('connect-redis').default;
+        this.app.use(cors({
+            origin: this.corsOrigin,
+            credentials: true
+        }));
+
+        this.app.use(bodyParser.json({ limit: this.jsonLimit }));
+        this.app.use(express.json());
+
+        if (this.API_SECRET) {
+            this.app.use(session({
+                store: this.redisServ && new RedisStore({ client: this.redisServ.client }),
+                secret: this.API_SECRET,
+                resave: this.sessionResave,
+                saveUninitialized: this.sessionSaveUninitialized,
+                cookie: {
+                    secure: this.useSSL, // Set secure to true if using HTTPS
+                    maxAge: this.sessionCookiesMaxAge
+                }
             }));
-
-            this.app.use(bodyParser.json({ limit: this.jsonLimit }));
-            this.app.use(express.json());
-
-            if (this.API_SECRET) {
-                this.app.use(session({
-                    store: new RedisStore({ client: this.redisServ.client }),
-                    secret: this.API_SECRET,
-                    resave: this.sessionResave,
-                    saveUninitialized: this.sessionSaveUninitialized,
-                    cookie: {
-                        secure: this.useSSL, // Set secure to true if using HTTPS
-                        maxAge: this.sessionCookiesMaxAge
-                    }
-                }));
-            } else {
-                throw 'You need to provide a API SECRET to start the server!';
-            }
-
-            if (this.staticPath) {
-                this.app.use(express.static(this.rootPath + this.staticPath));
-            }
-
-            if (this.useSSL) {
-                this.listenSSL(this.PORT, () => this.isSuccess());
-            } else {
-                this.app.listen(this.PORT, () => this.isSuccess());
-            }
         } else {
-            this.isSuccess();
+            throw 'You need to provide a API SECRET to start the server!';
+        }
+
+        if (this.staticPath) {
+            this.app.use(express.static(this.rootPath + this.staticPath));
+        }
+
+        if (this.useSSL) {
+            this.listenSSL(this.PORT, () => this.isSuccess());
+        } else {
+            this.app.listen(this.PORT, () => this.isSuccess());
         }
     }
 
@@ -355,12 +339,6 @@ class ServerAPI {
 
                 return;
             }
-        }
-    }
-
-    getCollectionSet(collectionName) {
-        if (Array.isArray(this.database?.collections)) {
-            return this.database.collections.find(coll => coll.name === collectionName);
         }
     }
 }

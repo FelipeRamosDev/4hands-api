@@ -1,5 +1,4 @@
 const crypto = require('crypto');
-const CRUD = require('4hands-api/src/services/database/crud');
 
 /**
  * Class representing a SubscriptionIO for managing query and document subscriptions.
@@ -153,6 +152,8 @@ class SubscriptionIO {
      * @throws {Error} - Throws an error if the loading operation fails.
      */
     async loadQuery(preventSnapshot = false) {
+        const CRUD = global._4handsAPI?.CRUD;
+
         try {
             const { sort, limit, page } = Object(this.options);
             const toLoad = CRUD.query({
@@ -192,6 +193,8 @@ class SubscriptionIO {
      * @throws {Error} - Throws an error if the loading operation fails.
      */
     async loadDoc(preventSnapshot = false) {
+        const CRUD = global._4handsAPI?.CRUD;
+
         try {
             const toLoad = CRUD.getDoc({
                 collectionName: this.collection,
@@ -231,6 +234,7 @@ class SubscriptionIO {
      * @throws {Error} - Throws an error if the operation fails.
      */
     async exec(eventType, docSnapshot) {
+        const CRUD = global._4handsAPI?.CRUD;
         const { id } = Object(docSnapshot);
         const sortOpt = this.options?.sort;
         const limitOpt = this.options?.limit;

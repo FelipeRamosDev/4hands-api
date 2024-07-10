@@ -100,6 +100,13 @@ async function increaseCounter(collection) {
         const Counters = mongoose.model(configs.database.counterCollection);
         const counter = await Counters.findByIdAndUpdate(collection, { $inc: { value: 1 }});
 
+        if (!counter) {
+            throw logError({
+                name: 'COUNTER_COLLECTION_NOT_FOUND',
+                message: 'The counter collection does not exist!'
+            });
+        }
+
         return counter.toObject();
     } catch(err) {
         throw logError(err);
@@ -242,7 +249,7 @@ function findRelFields(schema, exclude, levels, currentLevel) {
  * @async
  */
 async function createEncryptFields(context) {
-    const SafeValue = require('4hands-api/src/models/collections/SafeValue');
+    const SafeValue = require('4hands-api/src/collections/Models/safe_values.model');
 
     for (let key of context.encryptedFields) {
         const rawValue = context.raw['_' + key];
