@@ -44,10 +44,11 @@ class _4HandsAPI {
      * @param {Function} setup.redis.onError - Callback to when the client got an error.
      * @param {Function} setup.redis.onReconnecting - Callback to when the client is reconnected to the Redis.
     * @param {Object} setup.socketIO - The socket server configurations.
+     * @param {Object} setup.socketIO._4handsInstance - The main 4hands-api instance.
      * @param {string} setup.socketIO.path - The namespace path.
      * @param {number} setup.socketIO.port - The server port.
-     * @param {Object} setup.socketIO._4handsInstance - The main 4hands-api instance.
      * @param {Function[]} setup.socketIO.middlewares - The server/namespace middlewares.
+     * @param {string[]} setup.socketIO.corsOrigin - The server cors policy.
      * @param {Function} setup.socketIO.onConnect - The callback for when the socket connection is concluded with success.
      * @param {Function} setup.socketIO.onData - The callback for when an 'message' event arrives.
      * @param {Function} setup.socketIO.onDisconnect - The callback for when the client disconnected.
