@@ -33,7 +33,7 @@ class SocketIO {
          this._socket.on('error', this._onError);
          this._socket.on('disconnect', () => {
             this._onDisconnect();
-            this.parent.deleteSocket(this.routePath);
+            this.parent.closeSocket(this.routePath);
          });
       });
    }
