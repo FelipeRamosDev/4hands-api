@@ -151,9 +151,10 @@ class AJAX {
       const token = await this.getToken();
 
       if (!token) {
+         // If the token is not stored on the browser's cookies, it will throw an error.
          return this.toError({
             name: 'TOKEN_REQUIRED',
-            message: 'To send an authenticated HTTP request, the user token is required on the headers!'
+            message: 'To send an authenticated HTTP request, the user token is required!'
          });
       }
 
