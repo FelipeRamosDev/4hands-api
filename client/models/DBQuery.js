@@ -1,6 +1,17 @@
+/**
+ * Class representing a database query.
+ * @class
+ */
 class DBQuery {
+   /**
+    * Create a database query.
+    * @param {string} collection - The name of the collection.
+    * @param {string|Object} filter - The filter criteria.
+    * @param {_4HandsAPIClient} mainInstance - The main instance.
+    * @throws Will throw an error if the collection is not provided.
+    */
    constructor (collection, filter, mainInstance) {
-      this._options = {}
+      this._options = {};
       this._mainInstance = () => mainInstance;
 
       if (!collection) {
@@ -8,7 +19,7 @@ class DBQuery {
       }
 
       if (typeof filter === 'string') {
-         this.docUID = filter;         
+         this.docUID = filter;
       }
 
       else if (filter && typeof filter === 'object' && !Array.isArray(filter)) {
@@ -16,19 +27,30 @@ class DBQuery {
       }
 
       this.collection = collection;
-
    }
 
+   /**
+    * Get the main instance.
+    * @returns {Object} The main instance.
+    */
    get main() {
       return this._mainInstance();
    }
 
+   /**
+    * Get the options.
+    * @returns {Object} The options.
+    */
    get options() {
       if (Object.keys(this._options).length) {
          return this._options;
       }
    }
 
+   /**
+    * Get the subscription document body.
+    * @returns {Object} The subscription document body.
+    */
    get subscribeDocBody() {
       const result = {
          type: 'doc',
@@ -44,6 +66,10 @@ class DBQuery {
       return result;
    }
 
+   /**
+    * Get the subscription query body.
+    * @returns {Object} The subscription query body.
+    */
    get subscribeQueryBody() {
       const result = {
          type: 'query',
@@ -63,6 +89,13 @@ class DBQuery {
       return result;
    }
 
+   /**
+    * Sort the results.
+    * @param {Object|string} sortSet - The sort set or key.
+    * @param {boolean|number} order - The sort order.
+    * @returns {DBQuery} The instance of DBQuery.
+    * @throws Will throw an error if the sortSet is not provided.
+    */
    sort(sortSet, order) {
       if (!sortSet) {
          throw new Error('The "sortOrder" param is required!');
@@ -86,6 +119,11 @@ class DBQuery {
       return this;
    }
 
+   /**
+    * Limit the number of results.
+    * @param {number} value - The limit value.
+    * @returns {DBQuery} The instance of DBQuery.
+    */
    limit(value) {
       const number = this.main.utils.validateInteger(value);
 
@@ -93,6 +131,11 @@ class DBQuery {
       return this;
    }
 
+   /**
+    * Paginate the results.
+    * @param {number} [currentPage=0] - The current page number.
+    * @returns {DBQuery} The instance of DBQuery.
+    */
    paginate(currentPage = 0) {
       const number = this.main.utils.validateInteger(currentPage);
 
@@ -100,6 +143,12 @@ class DBQuery {
       return this;
    }
 
+   /**
+    * Set the populate method.
+    * @param {string} methodName - The method name.
+    * @returns {DBQuery} The instance of DBQuery.
+    * @throws Will throw an error if the methodName is not a string.
+    */
    populateMethod(methodName) {
       if (typeof methodName !== 'string') {
          throw new Error('The param "methodName" should be a string!');
@@ -109,6 +158,12 @@ class DBQuery {
       return this;
    }
 
+   /**
+    * Save a document.
+    * @param {Object} data - The document data.
+    * @returns {Promise<Object>} The saved document data.
+    * @throws Will throw an error if the save operation fails.
+    */
    async saveDoc(data) {
       const params = {
          collectionName: this.collection,
@@ -124,6 +179,11 @@ class DBQuery {
       }
    }
 
+   /**
+    * Get a document.
+    * @returns {Promise<Object>} The document data.
+    * @throws Will throw an error if the get operation fails.
+    */
    async getDoc() {
       try {
          const response = await this.main.ajax.authGet('/collection/get/doc', {
@@ -138,6 +198,11 @@ class DBQuery {
       }
    }
 
+   /**
+    * Get a query result.
+    * @returns {Promise<Object>} The query result data.
+    * @throws Will throw an error if the get operation fails.
+    */
    async getQuery() {
       try {
          const response = await this.main.ajax.authGet('/collection/get/query', {
@@ -152,6 +217,12 @@ class DBQuery {
       }
    }
 
+   /**
+    * Update a document.
+    * @param {Object} data - The document data to update.
+    * @returns {Promise<Object>} The updated document data.
+    * @throws Will throw an error if the update operation fails.
+    */
    async updateDoc(data) {
       try {
          const response = await this.main.ajax.authPost('/collection/update', {
@@ -168,6 +239,12 @@ class DBQuery {
       }
    }
 
+   /**
+    * Update multiple documents.
+    * @param {Object} data - The documents data to update.
+    * @returns {Promise<Object>} The updated documents data.
+    * @throws Will throw an error if the update operation fails.
+    */
    async updateMany(data) {
       try {
          const response = await this.main.ajax.authPost('/collection/update', {
@@ -184,6 +261,11 @@ class DBQuery {
       }
    }
 
+   /**
+    * Delete a document.
+    * @returns {Promise<Object>} The deleted document data.
+    * @throws Will throw an error if the delete operation fails.
+    */
    async deleteDoc() {
       try {
          const response = await this.main.ajax.authDelete('/collection/delete', {
@@ -199,6 +281,11 @@ class DBQuery {
       }
    }
 
+   /**
+    * Delete multiple documents.
+    * @returns {Promise<Object>} The deleted documents data.
+    * @throws Will throw an error if the delete operation fails.
+    */
    async deleteMany() {
       try {
          const response = await this.main.ajax.authDelete('/collection/delete', {
@@ -214,6 +301,13 @@ class DBQuery {
       }
    }
 
+   /**
+    * Subscribe to document changes.
+    * @param {Object} callbacks - The callback functions.
+    * @param {function} callbacks.onData - The callback function for data.
+    * @param {function} callbacks.onError - The callback function for errors.
+    * @returns {Object} The subscription socket.
+    */
    subscribeDoc(callbacks) {
       const subSocket = this.main.getSocket('subscription');
       const {
@@ -245,6 +339,13 @@ class DBQuery {
       }
    }
 
+   /**
+    * Subscribe to query changes.
+    * @param {Object} callbacks - The callback functions.
+    * @param {function} callbacks.onData - The callback function for data.
+    * @param {function} callbacks.onError - The callback function for errors.
+    * @returns {Object} The subscription socket.
+    */
    subscribeQuery(callbacks) {
       const subSocket = this.main.getSocket('subscription');
       const {
