@@ -73,38 +73,51 @@ class DBQuery {
       }
 
       else if (typeof sortSet === 'string') {
-         if (order) {
-            if (typeof order === 'boolean') {
-               order = order ? 1 : -1;
-            }
-   
-            this._options.sort = { [sortSet]: validateNumber(order) };
-         } else {
+         if (typeof order === 'boolean') {
+            order = order ? 1 : -1;
+         } else if (!order) {
             order = 1;
-            this._options.sort = { [sortSet]: validateNumber(order) };
          }
+
+         const orderNum = this.main.validateInteger(order);
+         this._options.sort = { [sortSet]: orderNum };
       }
 
       return this;
    }
 
    limit(value) {
-      const number = validateNumber(value);
+      const number = this.main.validateInteger(value);
 
       this._options.limit = number;
       return this;
    }
 
    paginate(currentPage = 0) {
-      const number = validateNumber(currentPage);
+      const number = this.main.validateInteger(currentPage);
 
       this._options.page = number;
       return this;
    }
 
+   populateMethod(methodName) {
+      if (typeof methodName !== 'string') {
+         throw new Error('The param "methodName" should be a string!');
+      }
+      
+      this._options.populateMethod = methodName;
+      return this;
+   }
+
    async getDoc() {
       try {
-         
+         const response = await this.main.ajax.authGet('/collection/get/doc', {
+            collectionName: this.collection,
+            filter: this.docUID || this.filter,
+            options: this.options
+         });
+
+         return response?.data;
       } catch (err) {
          throw err;
       }
@@ -179,19 +192,6 @@ class DBQuery {
          onError.call(this, err);
       }
    }
-}
-
-function validateNumber(value) {
-   if (isNaN(value)) {
-      throw new Error('The value provided should be a valid number.');
-   }
-
-   const number = Number(value);
-   if (number % 1) {
-      throw new Error('The value provided should be a valid integer but received a double.');
-   }
-
-   return number;
 }
 
 module.exports = DBQuery;

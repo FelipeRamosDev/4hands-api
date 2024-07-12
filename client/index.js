@@ -1,9 +1,13 @@
-const DBQuery = require('./services/DBQuery');
+const DBQuery = require('./models/DBQuery');
+const AJAX = require('./services/AJAX');
+const Utils = require('./utils');
 
 class _4HandsAPIClient {
    constructor (setup) {
       const {
-         apiURL = 'http://localhost',
+         ajaxConfig,
+         apiHost = 'http://localhost',
+         apiPort = 8000,
          sockets = [],
          useSubscription = false,
          subscriptionPort = 5000,
@@ -12,17 +16,26 @@ class _4HandsAPIClient {
       this._sockets = new Map();
       sockets.map(socket => this.createSocket(socket));
 
-      this.apiURL = apiURL;
+      this.apiHost = apiHost;
+      this.apiPort = apiPort;
       this.useSubscription = useSubscription;
+      this.subscriptionPort = subscriptionPort;
+
+      this.ajax = new AJAX(ajaxConfig, this);
+      this.utils = Utils;
 
       if(useSubscription) {
          this.createSocket({
             id: 'subscription',
-            hostURL: this.apiURL,
+            hostURL: this.apiHost,
             port: subscriptionPort,
             routePath: '/subscribe-changes'
          });
       }
+   }
+
+   get apiURL() {
+      return `${this.apiHost}:${this.apiPort}`;
    }
 
    dbQuery(collection, filter) {
@@ -44,7 +57,7 @@ class _4HandsAPIClient {
       return this._sockets.get(path);
    }
 
-   deleteSocket(path) {
+   closeSocket(path) {
       this._sockets.delete(path);
    }
 }
