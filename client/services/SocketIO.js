@@ -25,9 +25,8 @@ class SocketIO {
       this._onData = onData.bind(this);
       this._onError = onError.bind(this);
 
-      this._socket.on('connect', (connection) => {
-         this._onConnect(connection);
-         this._connection = connection;
+      this._socket.on('connect', () => {
+         this._onConnect();
 
          this._socket.on('message', this._onData);
          this._socket.on('error', this._onError);
@@ -51,11 +50,7 @@ class SocketIO {
    }
 
    listenTo(name, callback) {
-      if (this._connection) {
-         this._connection.on(name, callback);
-      } else {
-         this._socket.on(name, callback);
-      }
+      this._socket.on(name, callback);
    }
 }
 

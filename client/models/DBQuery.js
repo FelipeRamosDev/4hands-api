@@ -79,7 +79,7 @@ class DBQuery {
             order = 1;
          }
 
-         const orderNum = this.main.validateInteger(order);
+         const orderNum = this.main.utils.validateInteger(order);
          this._options.sort = { [sortSet]: orderNum };
       }
 
@@ -87,14 +87,14 @@ class DBQuery {
    }
 
    limit(value) {
-      const number = this.main.validateInteger(value);
+      const number = this.main.utils.validateInteger(value);
 
       this._options.limit = number;
       return this;
    }
 
    paginate(currentPage = 0) {
-      const number = this.main.validateInteger(currentPage);
+      const number = this.main.utils.validateInteger(currentPage);
 
       this._options.page = number;
       return this;
@@ -118,7 +118,7 @@ class DBQuery {
 
       try {
          const saved = await this.main.ajax.authPut('/collection/create', params);
-         return saved;
+         return saved?.data;
       } catch (err) {
          throw err;
       }
@@ -152,6 +152,38 @@ class DBQuery {
       }
    }
 
+   async updateDoc(data) {
+      try {
+         const response = await this.main.ajax.authPost('/collection/update', {
+            type: 'one',
+            collectionName: this.collection,
+            filter: this.docUID || this.filter,
+            options: this.options,
+            data
+         });
+
+         return response?.data;
+      } catch (err) {
+         throw err;
+      }
+   }
+
+   async updateMany(data) {
+      try {
+         const response = await this.main.ajax.authPost('/collection/update', {
+            type: 'many',
+            collectionName: this.collection,
+            filter: this.docUID || this.filter,
+            options: this.options,
+            data
+         });
+
+         return response?.data;
+      } catch (err) {
+         throw err;
+      }
+   }
+
    async deleteDoc() {
       try {
          const response = await this.main.ajax.authDelete('/collection/delete', {
@@ -161,7 +193,7 @@ class DBQuery {
             options: this.options
          });
 
-         return response;
+         return response?.data;
       } catch (err) {
          throw err;
       }
@@ -176,7 +208,7 @@ class DBQuery {
             options: this.options
          });
 
-         return response;
+         return response?.data;
       } catch (err) {
          throw err;
       }
