@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const { Mixed } = require('mongoose').SchemaTypes;
 const Endpoint = require('4hands-api/src/models/settings/Endpoint');
 
 /**
@@ -16,7 +16,7 @@ module.exports = new Endpoint({
             required: true
         },
         filter: {
-            type: mongoose.SchemaTypes.Mixed,
+            type: Mixed,
             required: true
         },
         options: {
