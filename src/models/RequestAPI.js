@@ -35,15 +35,27 @@ class RequestAPI extends ValidateSchema {
         if (Model) {
             this.body = new Model(request.body || {});
         } else {
-            const hasError = this.validate(request.body);
+            const blendBody = {...request.query, ...request.body};
+            const hasError = this.validate(blendBody);
 
             if (!hasError) {
-                this.body = request.body;
+                this.body = blendBody;
+
+                Object.keys(request.query).map(key => {
+                    const value = request.query[key];
+
+                    if (typeof value === 'string') {
+                        try {
+                            this.body[key] = JSON.parse(value);
+                        } catch (error) {
+                            this.body[key] = value;
+                        }
+                    } else {
+                        this.body[key] = value;
+                    }
+
+                });
             } else {
-                /**
-                 * Thrown if the request body fails schema validation.
-                 * @throws {ValidationError}
-                 */
                 throw hasError;
             }
         }

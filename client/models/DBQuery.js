@@ -104,9 +104,24 @@ class DBQuery {
       if (typeof methodName !== 'string') {
          throw new Error('The param "methodName" should be a string!');
       }
-      
+
       this._options.populateMethod = methodName;
       return this;
+   }
+
+   async saveDoc(data) {
+      const params = {
+         collectionName: this.collection,
+         options: this.options,
+         data
+      };
+
+      try {
+         const saved = await this.main.ajax.authPut('/collection/create', params);
+         return saved;
+      } catch (err) {
+         throw err;
+      }
    }
 
    async getDoc() {
@@ -125,7 +140,43 @@ class DBQuery {
 
    async getQuery() {
       try {
-         
+         const response = await this.main.ajax.authGet('/collection/get/query', {
+            collectionName: this.collection,
+            filter: this.docUID || this.filter,
+            options: this.options
+         });
+
+         return response?.data;
+      } catch (err) {
+         throw err;
+      }
+   }
+
+   async deleteDoc() {
+      try {
+         const response = await this.main.ajax.authDelete('/collection/delete', {
+            deleteType: 'one',
+            collectionName: this.collection,
+            filter: this.docUID || this.filter,
+            options: this.options
+         });
+
+         return response;
+      } catch (err) {
+         throw err;
+      }
+   }
+
+   async deleteMany() {
+      try {
+         const response = await this.main.ajax.authDelete('/collection/delete', {
+            deleteType: 'many',
+            collectionName: this.collection,
+            filter: this.docUID || this.filter,
+            options: this.options
+         });
+
+         return response;
       } catch (err) {
          throw err;
       }
@@ -144,7 +195,7 @@ class DBQuery {
                if (res?.error || !res?.id) {
                   onError.call(this, err);
                }
-   
+
                subSocket.listenTo(res?.id, (snapshot) => {
                   onData.call(this, snapshot);
                });
@@ -155,13 +206,13 @@ class DBQuery {
                message: 'The socket "/subscribe-changes" is not connected!'
             });
          }
-   
+
          return subSocket;
       } catch (err) {
          onError.call(this, err);
       }
    }
-   
+
    subscribeQuery(callbacks) {
       const subSocket = this.main.getSocket('subscription');
       const {
@@ -175,7 +226,7 @@ class DBQuery {
                if (res?.error || !res?.id) {
                   onError.call(this, err);
                }
-   
+
                subSocket.listenTo(res?.id, (snapshot) => {
                   onData.call(this, snapshot);
                });
@@ -186,7 +237,7 @@ class DBQuery {
                message: 'The socket "/subscribe-changes" is not connected!'
             });
          }
-   
+
          return subSocket;
       } catch (err) {
          onError.call(this, err);
