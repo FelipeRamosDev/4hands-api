@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const { Mixed } = require('mongoose').SchemaTypes;
 const Endpoint = require('4hands-api/src/models/settings/Endpoint');
 
 /**
@@ -16,43 +16,40 @@ module.exports = new Endpoint({
             required: true
         },
         filter: {
-            type: mongoose.SchemaTypes.Mixed,
+            type: Mixed,
             required: true
         },
         options: {
-            default: {},
-            type: {
-                paginate: {
-                    views: { type: Number },
-                    page: { type: Number },
-                    seeMore: { type: Boolean }
-                },
-                select: {
-                    default: [],
-                    type: Array
-                },
-                populate: {
-                    type: Object
-                }
-            }
+            type: Object
         }
     },
     controller: async (req, res) => {
         const CRUD = global._4handsAPI?.CRUD;
+        const { collectionName, filter, options } = req.body;
+        const { populateMethod } = Object(options);
 
         try {
-            const body = req.body;
-            const {populate, select} = body.options || {};
-            const queryDoc = CRUD.getDoc(body);
+            const docQuery = CRUD.getDoc({
+                collectionName,
+                filter
+            });
 
-            if (populate) {
-                queryDoc.populateAll(populate);
+            if (populateMethod && typeof docQuery[populateMethod] === 'function') {
+                const loaded = await docQuery[populateMethod]();
+                return res.status(201).send(loaded?.toObject ? loaded.toObject() : null);
             }
-
-            queryDoc.select(select);
-
-            const doc = await queryDoc.exec();
-            return res.status(200).send({ success: true, doc });
+            
+            else if (populateMethod) {
+                return res.status(404).send(toError({
+                    name: 'UNKNOWN_POPULATE_METHOD',
+                    message: `The populate method provided "${populateMethod}" doesn't exist!`
+                }))
+            }
+            
+            else {
+                const loaded = await docQuery.exec();
+                return res.status(201).send(loaded?.toObject ? loaded.toObject() : null);
+            }
         } catch(err) {
             const error = logError(err);
             res.status(500).send(error);
