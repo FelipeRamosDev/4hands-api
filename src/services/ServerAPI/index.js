@@ -129,7 +129,7 @@ class ServerAPI {
         this.createEndpoint(require('4hands-api/src/controllers/collection/delete'));
         this.createEndpoint(require('4hands-api/src/controllers/collection/get/doc'));
         this.createEndpoint(require('4hands-api/src/controllers/collection/get/query'));
-        this.createEndpoint(require('4hands-api/src/controllers/collection/update/document'));
+        this.createEndpoint(require('4hands-api/src/controllers/collection/update'));
 
         this.httpEndpoints.map(endpoint => this.createEndpoint(endpoint));
         this.init().catch(err => {

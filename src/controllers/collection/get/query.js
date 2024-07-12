@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const { Mixed } = require('mongoose').SchemaTypes;
 const Endpoint = require('4hands-api/src/models/settings/Endpoint');
 
 /**
@@ -15,44 +15,32 @@ module.exports = new Endpoint({
             type: String,
             required: true
         },
-        filter: {
-            type: mongoose.SchemaTypes.Mixed
-        },
-        options: {
-            type: {
-                paginate: { type: Object, default: {} },
-                populate: { type: Object, default: {} },
-                readable: { type: Boolean },
-                select: { type: [String], default: [] }
-            }
-        }
+        filter: { type: Mixed },
+        options: { type: Object }
     },
     controller: async function (req, res) {
         const CRUD = global._4handsAPI?.CRUD;
+        const { collectionName, filter, options } = req.body;
+        const { page, sort, limit, populateMethod } = Object(options);
 
         try {
-            const body = req.body;
-            const {paginate, populate, readable, select} = Object(body.options);
-            const query = CRUD.query(body);
-            let result;
+            const query = CRUD.query({
+                collectionName,
+                filter,
+                sort,
+                limit,
+                page
+            });
     
-            if (paginate) {
-                query.paginate(paginate);
-            }
-            if (populate) {
-                query.populateAll();
-            }
-            if (select) {
-                query.select(select);
-            }
-    
-            if (readable){
-                result = await query.readable();
+            if (populateMethod && query[populateMethod]) {
+                const result = await query[populateMethod]();
+
+                return res.status(200).send(result.map(doc => doc.toObject ? doc.toObject() : doc));
             } else {
-                result = await query.exec();
+                const result = await query.exec();
+
+                return res.status(200).send(result.map(doc => doc.toObject ? doc.toObject() : doc));
             }
-    
-            return res.status(200).send({ success: true });
         } catch(err) {
             const error = logError(err);
             res.status(500).send(error);
