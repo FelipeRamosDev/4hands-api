@@ -12,26 +12,21 @@ module.exports = new Endpoint({
     bodySchema: {
         collectionName: { type: String, required: true },
         data: { type: Object, required: true },
-        options: { type: Object, default: {} }
+        options: { type: Object }
     },
     controller: async (req, res) => {
         const CRUD = global._4handsAPI?.CRUD;
+        const body = req.body;
 
         try {
-            const body = req.body;
-    
-            // Creating document
             const doc = await CRUD.create(body.collectionName, body.data, body.options);
-    
-            if (!doc.errors) {
-                return res.status(200).send({ success: true, doc });
-            } else {
-                const error = logError(doc);
-                return res.status(500).send(error);
+            if (doc.error) {
+                return res.status(401).send(toError(doc));
             }
+
+            return res.status(200).send({ success: true, doc: doc.toObject() });
         } catch(err) {
-            const error = logError(err);
-            return res.status(500).send(error);
+            return res.status(500).send(toError(err));
         }
     }
 });

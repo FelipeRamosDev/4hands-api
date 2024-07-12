@@ -8,10 +8,10 @@ const Endpoint = require('4hands-api/src/models/settings/Endpoint');
  */
 module.exports = new Endpoint({
     method: 'POST',
-    routePath: '/collection/update/document',
+    routePath: '/collection/update',
     isAuthRoute: true,
     bodySchema: {
-        updateType: {
+        type: {
             type: String,
             default: 'one',
             enum: ['one', 'many']
@@ -41,9 +41,8 @@ module.exports = new Endpoint({
         const body = req.body;
 
         try {
-            body.data.sessionUser = req.session.currentUser;
             const updated = await CRUD.update(body);        
-            return res.status(200).send({ success: true, doc: updated });
+            return res.status(200).send({ success: true, updated });
         } catch(err) {
             const error = logError(err);
             return res.status(500).send(error);
