@@ -6,6 +6,18 @@ const INVALID_DATE_ERROR = {
 };
 
 class ScheduleCron {
+   /**
+    * Creates an instance of ScheduleCron.
+    * @param {Object} setup - The setup object for scheduling.
+    * @param {Array} [setup.oneTimeDate] - An array to construct a one-time date.
+    * @param {number} [setup.timeout=0] - Timeout in milliseconds.
+    * @param {number} [setup.second=0] - Second(s) for scheduling.
+    * @param {number} [setup.minute=0] - Minute(s) for scheduling.
+    * @param {number} [setup.hour=0] - Hour(s) for scheduling.
+    * @param {number} [setup.day=0] - Day(s) for scheduling.
+    * @param {number} [setup.week=0] - Week(s) for scheduling.
+    * @param {number} [setup.month=0] - Month(s) for scheduling.
+    */
    constructor (setup) {
       const {
          oneTimeDate,
@@ -25,7 +37,6 @@ class ScheduleCron {
       this.day = day;
       this.week = week;
       this.month = month;
-      this._timeSet;
 
       try {
          if (this.timeout) {
@@ -38,18 +49,10 @@ class ScheduleCron {
       }
    }
 
-   get timestamp() {
-      return this._timeSet;
-   }
-
-   get timestampDate() {
-      try {
-         return new Date(this.timestamp);
-      } catch (error) {
-         throw logError(INVALID_DATE_ERROR);
-      }
-   }
-
+   /**
+    * Gets the time in milliseconds for the second(s) set.
+    * @returns {number} The time in milliseconds.
+    */
    get _second() {
       if (typeof this.second === 'number') {
          return this.second * 1000;
@@ -58,6 +61,10 @@ class ScheduleCron {
       return 0;
    }
 
+   /**
+    * Gets the time in milliseconds for the minute(s) set.
+    * @returns {number} The time in milliseconds.
+    */
    get _minute() {
       if (typeof this.minute === 'number') {
          return this.minute * 60 * 1000;
@@ -66,6 +73,10 @@ class ScheduleCron {
       return 0;
    }
 
+   /**
+    * Gets the time in milliseconds for the hour(s) set.
+    * @returns {number} The time in milliseconds.
+    */
    get _hour() {
       if (typeof this.hour === 'number') {
          return this.hour * 60 * 60 * 1000;
@@ -74,6 +85,10 @@ class ScheduleCron {
       return 0;
    }
 
+   /**
+    * Gets the time in milliseconds for the day(s) set.
+    * @returns {number} The time in milliseconds.
+    */
    get _day() {
       if (typeof this.day === 'number') {
          return this.day * 24 * 60 * 60 * 1000;
@@ -82,6 +97,12 @@ class ScheduleCron {
       return 0;
    }
 
+   /**
+    * Schedules a job at the specified time with the provided callback.
+    * @param {Date|string|number} timeSet - The time to schedule the job.
+    * @param {Function} callback - The callback function to execute.
+    * @throws {Error} If the date format is invalid.
+    */
    scheduleJob(timeSet, callback) {
       if (typeof callback !== 'function') {
          return;
@@ -97,6 +118,10 @@ class ScheduleCron {
       }
    }
 
+   /**
+    * Schedules a job at the one-time date set in the constructor.
+    * @throws {Error} If the one-time date is not provided.
+    */
    scheduleDate() {
       if (!this.oneTimeDate?.getDate) {
          throw logError({
@@ -108,6 +133,11 @@ class ScheduleCron {
       schedule.scheduleJob(this.oneTimeDate, callback.bind(this));
    }
 
+   /**
+    * Schedules a job to run after a timeout period.
+    * @param {Function} callback - The callback function to execute.
+    * @throws {Error} If the timeout or one-time date is not provided.
+    */
    toTimeout(callback) {
       if (!this.oneTimeDate?.getDate) {
          throw logError({
@@ -119,6 +149,11 @@ class ScheduleCron {
       this.scheduleJob(this.oneTimeDate, callback);
    }
 
+   /**
+    * Schedules a job to run at the next time interval based on the provided seconds, minutes, hours, and days.
+    * @param {Function} callback - The callback function to execute.
+    * @throws {Error} If the date format is invalid.
+    */
    nextTime(callback) {
       let nextTime = 0;
 
@@ -139,6 +174,10 @@ class ScheduleCron {
       }
    }
 
+   /**
+    * Schedules a job to run in the next 24 hours.
+    * @throws {Error} If the date format is invalid.
+    */
    next24H() {
       try {
          const nextTime = Date.now() + (24 * 60 * 60 * 1000);
@@ -150,6 +189,11 @@ class ScheduleCron {
       }
    }
 
+   /**
+    * Schedules a job to run the next day at the specified hour, minute, and second.
+    * @param {Function} callback - The callback function to execute.
+    * @throws {Error} If the date format is invalid.
+    */
    nextDay(callback) {
       try {
          const nextDate = new Date(Date.now() + (24 * 60 * 60 * 1000));
@@ -167,6 +211,11 @@ class ScheduleCron {
       }
    }
 
+   /**
+    * Schedules a job to run the next month at the specified day, hour, minute, and second.
+    * @param {Function} callback - The callback function to execute.
+    * @throws {Error} If the date format is invalid.
+    */
    nextMonth(callback) {
       try {
          const nextDate = new Date(Date.now() + (30 * 24 * 60 * 60 * 1000));
@@ -184,26 +233,50 @@ class ScheduleCron {
       }
    }
 
+   /**
+    * Schedules a job to run every second.
+    * @param {Function} callback - The callback function to execute.
+    */
    everySecond(callback) {
       this.scheduleJob(`${this.second} * * * * *`, callback);
    }
 
+   /**
+    * Schedules a job to run every minute.
+    * @param {Function} callback - The callback function to execute.
+    */
    everyMinute(callback) {
       this.scheduleJob(`* ${this.minute} * * * *`, callback);
    }
 
+   /**
+    * Schedules a job to run every hour.
+    * @param {Function} callback - The callback function to execute.
+    */
    everyHour(callback) {
       this.scheduleJob(`* * ${this.hour} * * *`, callback);
    }
 
+   /**
+    * Schedules a job to run every day.
+    * @param {Function} callback - The callback function to execute.
+    */
    everyDay(callback) {
       this.scheduleJob(`* * * ${this.day} * *`, callback);
    }
 
+   /**
+    * Schedules a job to run every week.
+    * @param {Function} callback - The callback function to execute.
+    */
    everyWeek(callback) {
       this.scheduleJob(`* * * * ${this.week} *`, callback);
    }
 
+   /**
+    * Schedules a job to run every month.
+    * @param {Function} callback - The callback function to execute.
+    */
    everyMonth(callback) {
       this.scheduleJob(`* * * * * ${this.month}`, callback);
    }
