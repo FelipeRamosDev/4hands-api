@@ -37,16 +37,27 @@ class ScheduleCron {
       this.day = day;
       this.week = week;
       this.month = month;
+      this.timeset;
 
       try {
          if (this.timeout) {
             this.oneTimeDate = new Date(Date.now() + this.timeout);
          } else if (Array.isArray(oneTimeDate)) {
             this.oneTimeDate = new Date(...oneTimeDate);
+         } else if (oneTimeDate) {
+            this.oneTimeDate = new Date(oneTimeDate);
          }
       } catch (err) {
          throw logError(INVALID_DATE_ERROR);
       }
+   }
+
+   get localeStringTimeset() {
+      if (typeof this.timeset === 'string') {
+         return this.timeset;
+      }
+
+      return new Date(this.timeset).toLocaleString();
    }
 
    /**
@@ -98,20 +109,28 @@ class ScheduleCron {
    }
 
    /**
+    * Retrieve a simple object with only the class properties.
+    * @returns {Object}
+    */
+   toObject() {
+      return JSON.parse(JSON.stringify({ ...this }));
+   }
+
+   /**
     * Schedules a job at the specified time with the provided callback.
-    * @param {Date|string|number} timeSet - The time to schedule the job.
+    * @param {Date|string|number} timeset - The time to schedule the job.
     * @param {Function} callback - The callback function to execute.
     * @throws {Error} If the date format is invalid.
     */
-   scheduleJob(timeSet, callback) {
+   scheduleJob(timeset, callback) {
       if (typeof callback !== 'function') {
          return;
       }
 
       try {
-         const toDate = typeof timeSet !== 'string' ? new Date(timeSet) : timeSet;
+         const toDate = typeof timeset !== 'string' ? new Date(timeset) : timeset;
 
-         this._timeSet = timeSet;
+         this.timeset = toDate;
          schedule.scheduleJob(toDate, callback.bind(this));
       } catch (error) {
          throw logError(INVALID_DATE_ERROR);
@@ -122,15 +141,15 @@ class ScheduleCron {
     * Schedules a job at the one-time date set in the constructor.
     * @throws {Error} If the one-time date is not provided.
     */
-   scheduleDate() {
-      if (!this.oneTimeDate?.getDate) {
+   scheduleDate(callback) {
+      if (!this.oneTimeDate) {
          throw logError({
             name: 'BAD_PARAM',
             message: 'The param "oneTimeDate" should be provided at ScheduleCron construction to be able to use "scheduleDate" method!'
          });
       }
 
-      schedule.scheduleJob(this.oneTimeDate, callback.bind(this));
+      schedule.scheduleJob(this.oneTimeDate, callback);
    }
 
    /**
@@ -218,10 +237,10 @@ class ScheduleCron {
     */
    nextMonth(callback) {
       try {
-         const nextDate = new Date(Date.now() + (30 * 24 * 60 * 60 * 1000));
+         const nextDate = new Date(Date.now() + (31 * 24 * 60 * 60 * 1000));
          const year = nextDate.getFullYear();
          const month = nextDate.getMonth();
-         const day = this.day;
+         const day = this.day || 1;
          const hour = this.hour;
          const minute = this.minute;
          const second = this.second;
