@@ -1,5 +1,5 @@
-const User = require('4hands-api/src/collections/Models/users.model');
-const Endpoint = require('4hands-api/src/models/settings/Endpoint');
+const User = require('../../collections/Models/users.model');
+const Endpoint = require('../../models/settings/Endpoint');
 
 /**
  * Represents a controller endpoint to confirm email of user.
