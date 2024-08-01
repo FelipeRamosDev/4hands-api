@@ -1,3 +1,4 @@
+const Auth = require('./models/Auth');
 const DBQuery = require('./models/DBQuery');
 const AJAX = require('./services/AJAX');
 const Utils = require('./utils');
@@ -54,6 +55,10 @@ class _4HandsAPIClient {
     */
    get apiURL() {
       return `${this.apiHost}:${this.apiPort}`;
+   }
+
+   get auth() {
+      return new Auth(this);
    }
 
    /**

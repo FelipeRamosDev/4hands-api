@@ -149,7 +149,7 @@ class ScheduleCron {
          });
       }
 
-      schedule.scheduleJob(this.oneTimeDate, callback);
+      this.scheduleJob(this.oneTimeDate, callback);
    }
 
    /**
