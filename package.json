@@ -1,6 +1,6 @@
 {
   "name": "4hands-api",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "4Hands API is an backend framework to build applications.",
   "main": "index.js",
   "scripts": {
@@ -32,6 +32,7 @@
     "html-loader": "^4.2.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^7.5.2",
+    "node-schedule": "^2.1.1",
     "nodemailer": "^6.9.7",
     "path-browserify": "^1.0.1",
     "redis": "^4.6.10",
