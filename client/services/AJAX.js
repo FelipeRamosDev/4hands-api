@@ -10,14 +10,14 @@ class AJAX {
     * @param {Object} setup - The setup object.
     * @param {string} setup.rootURL - The root URL for the API.
     * @param {string} [setup.cookiesTokenPropName='token'] - The name of the token property in cookies.
-    * @param {boolean} [setup.rejectUnauthorized=true] - Whether to reject unauthorized SSL certificates.
+    * @param {boolean} [setup.rejectUnauthorized=false] - Whether to reject unauthorized SSL certificates.
     * @param {Object} mainInstance - The main instance object.
     */
    constructor(setup, mainInstance) {
       const {
          rootURL,
          cookiesTokenPropName = 'token',
-         rejectUnauthorized = true
+         rejectUnauthorized = false
       } = Object(setup);
 
       this._mainInstance = () => mainInstance;
@@ -81,12 +81,14 @@ class AJAX {
             toHeaders = await this.addToken(toHeaders);
          }
 
-         return await axios.get(this.url(endpoint), {
+         const response = await axios.get(this.url(endpoint), {
             ...options,
             httpAgent: this.httpAgent,
             headers: toHeaders,
             params: body
          });
+
+         return response.data;
       } catch(err) {
          throw this.toError(err);
       }
@@ -108,11 +110,13 @@ class AJAX {
             toHeaders = await this.addToken(toHeaders);
          }
 
-         return await axios.post(this.url(endpoint), body, {
+         const response =  await axios.post(this.url(endpoint), body, {
             ...options,
             httpAgent: this.httpAgent,
             headers: toHeaders,
          });
+
+         return response.data;
       } catch(err) {
          throw this.toError(err);
       }
@@ -134,11 +138,13 @@ class AJAX {
             toHeaders = await this.addToken(toHeaders);
          }
 
-         return await axios.put(this.url(endpoint), body, {
+         const response = await axios.put(this.url(endpoint), body, {
             ...options,
             httpAgent: this.httpAgent,
             headers: toHeaders,
          });
+
+         return response.data;
       } catch(err) {
          throw this.toError(err);
       }
@@ -160,12 +166,14 @@ class AJAX {
             toHeaders = await this.addToken(toHeaders);
          }
 
-         return await axios.delete(this.url(endpoint), {
+         const response = await axios.delete(this.url(endpoint), {
             ...options,
             headers: toHeaders,
             httpAgent: this.httpAgent,
             data: body
          });
+
+         return response.data;
       } catch(err) {
          throw this.toError(err);
       }
@@ -179,10 +187,12 @@ class AJAX {
     * @returns {Promise<Object>} The response data.
     */
    async authGet(endpoint, body, options = {}) {
-      return await this.get(endpoint, body, {
+      const response = await this.get(endpoint, body, {
          ...options,
          isAuth: true
       });
+
+      return response;
    }
 
    /**
@@ -193,10 +203,12 @@ class AJAX {
     * @returns {Promise<Object>} The response data.
     */
    async authPost(endpoint, body, options = {}) {
-      return await this.post(endpoint, body, {
+      const response = await this.post(endpoint, body, {
          ...options,
          isAuth: true
       });
+
+      return response;
    }
 
    /**
@@ -207,10 +219,12 @@ class AJAX {
     * @returns {Promise<Object>} The response data.
     */
    async authPut(endpoint, body, options = {}) {
-      return await this.put(endpoint, body, {
+      const response =  await this.put(endpoint, body, {
          ...options,
          isAuth: true
-      });
+      })
+
+      return response;
    }
 
    /**
@@ -221,10 +235,12 @@ class AJAX {
     * @returns {Promise<Object>} The response data.
     */
    async authDelete(endpoint, body, options = {}) {
-      return await this.delete(endpoint, body, {
+      const response = await this.delete(endpoint, body, {
          ...options,
          isAuth: true
       });
+
+      return response;
    }
 
    /**

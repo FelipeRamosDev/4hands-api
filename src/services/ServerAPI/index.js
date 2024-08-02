@@ -118,6 +118,7 @@ class ServerAPI {
 
         this.createEndpoint(require('4hands-api/src/controllers/api/health-check'));
         this.createEndpoint(require('4hands-api/src/controllers/api/read-logs'));
+        this.createEndpoint(require('4hands-api/src/controllers/auth/auth-check'));
         this.createEndpoint(require('4hands-api/src/controllers/auth/login'));
         this.createEndpoint(require('4hands-api/src/controllers/auth/register'));
         this.createEndpoint(require('4hands-api/src/controllers/auth/signout'));
