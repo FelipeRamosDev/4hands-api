@@ -235,18 +235,19 @@ class SubscriptionIO {
      */
     async exec(eventType, docSnapshot) {
         const CRUD = global._4handsAPI?.CRUD;
-        const { id } = Object(docSnapshot);
+        const { _id, id } = Object(docSnapshot);
         const sortOpt = this.options?.sort;
         const limitOpt = this.options?.limit;
         const sortOptKeys = sortOpt && Object.keys(sortOpt);
         const hasSortOpt = sortOptKeys?.length;
+        const UID = _id || id;
 
         switch (eventType) {
             case 'save': {
                 if (this.type === 'query') {
                     const isMatch = await CRUD.getDoc({
                         collectionName: this.collection,
-                        filter: { _id: id, ...Object(this.filter) }
+                        filter: { _id: UID, ...Object(this.filter) }
                     });
 
                     if (isMatch) {
@@ -268,6 +269,7 @@ class SubscriptionIO {
                             this.lastQueryLoaded = this.lastQueryLoaded.splice(0, limitOpt);
                         }
 
+                        this.uidString += UID;
                         this.sendSnapshot(this.lastQueryLoaded);
                     }
 
@@ -276,10 +278,10 @@ class SubscriptionIO {
             }
             case 'update': {
                 if (this.type === 'query') {
-                    if (this.uidString && this.uidString.indexOf(id) > -1) {
+                    if (this.uidString && this.uidString.indexOf(UID) > -1) {
                         // Updating the changed document
                         this.lastQueryLoaded = this.lastQueryLoaded.map((item, i) => {
-                            if (item.id === docSnapshot._id) {
+                            if (item.id === UID) {
                                 item = docSnapshot;
                             }
 
@@ -293,6 +295,17 @@ class SubscriptionIO {
                 if (this.type === 'doc') {
                     this.lastDocLoaded = docSnapshot;
                     this.sendSnapshot(docSnapshot);
+                }
+
+                return;
+            }
+            case 'delete': {
+                if (this.type === 'query') {
+                    if (this.uidString && this.uidString.indexOf(UID) > -1) {
+                        // Updating the changed document
+                        this.lastQueryLoaded = this.lastQueryLoaded.filter((item, i) => (item.id !== UID));
+                        this.sendSnapshot(this.lastQueryLoaded);
+                    }
                 }
 
                 return;
