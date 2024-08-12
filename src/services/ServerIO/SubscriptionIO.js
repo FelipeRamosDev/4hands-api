@@ -40,10 +40,10 @@ class SubscriptionIO {
                 if (typeof customMethod === 'function') {
                     customMethod.call(this);
                 } else {
-                    this.loadQuery();
+                    this.loadQuery().then(() => this.subscriber.setDocSubscription(this));
                 }
             } else {
-                this.loadQuery();
+                this.loadQuery().then(() => this.subscriber.setDocSubscription(this));
             }
         }
 
@@ -58,10 +58,10 @@ class SubscriptionIO {
                 if (typeof customMethod === 'function') {
                     customMethod.call(this);
                 } else {
-                    this.loadDoc();
+                    this.loadDoc().then(() => this.subscriber.setDocSubscription(this));
                 }
             } else {
-                this.loadDoc();
+                this.loadDoc().then(() => this.subscriber.setDocSubscription(this));
             }
         }
     }
