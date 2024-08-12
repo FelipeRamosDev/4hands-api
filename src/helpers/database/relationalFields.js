@@ -172,6 +172,11 @@ async function onUpdate() {
 async function onDelete() {
     try {
         const filter = this.getFilter();
+
+        if (!filter.$or?.length) {
+            return;
+        }
+
         const currentDoc = await this.model.findOne(filter);
         const promises = [];
     
