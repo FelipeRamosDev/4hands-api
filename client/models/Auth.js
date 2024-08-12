@@ -13,6 +13,18 @@ module.exports = class Auth {
       return Date.now() + config.session.cookieAge;
    }
 
+   async checkUser() {
+      try {
+         return await this.instance.ajax.authGet('/auth/auth-check');
+      } catch (err) {
+         if (err?.name === 'USER_NOT_AUTHORIZED') {
+            return { isLogged: false };
+         } else {
+            throw err;
+         }
+      }
+   }
+
    async login(email, password) {
       if (!email || !password) {
          throw new Error('The params "email" and "password" are required!');
@@ -38,6 +50,14 @@ module.exports = class Auth {
 
          cookieStore.set({ name: 'token', value: created.token, expires: age });
          return created;
+      } catch (err) {
+         throw err;
+      }
+   }
+
+   async signOut() {
+      try {
+         return await this.instance.ajax.authPost('/auth/signout');
       } catch (err) {
          throw err;
       }
