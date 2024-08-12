@@ -59,7 +59,11 @@ module.exports = class Auth {
       try {
          return await this.instance.ajax.authPost('/auth/signout');
       } catch (err) {
-         throw err;
+         if (err?.name === 'USER_NOT_AUTHORIZED') {
+            return { isLogged: false };
+         } else {
+            throw err;
+         }
       }
    }
 }
