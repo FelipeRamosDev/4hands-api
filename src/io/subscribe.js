@@ -60,6 +60,13 @@ module.exports = SubscriberIO.buildSubscriber({
         }
     },
 
+    onDelete(collection, docSnapshot) {
+        const querySubscriptions = this.getQuerySubscriptions(collection);
+        if (Array.isArray(querySubscriptions)) {
+            querySubscriptions.map(sub => sub.exec('delete', docSnapshot));
+        }
+    },
+
     onError(err) {
         throw logError(err);
     },
