@@ -138,7 +138,6 @@ class SubscriberIO extends ServerIO {
             loadMethod
         }, this);
 
-        this.setDocSubscription(subscription);
         return subscription;
     }
 

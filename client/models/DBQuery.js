@@ -173,7 +173,7 @@ class DBQuery {
 
       try {
          const saved = await this.main.ajax.authPut('/collection/create', params);
-         return saved?.data;
+         return saved;
       } catch (err) {
          throw err;
       }
@@ -192,7 +192,7 @@ class DBQuery {
             options: this.options
          });
 
-         return response?.data;
+         return response;
       } catch (err) {
          throw err;
       }
@@ -211,7 +211,7 @@ class DBQuery {
             options: this.options
          });
 
-         return response?.data;
+         return response;
       } catch (err) {
          throw err;
       }
@@ -233,7 +233,7 @@ class DBQuery {
             data
          });
 
-         return response?.data;
+         return response;
       } catch (err) {
          throw err;
       }
@@ -255,7 +255,7 @@ class DBQuery {
             data
          });
 
-         return response?.data;
+         return response;
       } catch (err) {
          throw err;
       }
@@ -275,7 +275,7 @@ class DBQuery {
             options: this.options
          });
 
-         return response?.data;
+         return response;
       } catch (err) {
          throw err;
       }
@@ -295,7 +295,7 @@ class DBQuery {
             options: this.options
          });
 
-         return response?.data;
+         return response;
       } catch (err) {
          throw err;
       }

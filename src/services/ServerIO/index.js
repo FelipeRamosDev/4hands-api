@@ -92,6 +92,7 @@ class ServerIO {
         // Adding EVENTS listeners
         this.io.on('connect_error', onError.bind(this));
         this.io.on('connect', (socket) => {
+            socket.setMaxListeners(10000);
             socket.on('message', onData.bind(this));
             socket.on('disconnect', () => {
                 this.deleteRoom(socket.id);
