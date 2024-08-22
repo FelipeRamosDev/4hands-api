@@ -319,7 +319,7 @@ class DBQuery {
          if (subSocket) {
             subSocket.sendTo('subscribe', this.subscribeDocBody, (res) => {
                if (res?.error || !res?.id) {
-                  onError.call(this, err);
+                  onError.call(this, res);
                }
 
                subSocket.listenTo(res?.id, (snapshot) => {
@@ -357,7 +357,7 @@ class DBQuery {
          if (subSocket) {
             subSocket.sendTo('subscribe', this.subscribeQueryBody, (res) => {
                if (res?.error || !res?.id) {
-                  onError.call(this, err);
+                  onError.call(this, res);
                }
 
                subSocket.listenTo(res?.id, (snapshot) => {
