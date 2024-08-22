@@ -128,6 +128,8 @@ class SubscriberIO extends ServerIO {
      * @returns {SubscriptionIO} - The created SubscriptionIO instance.
      */
     subscribeDoc(socketID, collection, docUID, filter, options) {
+        if (!docUID && !filter) return;
+
         const { loadMethod } = Object(options);
         const subscription = new SubscriptionIO({
             type: 'doc',
