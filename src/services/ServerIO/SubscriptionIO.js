@@ -40,10 +40,10 @@ class SubscriptionIO {
                 if (typeof customMethod === 'function') {
                     customMethod.call(this);
                 } else {
-                    this.loadQuery().then(() => this.subscriber.setDocSubscription(this));
+                    this.loadQuery().then(() => this.subscriber.setQuerySubscription(this));
                 }
             } else {
-                this.loadQuery().then(() => this.subscriber.setDocSubscription(this));
+                this.loadQuery().then(() => this.subscriber.setQuerySubscription(this));
             }
         }
 
