@@ -115,7 +115,6 @@ class SubscriberIO extends ServerIO {
             options
         }, this);
 
-        this.setQuerySubscription(subscription);
         return subscription;
     }
 
@@ -233,7 +232,7 @@ class SubscriberIO extends ServerIO {
             const collectionSubs = querySubs[collection];
 
             if (collectionSubs) {
-                collectionSubs.splice(subIndex, 1);
+                this.subscriptions.query[collection].splice(subIndex, 1);
             }
         }
 
