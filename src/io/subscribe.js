@@ -36,6 +36,12 @@ module.exports = SubscriberIO.buildSubscriber({
 
         if (subscription) {
             socket.on('disconnect', () => subscription.terminate());
+            socket.on('unsubscribe', (id) => {
+                if (id && id === subscription.id) {
+                    subscription.terminate();
+                }
+            });
+
             callback(subscription);
         } else {
             callback(toError());
