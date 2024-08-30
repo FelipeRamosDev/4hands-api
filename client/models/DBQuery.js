@@ -311,6 +311,7 @@ class DBQuery {
    subscribeDoc(callbacks) {
       const subSocket = this.main.getSocket('subscription');
       const {
+         onSubscribe = () => {},
          onData = () => {},
          onError = (err) => { throw err }
       } = Object(callbacks);
@@ -322,6 +323,7 @@ class DBQuery {
                   onError.call(this, res);
                }
 
+               onSubscribe(res?.id);
                subSocket.listenTo(res?.id, (snapshot) => {
                   onData.call(this, snapshot);
                });
@@ -349,6 +351,7 @@ class DBQuery {
    subscribeQuery(callbacks) {
       const subSocket = this.main.getSocket('subscription');
       const {
+         onSubscribe = () => {},
          onData = () => {},
          onError = (err) => { throw err }
       } = Object(callbacks);
@@ -360,6 +363,7 @@ class DBQuery {
                   onError.call(this, res);
                }
 
+               onSubscribe(res?.id);
                subSocket.listenTo(res?.id, (snapshot) => {
                   onData.call(this, snapshot);
                });
@@ -374,6 +378,14 @@ class DBQuery {
          return subSocket;
       } catch (err) {
          onError.call(this, err);
+      }
+   }
+
+   unsubscribe(id) {
+      const subSocket = this.main.getSocket('subscription');
+
+      if (subSocket && id) {
+         subSocket.sendTo('unsubscribe', id);
       }
    }
 }
