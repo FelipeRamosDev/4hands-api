@@ -11,7 +11,7 @@ class DBQuery {
     * @throws Will throw an error if the collection is not provided.
     */
    constructor (collection, filter, mainInstance) {
-      this._options = {};
+      this._options = { populateMethod: 'defaultPopulate' };
       this._mainInstance = () => mainInstance;
 
       if (!collection) {
@@ -27,6 +27,7 @@ class DBQuery {
       }
 
       this.collection = collection;
+      this.currentPage = 0;
    }
 
    /**
@@ -133,11 +134,11 @@ class DBQuery {
 
    /**
     * Paginate the results.
-    * @param {number} [currentPage=0] - The current page number.
+    * @param {number} [toPage=0] - The page number.
     * @returns {DBQuery} The instance of DBQuery.
     */
-   paginate(currentPage = 0) {
-      const number = this.main.utils.validateInteger(currentPage);
+   page(toPage = 0) {
+      const number = this.main.utils.validateInteger(toPage);
 
       this._options.page = number;
       return this;
@@ -156,6 +157,25 @@ class DBQuery {
 
       this._options.populateMethod = methodName;
       return this;
+   }
+
+   async goPage(pageNumber) {
+      try {
+         this.page(pageNumber);
+
+         return await this.getQuery();
+      } catch (err) {
+         throw err;
+      }
+   }
+
+   async reloadLimit(limit) {
+      try {
+         this.limit(limit);
+         return await this.getQuery();
+      } catch (err) {
+         throw logError(err);
+      }
    }
 
    /**
