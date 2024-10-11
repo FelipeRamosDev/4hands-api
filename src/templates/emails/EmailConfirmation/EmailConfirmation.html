@@ -1,81 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>%{{title:string}}%</title>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>%{{title:string}}%</title>
 
-    <style>
-        a {
-            color: white;
-        }
+   <style>
+      a,
+      a[href] {
+         color: #FAFAFA;
+      }
 
-        .container {
-            width: 95%;
-            max-width: 1440px;
-            margin: 0 auto;
-        }
+      a:visited,
+      a[href]:visited {
+         color: #8BFFBC;
+      }
 
-        .message-wrap {
-            width: 95%;
-            margin: 0 auto;
-            text-align: center;
-            background-color: black;
-            color: white;
-            border-radius: 10px;
-            padding: 1rem;
-        }
+      .container {
+         width: 98%;
+         max-width: 1000px;
+         margin: 0 auto;
+      }
 
-        .text-message {
-            text-align: center;
-        }
+      .message-wrap {
+         width: 95%;
+         margin: 0 auto;
+         text-align: center;
+         background-color: #283235;
+         color: #FAFAFA;
+         border-radius: 10px;
+         padding: 1rem;
+      }
 
-        .title {
-            text-align: center;
-            color: white;
-        }
+      .logo-wrap {
+         text-align: center;
+         margin-bottom: 15px;
+         width: 100%;
+      }
 
-        .button {
-            display: block;
-            margin: 0 auto;
-            text-transform: uppercase;
-            padding: 15px;
-            border-radius: 10px;
-            text-decoration: none;
-            background-color: greenyellow;
-            color: white;
-        }
+      .logo {
+         height: 80px;
+         width: 80px;
+      }
 
-        .container.custom {
-            %{{containerCSS:string}}%
-        }
+      .text-message {
+         text-align: center;
+      }
 
-        .message-wrap.custom {
-            %{{messageWrapCSS:string}}%
-        }
+      .title {
+         text-align: center;
+         color: #FAFAFA;
+         font-size: 20px;
+      }
 
-        .text-message.custom {
-            %{{textMesssageCSS:string}}%
-        }
+      .button {
+         display: block;
+         margin: 0 auto;
+         text-transform: uppercase;
+         padding: 15px;
+         border-radius: 10px;
+         text-decoration: none;
+         background-color: #8BFFBC;
+         color: #222222;
+      }
 
-        .title.custom {
-            %{{titleCSS:string}}%
-        }
+      .container.custom {
+         %{{containerCSS:string}}%
+      }
 
-        .button.custom {
-            %{{buttonCSS:string}}%
-        }
-    </style>
+      .message-wrap.custom {
+         %{{messageWrapCSS:string}}%
+      }
+
+      .text-message.custom {
+         %{{textMesssageCSS:string}}%
+      }
+
+      .title.custom {
+         %{{titleCSS:string}}%
+      }
+
+      .button.custom {
+         %{{buttonCSS:string}}%
+      }
+   </style>
 </head>
 <body>
-    <div class="container custom">
-        <div class="message-wrap custom">
-            %{{projectLogo:component}}%
-            <h1 class="title custom">%{{title:string}}%</h1>
+   <div class="container custom">
+      <div class="message-wrap custom">
+         <div class="logo-wrap">
+            <img class="logo" src="%{{projectLogoURL:string}}%" alt="CandlePilot Logo" />
+         </div>
+         <h1 class="title custom">%{{title:string}}%</h1>
 
-            <p class="text-message custom">%{{message:string}}%</p>
-            <a class="button custom" href="%{{confirmationURL:string}}%">Confirm e-mail</a>
-        </div>
-    </div>
+         <p class="text-message custom">%{{message:string}}%</p>
+         <a class="button custom" href="%{{confirmationURL:string}}%">Confirm e-mail</a>
+      </div>
+   </div>
 </body>
 </html>
