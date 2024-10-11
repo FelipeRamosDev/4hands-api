@@ -22,8 +22,11 @@ module.exports = new Endpoint({
                 if (user.error) {
                     let status = 500;
 
-                    if (user.name === 'AUTH_INVALID_CREDENTIALS') {
-                        status = 401;
+                    switch (user.name) {
+                        case 'USER_NOT_FOUND':
+                        case 'AUTH_INVALID_CREDENTIALS':
+                            status = 401;
+                            break;
                     }
         
                     return res.status(status).send(user);
