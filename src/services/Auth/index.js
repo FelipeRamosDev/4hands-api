@@ -56,7 +56,7 @@ class AuthService {
             if (!isValid) {
                 return logError({
                     name: 'INVALID_CREADENTIALS',
-                    message: `The creadentials provided is not valid!`
+                    message: `The username or password is not correct!`
                 });
             }
 
