@@ -191,7 +191,10 @@ class User extends _Global {
 
                 emailLink.searchParams.set('confirmationtoken', confirmationTokenString);
 
-                const emailSent = await API.mailService.sendConfirmation(this.email, emailLink.toString());
+                const emailSent = await API.mailService.sendConfirmation(this.email, emailLink.toString(), {
+                    projectLogoURL: API.FE_ORIGIN + '/images/candlepilot_logo.png'
+                });
+
                 emailSent.confirmationToken = confirmationTokenString;
                 return emailSent;
             }
@@ -286,7 +289,10 @@ class User extends _Global {
             const isExist = await this.isExist(userName || email);
             // If the user is already in use, throw an error
             if (isExist) {
-                return logError('auth.user_in_use');
+                return logError({
+                    name: 'USERNAME_ALREADY_USED',
+                    message: `The user name "${userName || email}" is already in use!`
+                });
             }
 
             const newUser = await CRUD.create('users', setup);
@@ -319,12 +325,14 @@ class User extends _Global {
             const userDOC = await CRUD.getDoc({ collectionName: 'users', filter: { email: userName }}).defaultPopulate();
 
             if (!userDOC) {
-                return logError('auth.user_not_found', userName);
+                return logError({
+                    name: 'USER_NOT_FOUND',
+                    message: `The user "${userName}" does not exist!`
+                });
             }
 
             if (!preventEmailConfirm && !userDOC.isEmailConfirmed) {
                 return logError({
-                    code: 401,
                     name: 'USER_EMAIL_NOT_CONFIRMED',
                     message: `The user needs to confirm his email before login!`
                 });

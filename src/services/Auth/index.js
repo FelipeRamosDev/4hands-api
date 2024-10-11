@@ -53,8 +53,11 @@ class AuthService {
         try {
             const isValid = await this.validateCredentials(password);
 
-            if(!isValid) {
-                return logError('auth.invalid_credentials');
+            if (!isValid) {
+                return logError({
+                    name: 'INVALID_CREADENTIALS',
+                    message: `The username or password is not correct!`
+                });
             }
 
             return isValid.toSuccess('User is valid!');

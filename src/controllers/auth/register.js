@@ -22,7 +22,7 @@ module.exports = new Endpoint({
             const { password, confirmPassword } = Object(req.body);
 
             if (password !== confirmPassword) {
-                res.status(400).send(logError({
+                res.status(401).send(logError({
                     name: 'PASSWORD_NOT_MATCH',
                     message: 'The password confirmation need to be the same value of password!'
                 }));
@@ -37,7 +37,7 @@ module.exports = new Endpoint({
             const newUser = await User.create(body, { confirmationEmail: true });
     
             if (newUser.error) {
-                return res.status(500).send(newUser);
+                return res.status(401).send(newUser);
             }
 
             req.session.user = newUser.toPublic();
