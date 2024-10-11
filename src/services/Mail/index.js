@@ -113,7 +113,7 @@ class MailService {
      * @throws Will throw an error if the email sending operation fails.
      */
     async sendConfirmation(userEmail, confirmationURL, options) {
-        const { customSubject } = Object(options);
+        const { customSubject, projectLogoURL } = Object(options);
 
         if (!this.signUpConfirmationEmail) {
             return logError({
@@ -124,6 +124,9 @@ class MailService {
 
         try {
             const body = new EmailConfirmation({
+                customTitle: 'Welcome to CandlePilot',
+                customMessage: 'We\'re excited to have you on board! The final step before you can start using CandlePilot is to confirm your email. Please click the button below to verify your email address.',
+                projectLogoURL,
                 userEmail,
                 confirmationURL,
                 ...Object(options)
