@@ -10,7 +10,7 @@ const configs = require('4hands-api/configs/project');
 function isCollectionExist(collection) {
     try {
         return mongoose.modelNames().find(model => model === collection);
-    } catch(err) {
+    } catch (err) {
         throw logError('helpers.is_collection_exist', collection);
     }
 }
@@ -26,7 +26,7 @@ async function isDocExist(collectionName, filter) {
     try {
         return await mongoose.model(collectionName).exists(filter);
     } catch (err) {
-        return;   
+        return;
     }
 }
 
@@ -61,7 +61,7 @@ function getCollectionModel(collection) {
         } else {
             throw logError('database.collection_dont_exist', collection);
         }
-    } catch(err) {
+    } catch (err) {
         throw logError(err);
     }
 }
@@ -71,7 +71,7 @@ function getCollectionModel(collection) {
  * @param {Object} collection - The collection object containing 'name' and 'symbol' properties.
  * @throws {Error} - Throws an error if there is an issue creating the counter document.
  */
-async function createCounter(collection){
+async function createCounter(collection) {
     try {
         const Counters = mongoose.model(configs.database.counterCollection);
         const collCounter = await Counters.findById(collection.name);
@@ -84,7 +84,7 @@ async function createCounter(collection){
 
             await newCounter.save();
         }
-    } catch(err) {
+    } catch (err) {
         throw logError(err);
     }
 }
@@ -98,7 +98,7 @@ async function createCounter(collection){
 async function increaseCounter(collection) {
     try {
         const Counters = mongoose.model(configs.database.counterCollection);
-        const counter = await Counters.findByIdAndUpdate(collection, { $inc: { value: 1 }});
+        const counter = await Counters.findByIdAndUpdate(collection, { $inc: { value: 1 } });
 
         if (!counter) {
             throw logError({
@@ -108,7 +108,7 @@ async function increaseCounter(collection) {
         }
 
         return counter.toObject();
-    } catch(err) {
+    } catch (err) {
         throw logError(err);
     }
 }
@@ -121,13 +121,13 @@ async function increaseCounter(collection) {
  * @returns {Object} - The updated document object.
  * @throws {Error} - Throws an error if there is an issue updating the document properties.
  */
-async function increaseDocProp(collectionName, filter, data) {   
+async function increaseDocProp(collectionName, filter, data) {
     try {
         const DBModel = mongoose.model(collectionName);
         const doc = await DBModel.findOneAndUpdate(filter, { $inc: data });
 
         return doc.initialize();
-    } catch(err) {
+    } catch (err) {
         throw logError(err);
     }
 }
@@ -143,7 +143,7 @@ function pickQueryType(filter, type) {
 
     if (filterType === 'string') return 'one';
     if (filterType === 'object' && !Array.isArray(filter)) {
-        switch(type) {
+        switch (type) {
             case 'many': {
                 return 'many';
             }
@@ -167,7 +167,7 @@ function treatFilter(filter) {
     let query;
 
     try {
-        if (Boolean.isValid(filter).stringFilled()){
+        if (Boolean.isValid(filter).stringFilled()) {
             query = { _id: filter };
         } else if (Boolean.isValid(filter).object().eval()) {
             query = filter;
@@ -180,7 +180,7 @@ function treatFilter(filter) {
                 'dbHelpers.js'
             );
         }
-    } catch(err) {
+    } catch (err) {
         throw logError(err);
     }
 
@@ -205,20 +205,20 @@ function findRelFields(schema, exclude, levels, currentLevel) {
 
     try {
         if (schema) {
-            Object.keys(schema.obj || {}).map(key=>{
+            Object.keys(schema.obj || {}).map(key => {
                 const curr = schema.obj[key] || {};
-                const typeOf = curr.type && curr.type.schemaName || typeof curr.type; 
+                const typeOf = curr.type && curr.type.schemaName || typeof curr.type;
                 const isExclude = (!exclude || !exclude.find(x => x === key));
                 const refSchema = curr.ref && mongoose.model(curr.ref).schema;
-                
+
                 if (Array.isArray(curr.type)) {
                     const type = curr.type.find(x => x.schemaName === 'ObjectId')
                     if (type && isExclude && refSchema) result.push({
-                        path: key, 
+                        path: key,
                         populate: findRelFields(refSchema, exclude, levels, ++currentLevel)
                     });
                 }
-                else if (typeOf === 'ObjectId' && isExclude){
+                else if (typeOf === 'ObjectId' && isExclude) {
                     result.push({
                         path: key,
                         model: curr.ref,
@@ -226,16 +226,16 @@ function findRelFields(schema, exclude, levels, currentLevel) {
                     });
                 }
                 else if (typeOf === 'object' && isExclude) {
-                    const subRels = findRelFields({obj: curr.type}, exclude, levels, ++currentLevel);
-                    result.push({path: key, populate: subRels});
+                    const subRels = findRelFields({ obj: curr.type }, exclude, levels, ++currentLevel);
+                    result.push({ path: key, populate: subRels });
                 }
             });
-    
+
             return result;
         } else {
             return logError('common.missing_params', 'schema', 'findRelFields', 'dbHelpers.js');
         }
-    } catch(err) {
+    } catch (err) {
         throw logError(err);
     }
 }
