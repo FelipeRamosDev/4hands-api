@@ -6,6 +6,7 @@ const configs = require('4hands-api/configs/project');
 const GlobalClass = require('4hands-api/src/collections/Models/_globals.model');
 const FS = require('4hands-api/src/services/FS');
 const path = require('path');
+const { mapToObject } = require('4hands-api/src/helpers/database/dbHelpers');
 
 /**
  * Represents a schema for MongoDB database, including methods for initializing queries, events, and classes.
@@ -223,7 +224,7 @@ class SchemaDB {
                 this.schema.loadClass(this.DefaultModel);
             }
 
-            this.schema.set('toObject', {virtuals: true});
+            this.schema.set('toObject', { virtuals: true });
         } catch(err) {
             throw logError(err);
         }
