@@ -74,7 +74,7 @@ module.exports = SubscriberIO.buildSubscriber({
     },
 
     onError(err) {
-        throw logError(err);
+        logError(err);
     },
 
     ...CUSTOM_CONFIGS
