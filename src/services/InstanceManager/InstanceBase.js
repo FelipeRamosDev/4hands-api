@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const InstanceRoute = require('./InstanceRoute');
+const EventEndpoint = require('../../models/settings/EventEndpoint');
 
 /**
  * Represents a base instance with routes, data storage, and lifecycle callbacks.
@@ -11,7 +12,7 @@ class InstanceBase {
      * @param {string} [setup.id] - The unique identifier for the instance.
      * @param {string} [setup.tagName] - The tag name associated with the instance.
      * @param {string} setup.filePath - The file path of the instance.
-     * @param {InstanceRoute[]} [setup.routes] - An array of routes associated with the instance.
+     * @param {InstanceRoute[]|EventEndpoint[]} [setup.routes] - An array of routes associated with the instance.
      * @param {Object} [setup._routes] - An object containing route instances keyed by their paths.
      * @param {Object} [setup.dataStore] - An object to store data associated with the instance.
      * @param {Function} [setup.onReady] - A callback function to be called when the instance is ready.
@@ -27,6 +28,7 @@ class InstanceBase {
             filePath,
             routes = [],
             _routes = {},
+            _eventRoutes = {},
             dataStore = {},
             onReady = () => {},
             onData = () => {},
@@ -38,6 +40,7 @@ class InstanceBase {
         this._parent = () => parent;
         this._dataStore = dataStore;
         this._routes = _routes;
+        this._eventRoutes = _eventRoutes;
 
         this.id = id || this.genRandomBytes();
         this.tagName = tagName || this.id;
@@ -122,7 +125,11 @@ class InstanceBase {
      */
     setRoute(route) {
         try {
-            if (route instanceof InstanceRoute) {
+            if (route instanceof EventEndpoint) {
+                route.setInstance(this);
+                this._eventRoutes[route.fullPath] = route;
+                return route;
+            } else if (route instanceof InstanceRoute) {
                 route.setInstance(this);
                 this._routes[route.path] = route;
                 return route;
