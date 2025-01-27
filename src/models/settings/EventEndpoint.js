@@ -37,6 +37,8 @@ class EventEndpoint {
       this._instance = () => instance;
       this.ioRedis = ioRedis;
 
+      this.ioRedis.setMaxListeners(0);
+
       /**
        * The root path of the endpoint's route.
        * @type {string}
