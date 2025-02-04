@@ -32,12 +32,15 @@ class MailService {
                 case 'smtp': {
                     this.options = {
                         host,
-                        port: Number(smtpPort || 465),
-                        secure: false,
+                        port: Number(smtpPort || 587),
+                        secure: false, // true for port 465, false for other ports
                         auth: {
                             user: emailUser,
                             pass: emailPassword
                         },
+                        tls: {
+                            rejectUnauthorized: false
+                        }
                     };
 
                     break;
@@ -83,7 +86,7 @@ class MailService {
      */
     async send(to, subject, body, cc) {
         return new Promise((resolve, reject) => {
-            this.transporter.sendMail({ to, subject, cc, html: body }, (err, info) => {
+            this.transporter.sendMail({ from: this.options.auth.user, to, subject, cc, html: body }, (err, info) => {
                 if (err) {
                     return reject(err);
                 }
