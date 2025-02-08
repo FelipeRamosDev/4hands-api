@@ -10,11 +10,6 @@ const notConfirmedEmail = {
     message: `The user's e-mail is not confirmed!`
 };
 
-const badConfirmationToken = {
-    name: 'BAD_CONFIMATION_TOKEN',
-    message: `The confirmation token provided is not correct!`
-};
-
 module.exports = async (req, res, next) => {
     const { session, sessionStore, headers, body } = req;
     const authService = new AuthService();
@@ -40,7 +35,8 @@ module.exports = async (req, res, next) => {
         } else {
             if (!data.isEmailConfirmed) {
                 if (typeof body.confirmationtoken !== 'string') {
-                    return res.status(401).send(notConfirmedEmail);
+                    const error = toError(notConfirmedEmail);
+                    return res.status(201).send({ ...error, userName: data.user?.email });
                 }
                 
                 session.confirmationToken = data.confirmationToken;

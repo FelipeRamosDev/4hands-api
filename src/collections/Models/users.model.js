@@ -318,7 +318,7 @@ class User extends _Global {
      * @returns {Promise<User|Error>} - A promise resolving to the signed-in user object, or an error object if sign-in fails.
      * @throws {Error.Log} If there is an error during sign-in.
      */
-     static async signIn(userName, password, preventEmailConfirm) {
+     static async signIn(userName, password) {
         const CRUD = global._4handsAPI?.CRUD;
 
         try {
@@ -328,13 +328,6 @@ class User extends _Global {
                 return logError({
                     name: 'USER_NOT_FOUND',
                     message: `The user "${userName}" does not exist!`
-                });
-            }
-
-            if (!preventEmailConfirm && !userDOC.isEmailConfirmed) {
-                return logError({
-                    name: 'USER_EMAIL_NOT_CONFIRMED',
-                    message: `The user needs to confirm his email before login!`
                 });
             }
 
