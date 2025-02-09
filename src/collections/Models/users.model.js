@@ -106,7 +106,7 @@ class User extends _Global {
         const { headers, session } = Object(req);
         const feOrigin = headers.origin;
         const resetToken = await this.genResetPassToken(session.id);
-        const url = new URL(feOrigin + '/dashboard/reset-password/create-new');
+        const url = new URL(feOrigin + '/dashboard/reset-password');
 
         url.searchParams.set('useremail', this.email);
         url.searchParams.set('resettoken', resetToken);
@@ -218,7 +218,7 @@ class User extends _Global {
             const userDOC = await CRUD.getDoc({collectionName: 'users', filter}).defaultPopulate();
 
             if (!userDOC) {
-                return logError('user.not_found', filter);
+                return;
             }
 
             const initialized = userDOC.initialize();
