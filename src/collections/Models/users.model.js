@@ -106,7 +106,7 @@ class User extends _Global {
         const { headers, session } = Object(req);
         const feOrigin = headers.origin;
         const resetToken = await this.genResetPassToken(session.id);
-        const url = new URL(feOrigin + '/dashboard/reset-password/create-new');
+        const url = new URL(feOrigin + '/dashboard/reset-password');
 
         url.searchParams.set('useremail', this.email);
         url.searchParams.set('resettoken', resetToken);
@@ -218,7 +218,7 @@ class User extends _Global {
             const userDOC = await CRUD.getDoc({collectionName: 'users', filter}).defaultPopulate();
 
             if (!userDOC) {
-                return logError('user.not_found', filter);
+                return;
             }
 
             const initialized = userDOC.initialize();
@@ -318,7 +318,7 @@ class User extends _Global {
      * @returns {Promise<User|Error>} - A promise resolving to the signed-in user object, or an error object if sign-in fails.
      * @throws {Error.Log} If there is an error during sign-in.
      */
-     static async signIn(userName, password, preventEmailConfirm) {
+     static async signIn(userName, password) {
         const CRUD = global._4handsAPI?.CRUD;
 
         try {
@@ -328,13 +328,6 @@ class User extends _Global {
                 return logError({
                     name: 'USER_NOT_FOUND',
                     message: `The user "${userName}" does not exist!`
-                });
-            }
-
-            if (!preventEmailConfirm && !userDOC.isEmailConfirmed) {
-                return logError({
-                    name: 'USER_EMAIL_NOT_CONFIRMED',
-                    message: `The user needs to confirm his email before login!`
                 });
             }
 
