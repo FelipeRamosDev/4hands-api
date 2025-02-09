@@ -14,19 +14,24 @@ module.exports = new Endpoint({
     },
     controller: async (req, res) => {
         const { email } = req.body;
-        const user = await User.getUser({ email });
 
-        if (!user) {
-            return res.status(404).send(logError({
-                name: 'USER_DOES_NOT_EXIST',
-                message: `The user e-mail doesn't exist!`
-            }));
+        try {
+            const user = await User.getUser({ email });
+    
+            if (!user) {
+                return res.status(404).send(logError({
+                    name: 'USER_DOES_NOT_EXIST',
+                    message: `The user e-mail doesn't exist!`
+                }));
+            }
+    
+            // Generate the link and send the email
+            const sent = await user.sendResetPassEmail(req);
+    
+            req.session.userEmail = user.email;
+            return res.status(200).send(sent);
+        } catch (err) {
+            return res.status(500).send(toError(err));
         }
-
-        // Generate the link and send the email
-        const sent = await user.sendResetPassEmail(req);
-
-        req.session.userEmail = user.email;
-        return res.status(200).send(sent);
     }
 });
