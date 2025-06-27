@@ -1,5 +1,5 @@
 const Success = require('4hands-api/src/models/Success');
-const bcrypt = require('bcrypt');
+const bcryptjs = require('bcryptjs');
 const JWT = require('jsonwebtoken');
 const crypto = require('crypto');
 
@@ -119,7 +119,7 @@ class AuthService {
      */
     async genSalt(length) {
         try {
-            const salt = await bcrypt.genSalt(length || 8);
+            const salt = await bcryptjs.genSalt(length || 8);
             return salt;
         } catch (err) {
             throw logError(err);
@@ -135,7 +135,7 @@ class AuthService {
     async createHash(password, saltLength) {
         try {
             const salt = await this.genSalt(saltLength);
-            const hash = bcrypt.hash(password, salt);
+            const hash = bcryptjs.hash(password, salt);
             return hash;
         } catch (err) {
             throw logError(err);
@@ -234,7 +234,7 @@ class AuthService {
      */
     async validateCredentials(password) {
         try {
-            const isMatch = await bcrypt.compare(password, this.parentBucket.password.toString());
+            const isMatch = await bcryptjs.compare(password, this.parentBucket.password.toString());
             return isMatch;
         } catch (err) {
             throw logError(err);
