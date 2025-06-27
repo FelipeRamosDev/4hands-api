@@ -1,6 +1,6 @@
 const { logError } = require('4hands-api/src/models/ErrorLog');
-const IORedis = require('ioredis');
-const ioRedis = new IORedis();
+const IORedis = require('ioredis').default;
+const ioRedis = new IORedis(process.env.REDIS_URL);
 
 /**
  * Represents an API endpoint configuration.
