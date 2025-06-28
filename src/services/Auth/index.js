@@ -135,7 +135,7 @@ class AuthService {
     async createHash(password, saltLength) {
         try {
             const salt = await this.genSalt(saltLength);
-            const hash = bcryptjs.hash(password, salt);
+            const hash = await bcryptjs.hash(password.toString(), salt);
             return hash;
         } catch (err) {
             throw logError(err);
