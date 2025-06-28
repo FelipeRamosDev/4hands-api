@@ -17,6 +17,13 @@ class DBService {
      * @param {Function} setup.onReady - On ready callback.
      * @param {Function} setup.onError - On error callback.
      * @param {string} [setup.hostURL='mongodb://0.0.0.0:27017/'] - The host URL for the MongoDB server.
+     * @param {string} [setup.username] - The username for the MongoDB server.
+     * @param {string} [setup.password] - The password for the MongoDB server
+     * @param {boolean} [setup.useNewUrlParser] - Whether to use the new URL parser for MongoDB.
+     * @param {boolean} [setup.useUnifiedTopology] - Whether to use the unified topology for MongoDB.
+     * @param {number} [setup.serverSelectionTimeoutMS] - The server selection timeout in milliseconds.
+     * @param {number} [setup.socketTimeoutMS] - The socket timeout in milliseconds.
+     * @param {string} [setup.authSource='admin'] - The authentication source for MongoDB.
      * @param {Array} [setup.collections] - Additional collections to be initialized along with the default ones.
      */
     constructor(setup, _4handsInstance) {
@@ -25,14 +32,29 @@ class DBService {
             onReady,
             onError,
             hostURL = 'mongodb://0.0.0.0:27017/',
+            username,
+            password,
+            useNewUrlParser,
+            useUnifiedTopology,
+            serverSelectionTimeoutMS,
+            socketTimeoutMS,
+            authSource = 'admin',
             collections = [],
         } = Object(setup);
 
         /**
          * The main 4hands-api instance.
-         * @type {Object}
+         * @type {function}
+         * @returns {Object | undefined}
          */
         this._4handsInstance = () => _4handsInstance;
+
+        /**
+         * The password for the MongoDB server.
+         * @type {function}
+         * @returns {string}
+         */
+        this._password = () => password;
 
         /**
          * The host URL for the MongoDB server.
@@ -41,10 +63,46 @@ class DBService {
         this.hostURL = hostURL;
 
         /**
+         * The username for the MongoDB server.
+         * @type {string}
+         */
+        this.username = username;
+
+        /**
          * The name of the database.
          * @type {string}
          */
         this.dbName = dbName;
+
+        /**
+         * Whether to use the new URL parser for MongoDB.
+         * @type {boolean}
+         */
+        this.useNewUrlParser = useNewUrlParser;
+
+        /**
+         * Whether to use the unified topology for MongoDB.
+         * @type {boolean}
+         */
+        this.useUnifiedTopology = useUnifiedTopology;
+
+        /**
+         * The server selection timeout in milliseconds.
+         * @type {number}
+         */
+        this.serverSelectionTimeoutMS = serverSelectionTimeoutMS;
+
+        /**
+         * The socket timeout in milliseconds.
+         * @type {number}
+         */
+        this.socketTimeoutMS = socketTimeoutMS;
+
+        /**
+         * The authentication source for MongoDB.
+         * @type {string}
+         */
+        this.authSource = authSource;
 
         /**
          * The MongoDB server instance.
@@ -95,6 +153,10 @@ class DBService {
         return this._4handsInstance();
     }
 
+    get password() {
+        return this._password();
+    }
+
     /**
      * Initializes the database connection and sets up the collections.
      * @param {Object} callbacks - Success and error callbacks for database initialization.
@@ -105,7 +167,14 @@ class DBService {
     init({ success = () => {}, error = () => {} }) {
         mongoose.set('strictQuery', false);
         mongoose.connect(this.hostURL, {
-            dbName: this.dbName
+            dbName: this.dbName,
+            user: this.username,
+            pass: this.password,
+            useNewUrlParser: this.useNewUrlParser,
+            useUnifiedTopology: this.useUnifiedTopology,
+            serverSelectionTimeoutMS: this.serverSelectionTimeoutMS,
+            socketTimeoutMS: this.socketTimeoutMS,
+            authSource: this.authSource
         }).then(async (connectedDB) => {
             this.parent.toConsole(`Database "${this.dbName}" is connected on: "${this.hostURL}"`);
 
