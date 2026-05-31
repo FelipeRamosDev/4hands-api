@@ -41,16 +41,21 @@ module.exports = async (req, res, next) => {
                 }
             }
 
-            session.user = data.user;
-            session.isAuthorized = data.isAuthorized;
-            session.sessionSalt = data.sessionSalt;
-            session.isEmailConfirmed = data.isEmailConfirmed;
+            const ghostSessionID = req.sessionID;
+            req.sessionID = tokenData.sessionID;
 
-            if (data.confirmationToken) {
-                session.confirmationToken = data.confirmationToken;
+            // Rebuild req.session with session.id = Session A (the real session).
+            // createSession() creates new Session(req, data), which sets session.id = req.sessionID.
+            // This ensures express-session's auto-save at response end writes to Session A, not Session B.
+            sessionStore.createSession(req, data);
+
+            // Destroy the ghost Session B to prevent accumulation in the store.
+            if (ghostSessionID !== tokenData.sessionID) {
+                sessionStore.destroy(ghostSessionID, (destroyErr) => {
+                    if (destroyErr) console.error('[authVerify] Failed to destroy ghost session:', destroyErr);
+                });
             }
 
-            req.sessionID = tokenData.sessionID;
             return next();
         }
     });
