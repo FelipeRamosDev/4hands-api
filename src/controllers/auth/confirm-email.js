@@ -35,9 +35,7 @@ module.exports = new Endpoint({
                 return res.status(401).send(badConfirmationToken);
             }
 
-            await user.updateSession(req.session);
-            req.sessionID = req.session.id;
-            req.session.save((saveErr) => {
+            req.sessionStore.set(req.sessionID, req.session, (saveErr) => {
                 if (saveErr) return res.status(500).send(toError(saveErr));
                 res.status(200).send({ success: true });
             });

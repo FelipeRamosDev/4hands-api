@@ -42,9 +42,6 @@ class User extends _Global {
             const user = await User.getUser(this._id);
 
             session.user = await user.toSession(session);
-            session.sessionSalt = session.sessionSalt;
-            session.isEmailConfirmed = user.isEmailConfirmed;
-            await session.save();
             return user;
         } catch (error) {
             throw logError(error);
