@@ -34,8 +34,6 @@ module.exports = async (req, res, next) => {
             return res.status(401).send(notAuthorizedError);
         } else {
             if (!data.isEmailConfirmed) {
-                session.confirmationToken = data.confirmationToken;
-
                 if (typeof body.confirmationtoken !== 'string') {
                     const user = data.user;
                     const fullName = user?.fullName || [user?.firstName, user?.lastName].filter(Boolean).join(' ');
@@ -46,8 +44,13 @@ module.exports = async (req, res, next) => {
             session.user = data.user;
             session.isAuthorized = data.isAuthorized;
             session.sessionSalt = data.sessionSalt;
-            req.sessionID = tokenData.sessionID;
+            session.isEmailConfirmed = data.isEmailConfirmed;
 
+            if (data.confirmationToken) {
+                session.confirmationToken = data.confirmationToken;
+            }
+
+            req.sessionID = tokenData.sessionID;
             return next();
         }
     });
