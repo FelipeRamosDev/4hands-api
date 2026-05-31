@@ -46,7 +46,7 @@ module.exports = new Endpoint({
             req.session.isAuthorized = true;
             req.session.isEmailConfirmed = false;
 
-            req.session.save((saveErr) => {
+            req.sessionStore.set(req.sessionID, req.session, (saveErr) => {
                 if (saveErr) return res.status(500).send(logError(saveErr));
                 return res.status(200).send(response);
             });
