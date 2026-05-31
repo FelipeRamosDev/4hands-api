@@ -5,6 +5,12 @@ const dbHelpers = require('../../helpers/database/dbHelpers');
 class User extends _Global {
     constructor (setup, parent) {
         super(setup, parent);
+        const { firstName, lastName, email, phone } = Object(setup);
+
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.phone = phone;
     }
 
     /**
@@ -29,6 +35,18 @@ class User extends _Global {
      */
     get authService() {
         return this.auth?.service;
+    }
+    
+    async updateSession(session) {
+        try {
+            const user = await User.getUser(this._id);
+
+            session.user = await user.toSession(session);
+            session.save();
+            return user;
+        } catch (error) {
+            throw logError(error);
+        }
     }
 
     /**
