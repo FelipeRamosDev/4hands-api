@@ -34,12 +34,13 @@ module.exports = async (req, res, next) => {
             return res.status(401).send(notAuthorizedError);
         } else {
             if (!data.isEmailConfirmed) {
-                if (typeof body.confirmationtoken !== 'string') {
-                    const error = toError(notConfirmedEmail);
-                    return res.status(201).send({ ...error, userName: data.user?.email });
-                }
-                
                 session.confirmationToken = data.confirmationToken;
+
+                if (typeof body.confirmationtoken !== 'string') {
+                    const user = data.user;
+                    const fullName = user?.fullName || [user?.firstName, user?.lastName].filter(Boolean).join(' ');
+                    return res.status(201).send({ ...notConfirmedEmail, isLogged: true, user: { ...user, fullName }, userName: user?.email });
+                }
             }
 
             session.user = data.user;

@@ -24,13 +24,14 @@ module.exports = new Endpoint({
                     throw updated;
                 }
 
-                data.isEmailConfirmed = true;
+                req.session.isEmailConfirmed = true;
             } else {
-                data.isEmailConfirmed = false;
+                req.session.isEmailConfirmed = false;
                 return res.status(401).send(badConfirmationToken);
             }
 
-            req.sessionStore.destroy(req.sessionID);
+            await user.updateSession(req.session);
+            // req.sessionStore.destroy(req.sessionID);
             res.status(200).send({ success: true });
         } catch(err) {
             return res.status(500).send(toError(err));

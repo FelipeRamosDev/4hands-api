@@ -50,19 +50,25 @@ class Auth {
     * Logs in the user with the provided email and password.
     * @param {string} email - The user's email address.
     * @param {string} password - The user's password.
+    * @param {string} [customRoute] - Optional custom route for the login endpoint.
     * @returns {Promise<Object>} - An object containing the login result or an error.
     * @throws {Error} - If email or password is missing, or if another error occurs.
     */
-   async login(email, password) {
+   async login(email, password, customRoute) {
       if (!email || !password) {
          throw new Error('The params "email" and "password" are required!');
       }
 
-      const logged = await this.instance.ajax.authPost('/auth/login', { email, password });
+      const route = customRoute || '/auth/login';
+      const logged = await this.instance.ajax.authPost(route, { email, password });
       const cookieAge = this.cookieAge;
 
       if (logged && !logged.error) {
-         cookieStore.set({ name: 'token', value: logged.token, expires: cookieAge });
+         if (typeof cookieStore !== 'undefined') {
+            cookieStore.set({ name: 'token', value: logged.token, expires: cookieAge });
+         } else {
+            document.cookie = `token=${logged.token}; expires=${new Date(cookieAge).toUTCString()}; path=/`;
+         }
          return logged;
       } else if (logged.error) {
          return toError(logged);
@@ -77,12 +83,17 @@ class Auth {
     * @returns {Promise<Object>} - An object containing the registration result.
     * @throws {Error} - If registration fails.
     */
-   async register(data) {
+   async register(data, customRoute) {
       try {
-         const created = await this.instance.ajax.post('/auth/register', data);
+         const route = customRoute || '/auth/register';
+         const created = await this.instance.ajax.post(route, data);
          const age = this.cookieAge;
 
-         cookieStore.set({ name: 'token', value: created.token, expires: age });
+         if (typeof cookieStore !== 'undefined') {
+            cookieStore.set({ name: 'token', value: created.token, expires: age });
+         } else {
+            document.cookie = `token=${created.token}; expires=${new Date(age).toUTCString()}; path=/`;
+         }
          return created;
       } catch (err) {
          throw err;
