@@ -107,7 +107,16 @@ class Auth {
     */
    async signOut() {
       try {
-         return await this.instance.ajax.authPost('/auth/signout');
+         const result = await this.instance.ajax.authPost('/auth/signout');
+
+         // Clear the token cookie so subsequent requests don't carry a stale JWT.
+         if (typeof cookieStore !== 'undefined') {
+            await cookieStore.delete('token');
+         } else {
+            document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
+         }
+
+         return result;
       } catch (err) {
          if (err?.name === 'USER_NOT_AUTHORIZED') {
             return { isLogged: false };

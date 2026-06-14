@@ -184,7 +184,12 @@ class User extends _Global {
      * @returns {Object} - The public object representing the user information.
      */
     toPublic(append) {
-        const dataOut = {...this, ...append};
+        const dataOut = {
+            ...this,
+            fullName: this.fullName,
+            avatarUrl: this.avatarUrl,
+            ...append
+        };
 
         delete dataOut.auth;
         delete dataOut._schema;

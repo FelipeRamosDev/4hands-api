@@ -59,7 +59,7 @@ module.exports = SubscriberIO.buildSubscriber({
             querySubscriptions.map(sub => sub.exec('update', docSnapshot));
         }
 
-        const docUID = docSnapshot.id || docSnapshot.UID || docSnapshot._id;
+        const docUID = docSnapshot.id || docSnapshot.UID || docSnapshot._id || docSnapshot._doc?._id;
         const docSubscriptions = this.getDocSubscriptions(collection, docUID.toString());
         if (Array.isArray(docSubscriptions)) {
             docSubscriptions.map(sub => sub.exec('update', docSnapshot));
