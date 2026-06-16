@@ -15,7 +15,7 @@ module.exports = new Endpoint({
         email: { type: String, required: true },
         phone: { type: String },
         password: { type: String, required: true },
-        confirmPassword: { type: String, required: true }
+        confirmPassword: { type: String, required: true },
     },
     middlewares: [
         function (req, res, next) {
@@ -40,13 +40,16 @@ module.exports = new Endpoint({
                 return res.status(401).send(newUser);
             }
 
-            req.session.user = newUser.toPublic();
-            req.session.confirmationToken = newUser.confirmationToken.toString('hex');
+            const response = await newUser.toSession(req.session);
+            req.session.user = response;
+            req.session.confirmationToken = newUser.confirmationToken?.toString('hex');
             req.session.isAuthorized = true;
             req.session.isEmailConfirmed = false;
 
-            const response = await newUser.toSession(req.session);
-            return res.status(200).send(response);
+            req.sessionStore.set(req.sessionID, req.session, (saveErr) => {
+                if (saveErr) return res.status(500).send(logError(saveErr));
+                return res.status(200).send(response);
+            });
         } catch(err) {
             return res.status(500).send(logError(err));
         }

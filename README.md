@@ -1,12 +1,20 @@
-# 4Hands API (v0.7.15 BETA)
+# 4Hands API (v0.8.0 BETA)
 This is a API framework to create a backend for your applications.
 
 ### New Features
 1. Redis service (Manage Redis database)
+2. File upload support via `multipart/form-data` (`AJAX.upload` and `AJAX.authUpload`)
+3. Custom route support for `Auth.login()` and `Auth.register()` on the client
+4. `bodyValidation` middleware now exported from the middleware index
 
 ### Bugs fixed
 1. Fixed the memory heap issue on larger apps
-2. Smaller bugs
+2. Fixed session not persisting after login, register, and email confirmation
+3. Fixed signout recreating a new session after destroying the old one
+4. Fixed ghost sessions accumulating in the session store
+5. Fixed document subscription ID not resolving on nested snapshots
+6. Fixed `cookieStore` unavailable error in environments that do not support the Cookie Store API
+7. Smaller bugs
 
 ## Instalation
 Proceed with the following steps to install the framework.
@@ -28,6 +36,7 @@ With the database running, follow the next steps:
 - [User Authentication 🔗](https://github.com/FelipeRamosDev/4hands-api#user-authentication)
 - - [E-mail Confirmation 🔗](https://github.com/FelipeRamosDev/4hands-api#sign-up-e-mail-confirmation)
 - - [Password Recovery 🔗](https://github.com/FelipeRamosDev/4hands-api#password-recovery)
+- [File Upload 🔗](https://github.com/FelipeRamosDev/4hands-api#file-upload)
 - [Send E-mails (MailService) 🔗](https://github.com/FelipeRamosDev/4hands-api#Send-e-mails-mailservice)
 
 ### Create Server
@@ -303,6 +312,13 @@ The 4hands API has two default endpoints to be used on authentication that is lo
 ##### Success Response
 Returns the new user document. One of the properties on the response is `token`, this token will be required on the request headers for every endpoint that is auth protected with `isAuthRoute` set as `true`, so store it into the cookies to use later.
 
+##### Custom Route
+If your project overrides the default register endpoint you can pass a custom route when calling `Auth.register()` on the client:
+
+```javascript
+await instance.auth.register(data, '/my-custom/register');
+```
+
 #### [POST] /auth/login
 ##### Params
 | name | type | description |
@@ -312,6 +328,13 @@ Returns the new user document. One of the properties on the response is `token`,
 
 ##### Success Response
 Returns the new user document. One of the properties on the response is `token`, this token will be required on the request headers for every endpoint that is auth protected with `isAuthRoute` set as `true`, so store it into the cookies to use later.
+
+##### Custom Route
+If your project overrides the default login endpoint you can pass a custom route when calling `Auth.login()` on the client:
+
+```javascript
+await instance.auth.login(email, password, '/my-custom/login');
+```
 
 #### Sign-up E-mail Confirmation
 If you'd like to set the ServerAPI to send a confirmation e-mail and a new user sign-up, you need first to set the `emailConfig` property of `ServerAPI` instance. Check below:
@@ -354,6 +377,30 @@ You'll receive back a `{ success: true }` if the e-mail was successfully validat
 **Success Response**
 You'll receive back a `{ success: true }` if the e-mail was successfully validated.
 
+
+### File Upload
+The client AJAX service supports uploading files via `multipart/form-data`. Two methods are available: `upload` for unauthenticated requests and `authUpload` for requests that require a valid auth token.
+
+#### `AJAX.upload(endpoint, file, fields, options)`
+| param | type | description |
+| ----- | ---- | ----------- |
+| endpoint | string | The API endpoint path |
+| file | File \| Blob | The file to upload |
+| fields | object | Additional form fields to include (e.g. `{ bucket: 'avatars' }`) |
+| options | object | Optional request options (`headers`, `onUploadProgress`, etc.) |
+
+```javascript
+const result = await instance.ajax.upload('/files/upload', file, { bucket: 'avatars' }, {
+    onUploadProgress: (event) => console.log(event.loaded, event.total)
+});
+```
+
+#### `AJAX.authUpload(endpoint, file, fields, options)`
+Same as `upload` but automatically attaches the auth token to the request headers.
+
+```javascript
+const result = await instance.ajax.authUpload('/files/upload', file, { bucket: 'avatars' });
+```
 
 ### Send E-mails (MailService)
 To use e-mails on your ServerAPI instance, you'll need to set the `emailConfig` property of `ServerAPI`. The `MailService` instance will be always available at ServerAPI properties after instantiated, to access e-mail features use the **ServerAPI.mailService** property.

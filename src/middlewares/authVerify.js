@@ -35,17 +35,26 @@ module.exports = async (req, res, next) => {
         } else {
             if (!data.isEmailConfirmed) {
                 if (typeof body.confirmationtoken !== 'string') {
-                    const error = toError(notConfirmedEmail);
-                    return res.status(201).send({ ...error, userName: data.user?.email });
+                    const user = data.user;
+                    const fullName = user?.fullName || [user?.firstName, user?.lastName].filter(Boolean).join(' ');
+                    return res.status(201).send({ ...notConfirmedEmail, isLogged: true, user: { ...user, fullName }, userName: user?.email });
                 }
-                
-                session.confirmationToken = data.confirmationToken;
             }
 
-            session.user = data.user;
-            session.isAuthorized = data.isAuthorized;
-            session.sessionSalt = data.sessionSalt;
+            const ghostSessionID = req.sessionID;
             req.sessionID = tokenData.sessionID;
+
+            // Rebuild req.session with session.id = Session A (the real session).
+            // createSession() creates new Session(req, data), which sets session.id = req.sessionID.
+            // This ensures express-session's auto-save at response end writes to Session A, not Session B.
+            sessionStore.createSession(req, data);
+
+            // Destroy the ghost Session B to prevent accumulation in the store.
+            if (ghostSessionID !== tokenData.sessionID) {
+                sessionStore.destroy(ghostSessionID, (destroyErr) => {
+                    if (destroyErr) console.error('[authVerify] Failed to destroy ghost session:', destroyErr);
+                });
+            }
 
             return next();
         }

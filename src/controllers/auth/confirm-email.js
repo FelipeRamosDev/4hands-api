@@ -1,6 +1,12 @@
 const User = require('../../collections/Models/users.model');
 const Endpoint = require('../../models/settings/Endpoint');
 
+const badConfirmationToken = {
+    error: true,
+    name: 'BAD_CONFIRMATION_TOKEN',
+    message: 'The confirmation token provided is not valid!'
+};
+
 /**
  * Represents a controller endpoint to confirm email of user.
  * @name AuthConfirmEmail
@@ -24,14 +30,15 @@ module.exports = new Endpoint({
                     throw updated;
                 }
 
-                data.isEmailConfirmed = true;
+                req.session.isEmailConfirmed = true;
             } else {
-                data.isEmailConfirmed = false;
                 return res.status(401).send(badConfirmationToken);
             }
 
-            req.sessionStore.destroy(req.sessionID);
-            res.status(200).send({ success: true });
+            req.sessionStore.set(req.sessionID, req.session, (saveErr) => {
+                if (saveErr) return res.status(500).send(toError(saveErr));
+                res.status(200).send({ success: true });
+            });
         } catch(err) {
             return res.status(500).send(toError(err));
         }

@@ -139,7 +139,7 @@ class SubscriptionIO {
         const socket = this.subscriber.getConnection(this.socketID);
 
         if (socket) {
-            socket.emit(this.id, data);
+            socket.emit(this.id, data?.toObject?.() || data);
         }
     }
 
