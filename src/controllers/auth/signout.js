@@ -11,11 +11,14 @@ module.exports = new Endpoint({
     isAuthRoute: true,
     controller: async (req, res) => {
         try {
-            req.sessionStore.destroy(req.sessionID, (err, data) => {
+            // req.session.destroy() deletes req.session before returning,
+            // which prevents express-session's auto-save hook from recreating the session.
+            req.session.destroy((err) => {
+                if (err) return res.status(500).send({ error: true, message: err.message });
                 return res.status(200).send({ success: true });
             });
         } catch(err) {
-            return res.status(500).send(logError(err));
+            return res.status(500).send({ error: true, message: err.message });
         }
     }
 });

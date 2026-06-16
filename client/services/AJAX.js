@@ -264,6 +264,58 @@ class AJAX {
    }
 
    /**
+    * Perform a file upload POST request using multipart/form-data.
+    * @param {string} endpoint - The API endpoint.
+    * @param {File|Blob} file - The file to upload.
+    * @param {Object} [fields={}] - Additional form fields (e.g. { bucket: 'avatars' }).
+    * @param {Object} [options={}] - The request options.
+    * @returns {Promise<Object>} The response data (FileMetadata).
+    */
+   async upload(endpoint, file, fields = {}, options = {}) {
+      const { isAuth, headers, onUploadProgress } = options;
+      let toHeaders = { ...headers };
+
+      try {
+         if (isAuth) {
+            toHeaders = await this.addToken(toHeaders);
+         }
+
+         const formData = new FormData();
+         formData.append('file', file);
+
+         Object.entries(fields).forEach(([key, value]) => {
+            formData.append(key, value);
+         });
+
+         const response = await axios.post(this.url(endpoint), formData, {
+            ...options,
+            httpAgent: this.httpAgent,
+            headers: {
+               ...toHeaders,
+               'Content-Type': 'multipart/form-data'
+            },
+            onUploadProgress
+         });
+
+         return response.data;
+      } catch (err) {
+         throw this.toError(err);
+      }
+   }
+
+   /**
+    * Perform an authenticated file upload POST request.
+    * @param {string} endpoint - The API endpoint.
+    * @param {File|Blob} file - The file to upload.
+    * @param {Object} [fields={}] - Additional form fields (e.g. { bucket: 'avatars' }).
+    * @param {Object} [options={}] - The request options.
+    * @returns {Promise<Object>} The response data (FileMetadata).
+    */
+   async authUpload(endpoint, file, fields = {}, options = {}) {
+      return this.upload(endpoint, file, fields, { ...options, isAuth: true });
+   }
+
+   /**
     * Convert an error to a standardized error object.
     * @param {Object} err - The error object.
     * @returns {Object} The standardized error object.
