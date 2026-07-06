@@ -359,7 +359,7 @@ class RedisService {
                 throw logError('commom.bad_format_param', 'field', 'RedisService.setDocField', 'string', uid);
             }
 
-            if (!value) {
+            if (!value && typeof value !== 'boolean' && typeof value !== 'number') {
                 return;
             }
 
