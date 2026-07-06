@@ -10,7 +10,7 @@ class RedisHelpers {
     }
 
     static parseDocToSave(collectionSet, value) {
-        const { parseString, parseNum, parseArrayToSave, parseObjectToSave } = RedisHelpers;
+        const { parseString, parseBooleanToSave, parseNum, parseArrayToSave, parseObjectToSave } = RedisHelpers;
         const isValueObj = (typeof value === 'object' && !Array.isArray(value));
         const result = {};
 
@@ -32,6 +32,10 @@ class RedisHelpers {
 
                 else if (typeof currentValue === 'object' && !Array.isArray(currentValue)) {
                     result[key] = parseObjectToSave(currentValue);
+                }
+
+                else if (typeof currentValue === 'boolean') {
+                    result[key] = parseBooleanToSave(currentValue);
                 }
 
                 return;
@@ -84,7 +88,7 @@ class RedisHelpers {
     }
 
     static parseDocToRead(collectionSet, value) {
-        const { parseString, parseNum, parseDateToRead, parseArrayToRead, parseObjectToRead, parseDefault, parseObjectId, isValidJSON } = RedisHelpers;
+        const { parseBooleanToRead, parseString, parseNum, parseDateToRead, parseArrayToRead, parseObjectToRead, parseDefault, parseObjectId, isValidJSON } = RedisHelpers;
         const result = {};
 
         if (collectionSet instanceof Collection && typeof value === 'object' && !Array.isArray(value)) {
@@ -111,6 +115,10 @@ class RedisHelpers {
 
                 else if (type?.name === 'Date') {
                     result[key] = parseDateToRead(value[key]) || parsedDefault;
+                }
+
+                else if (type?.name === 'Boolean') {
+                    result[key] = parseBooleanToRead(value[key]);
                 }
 
                 else if (Array.isArray(type)) {
@@ -170,7 +178,7 @@ class RedisHelpers {
     }
 
     static parseNum(value) {
-        if (!value) {
+        if (value === undefined || value === null || value === NaN) {
             return;
         }
 
@@ -205,6 +213,14 @@ class RedisHelpers {
         } catch (err) {
             return;
         }
+    }
+
+    static parseBooleanToSave(value) {
+        return value ? 'true' : 'false';
+    }
+
+    static parseBooleanToRead(value) {
+        return value === 'true';
     }
 
     static parseArrayToSave(value) {
