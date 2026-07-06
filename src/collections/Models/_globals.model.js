@@ -406,10 +406,10 @@ class _Global {
      * @throws {Error} - If there is an error during the cache creation process.
      */
     async createCache(data) {
-        const API = global._4handsAPI?.API;
+        const redis = global._4handsAPI?.Redis;
 
         try {
-            const created = await API.Redis.createDoc({ collection: this.collectionName, uid: this.UID, data: data || {...this} });
+            const created = await redis.createDoc({ collection: this.collectionName, uid: this.UID, data: data || {...this} });
             return created;
         } catch (err) {
             throw logError(err);
@@ -485,6 +485,10 @@ class _Global {
                 docResult = await docQuery.exec();
             }
 
+            if (!docResult) {
+                return logError({ name: 'DOCUMENT-NOT-FOUND', message: `Document with UID ${uid} not found in collection ${collection}.` });
+            }
+
             const doc = docResult.initialize();
             const cached = await doc.createCache();
             return cached;
@@ -501,10 +505,10 @@ class _Global {
      * @throws {Error} - If there is an error during the cache retrieval process.
      */
     static async getCache(collection, uid) {
-        const API = global._4handsAPI?.API;
+        const redis = global._4handsAPI?.Redis;
 
         try {
-            const cacheDoc = await API.Redis.getDoc({ collection, uid });
+            const cacheDoc = await redis.getDoc({ collection, uid });
             return cacheDoc;
         } catch (err) {
             throw logError(err);

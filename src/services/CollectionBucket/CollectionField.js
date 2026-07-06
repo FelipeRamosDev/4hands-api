@@ -114,6 +114,18 @@ class CollectionField {
     toObject() {
         return {...this};
     }
+
+    toSchemaField() {
+        const schemaField = {
+            type: this.type,
+            required: this.required,
+            unique: this.unique,
+            immutable: this.immutable,
+            default: this.default
+        };
+
+        return schemaField;
+    }
 }
 
 module.exports = CollectionField;
