@@ -1,7 +1,7 @@
 const axios = require('axios');
 const https = require('https');
 const agent = new https.Agent({
-    rejectUnauthorized: false
+    rejectUnauthorized: (process.env.NODE_ENV === 'production') ? true : false
 });
 
 module.exports = (url, data) => {
