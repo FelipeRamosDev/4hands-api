@@ -3,7 +3,6 @@ require('../../global');
 
 const express = require('express');
 const session = require('express-session');
-const bodyParser = require('body-parser');
 const cors = require('cors');
 const https = require('https');
 const path = require('path');
@@ -202,8 +201,7 @@ class ServerAPI {
             credentials: true
         }));
 
-        this.app.use(bodyParser.json({ limit: this.jsonLimit }));
-        this.app.use(express.json());
+        this.app.use(express.json({ limit: this.jsonLimit }));
 
         if (this.API_SECRET) {
             this.app.use(session({

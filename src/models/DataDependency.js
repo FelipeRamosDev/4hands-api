@@ -61,7 +61,7 @@ class DataDependency {
             this.parent.updateMerge({[this.name]: newValue});
 
             const htmlString = this.parent.renderToString();
-            socketConnection.socket.emit('subscribe:component:data:' + subsUID, htmlString.toSuccess());
+            socketConnection.socket.emit('subscribe:component:data:' + subsUID, { success: true, data: htmlString });
         } catch (err) {
             throw logError(err);
         }
