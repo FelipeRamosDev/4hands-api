@@ -60,7 +60,7 @@ class AuthService {
                 });
             }
 
-            return isValid.toSuccess('User is valid!');
+            return { success: true, data: isValid, message: 'User is valid!' };
         } catch (err) {
             throw logError(err);
         }
