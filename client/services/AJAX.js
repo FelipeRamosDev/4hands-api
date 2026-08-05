@@ -1,5 +1,6 @@
 const axios = require('axios');
 const https = require('https');
+const NODE_ENV = process.env.NEXT_PUBLIC_NODE_ENV;
 
 /**
  * Class representing AJAX requests.
@@ -22,12 +23,15 @@ class AJAX {
 
       this._mainInstance = () => mainInstance;
       this._cookiesTokenPropName = cookiesTokenPropName;
-      this._rejectUnauthorized = rejectUnauthorized;
+      this._rejectUnauthorized = rejectUnauthorized || (NODE_ENV === 'production') ? true : false;
 
       if (!this._rejectUnauthorized) {
-         this.httpAgent = new https.Agent({
+         const insecureAgent = new https.Agent({
             rejectUnauthorized: false
          });
+
+         this.httpAgent = insecureAgent;
+         this.httpsAgent = insecureAgent;
       }
       
       this.rootURL = rootURL || this.mainInstance.apiURL;
@@ -83,6 +87,7 @@ class AJAX {
 
          const response = await axios.get(this.url(endpoint), {
             ...options,
+            httpsAgent: this.httpsAgent,
             httpAgent: this.httpAgent,
             headers: toHeaders,
             params: body
@@ -112,6 +117,7 @@ class AJAX {
 
          const response =  await axios.post(this.url(endpoint), body, {
             ...options,
+            httpsAgent: this.httpsAgent,
             httpAgent: this.httpAgent,
             headers: toHeaders,
          });
@@ -140,6 +146,36 @@ class AJAX {
 
          const response = await axios.put(this.url(endpoint), body, {
             ...options,
+            httpsAgent: this.httpsAgent,
+            httpAgent: this.httpAgent,
+            headers: toHeaders,
+         });
+
+         return response.data;
+      } catch(err) {
+         throw this.toError(err);
+      }
+   }
+
+   /**
+    * Perform a PATCH request.
+    * @param {string} endpoint - The API endpoint.
+    * @param {Object} [body={}] - The request body.
+    * @param {Object} [options={}] - The request options.
+    * @returns {Promise<Object>} The response data.
+    */
+   async patch(endpoint, body = {}, options = {}) {
+      const { isAuth, headers } = options;
+      let toHeaders = { ...headers };
+
+      try {
+         if (isAuth) {
+            toHeaders = await this.addToken(toHeaders);
+         }
+
+         const response = await axios.patch(this.url(endpoint), body, {
+            ...options,
+            httpsAgent: this.httpsAgent,
             httpAgent: this.httpAgent,
             headers: toHeaders,
          });
@@ -168,6 +204,7 @@ class AJAX {
 
          const response = await axios.delete(this.url(endpoint), {
             ...options,
+            httpsAgent: this.httpsAgent,
             headers: toHeaders,
             httpAgent: this.httpAgent,
             data: body
@@ -223,6 +260,22 @@ class AJAX {
          ...options,
          isAuth: true
       })
+
+      return response;
+   }
+
+   /**
+    * Perform an authenticated PATCH request.
+    * @param {string} endpoint - The API endpoint.
+    * @param {Object} body - The request body.
+    * @param {Object} [options={}] - The request options.
+    * @returns {Promise<Object>} The response data.
+    */
+   async authPatch(endpoint, body, options = {}) {
+      const response = await this.patch(endpoint, body, {
+         ...options,
+         isAuth: true
+      });
 
       return response;
    }
@@ -289,6 +342,7 @@ class AJAX {
 
          const response = await axios.post(this.url(endpoint), formData, {
             ...options,
+            httpsAgent: this.httpsAgent,
             httpAgent: this.httpAgent,
             headers: {
                ...toHeaders,
