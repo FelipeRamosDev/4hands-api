@@ -1,5 +1,6 @@
 const Prompt = require('4hands-api/src/services/Prompt');
 const PoolForm = require('./index');
+const { getObjectPath } = require('4hands-api/src/global/utils');
 
 /**
  * Class representing a question model.
@@ -60,7 +61,7 @@ class QuestionModel {
     }
 
     get poolData() {
-        return this.getSafe('parentPool.values');
+        return getObjectPath(this, 'parentPool.values');
     }
 
     async redirectTo(path, timeout) {

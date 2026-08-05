@@ -51,7 +51,7 @@ class FileSystemService {
             fs.writeFile(path, data, err => {
                 if (err) return reject(err);
 
-                return resolve(Object().toSuccess());
+                return resolve({ success: true });
             });
         });
     }

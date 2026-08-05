@@ -1,3 +1,5 @@
+const { getObjectPath } = require('4hands-api/src/global/utils');
+
 /**
  * Model to set the events that will trigger actions throughout the app.
  * @module EventStd
@@ -112,14 +114,14 @@ class EventStd {
      */
     async populateTarget(target) {
         const CRUD = global._4handsAPI?.CRUD;
-        let collectionName = Object(target).getSafe('_collection.collectionName');
+        let collectionName = getObjectPath(target, '_collection.collectionName');
     
         try {
             if (!collectionName && !target) {
                 return;
             }
 
-            if (target._id && target._id.oid()) {
+            if (target._id && global.oid(target._id)) {
                 const docQuery = await CRUD.getDoc({ collectionName: target.collection.collectionName, filter: { _id: target.id } }).defaultPopulate();
                 return docQuery.initialize();
             }

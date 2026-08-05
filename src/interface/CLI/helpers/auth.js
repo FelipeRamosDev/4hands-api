@@ -1,5 +1,6 @@
 const FS = require('4hands-api/src/services/FS');
 const config = require('4hands-api/configs/project');
+const { getObjectPath } = require('4hands-api/src/global/utils');
 const sessionCLI = FS.isExist(config.sessionPath) && require('4hands-api/sessionCLI.jsonessionCLI.json') || {};
 
 /**
@@ -55,7 +56,7 @@ async function createUserCLISession(user) {
         session.currentUser = user._id;
         session[user._id] = {
             token,
-            gitHubToken: user && user.getSafe('auth._gitHubToken').toString(),
+            gitHubToken: user && getObjectPath(user, 'auth._gitHubToken'),
             expiration: Date.now() + 86400000
         }
 
