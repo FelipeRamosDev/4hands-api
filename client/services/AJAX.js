@@ -69,6 +69,13 @@ class AJAX {
       }
    }
 
+   async getCookie(name) {
+      if (typeof window !== 'undefined') {
+         const cookie = await cookieStore.get(name);
+         return cookie?.value;
+      }
+   }
+
    /**
     * Perform a GET request.
     * @param {string} endpoint - The API endpoint.
@@ -82,7 +89,11 @@ class AJAX {
 
       try {
          if (isAuth) {
+            const legacy_session = await this.getCookie('legacy_session');
             toHeaders = await this.addToken(toHeaders);
+
+            toHeaders.legacy_session = legacy_session;
+            options.withCredentials = true;
          }
 
          const response = await axios.get(this.url(endpoint), {
@@ -113,6 +124,7 @@ class AJAX {
       try {
          if (isAuth) {
             toHeaders = await this.addToken(toHeaders);
+            options.withCredentials = true;
          }
 
          const response =  await axios.post(this.url(endpoint), body, {
@@ -142,6 +154,7 @@ class AJAX {
       try {
          if (isAuth) {
             toHeaders = await this.addToken(toHeaders);
+            options.withCredentials = true;
          }
 
          const response = await axios.put(this.url(endpoint), body, {
@@ -171,6 +184,7 @@ class AJAX {
       try {
          if (isAuth) {
             toHeaders = await this.addToken(toHeaders);
+            options.withCredentials = true;
          }
 
          const response = await axios.patch(this.url(endpoint), body, {
@@ -200,6 +214,7 @@ class AJAX {
       try {
          if (isAuth) {
             toHeaders = await this.addToken(toHeaders);
+            options.withCredentials = true;
          }
 
          const response = await axios.delete(this.url(endpoint), {

@@ -357,10 +357,10 @@ class User extends _Global {
             const signedIn = await user.authService.signIn(password);
 
             if (signedIn.success) {
-                return user;
             } else {
                 return signedIn;
             }
+            return user;
         } catch (err) {
             throw logError(err);
         }
