@@ -2,6 +2,7 @@
 require('../../global');
 
 const express = require('express');
+const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const cors = require('cors');
 const https = require('https');
@@ -53,8 +54,8 @@ class ServerAPI {
             httpEndpoints = [],
             defaultMaxListeners = 20,
             sessionCookiesMaxAge = 86400000,
-            sessionResave = true,
-            sessionSaveUninitialized = true,
+            sessionResave = false,
+            sessionSaveUninitialized = false,
             redisURL = 'redis://localhost:6379',
             corsOrigin = ['http://localhost', 'https://localhost']
         } = Object(setup);
@@ -196,6 +197,7 @@ class ServerAPI {
 
         // Initializing the Redis DB
         const RedisStore = require('connect-redis').default;
+        this.app.use(cookieParser());
         this.app.use(cors({
             origin: this.corsOrigin,
             credentials: true
