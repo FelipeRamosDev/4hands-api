@@ -11,52 +11,33 @@ const notConfirmedEmail = {
 };
 
 module.exports = async (req, res, next) => {
-    const { session, sessionStore, headers, body } = req;
-    const authService = new AuthService();
+    if (req.session.userId) {
+        return next();
+    }
 
-    if (!headers.token || headers.token === 'undefined') {
+    const legacySessionID = req.cookies?.legacy_session_id;
+
+    if (!legacySessionID || !req.sessionStore?.get) {
         return res.status(401).send(notAuthorizedError);
     }
 
-    const tokenData = authService.validateToken(headers.token);
-    if (!tokenData) {
-        return res.status(401).send(notAuthorizedError);
-    }
-
-    sessionStore.get(tokenData.sessionID, (err, data) => {
-        if (err || !data || !data.isAuthorized) {
-            if (!data) {
-                delete req.session.user;
-                delete req.session.isAuthorized;
-                delete req.session.sessionSalt;
-            }
-
+    req.sessionStore.get(legacySessionID, (err, data) => {
+        if (err || !data) {
             return res.status(401).send(notAuthorizedError);
-        } else {
-            if (!data.isEmailConfirmed) {
-                if (typeof body.confirmationtoken !== 'string') {
-                    const user = data.user;
-                    const fullName = user?.fullName || [user?.firstName, user?.lastName].filter(Boolean).join(' ');
-                    return res.status(201).send({ ...notConfirmedEmail, isLogged: true, user: { ...user, fullName }, userName: user?.email });
-                }
-            }
-
-            const ghostSessionID = req.sessionID;
-            req.sessionID = tokenData.sessionID;
-
-            // Rebuild req.session with session.id = Session A (the real session).
-            // createSession() creates new Session(req, data), which sets session.id = req.sessionID.
-            // This ensures express-session's auto-save at response end writes to Session A, not Session B.
-            sessionStore.createSession(req, data);
-
-            // Destroy the ghost Session B to prevent accumulation in the store.
-            if (ghostSessionID !== tokenData.sessionID) {
-                sessionStore.destroy(ghostSessionID, (destroyErr) => {
-                    if (destroyErr) console.error('[authVerify] Failed to destroy ghost session:', destroyErr);
-                });
-            }
-
-            return next();
         }
+
+        const userId = data.userId || data.user?._id || data.user?.id;
+
+        if (!userId) {
+            return res.status(401).send(notAuthorizedError);
+        }
+
+        req.sessionID = legacySessionID;
+        req.session.userId = userId;
+        req.session.user = data.user;
+        req.session.isAuthorized = data.isAuthorized;
+        req.session.isEmailConfirmed = data.isEmailConfirmed;
+
+        return next();
     });
 }

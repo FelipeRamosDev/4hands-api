@@ -21,7 +21,7 @@ module.exports = new Endpoint({
         try {
             const body = req.body;
             const data = req.session;
-            const user = await User.getUser(req.session?.user?._id);
+            const user = await User.getUser(req.session.userId);
             
             if (body.confirmationtoken === data.confirmationToken) {
                 const updated = await user.updateDB({ data: { isEmailConfirmed: true }});
