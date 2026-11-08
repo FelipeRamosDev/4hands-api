@@ -29,6 +29,25 @@ With the database running, follow the next steps:
 
 1. Run the command `npm install 4hands-api`
 
+### Socket client options
+
+Pass Socket.IO client options through `socketOptions`. For cross-origin
+connections that use a session cookie, enable credentials and handle connection
+errors through `onError`:
+
+```javascript
+api.createSocket({
+    id: 'updates',
+    hostURL: 'https://api.example.com',
+    port: 5050,
+    routePath: '/updates',
+    socketOptions: { withCredentials: true },
+    onError(error) {
+        console.error('Socket connection failed:', error);
+    }
+});
+```
+
 ## Getting Started
 - [Create Server 🔗](https://github.com/FelipeRamosDev/4hands-api#create-server)
 - [Create Collection 🔗](https://github.com/FelipeRamosDev/4hands-api#create-collection)

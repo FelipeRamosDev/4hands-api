@@ -11,6 +11,7 @@ class SocketIO {
     * @param {string} [setup.routePath='/'] - The route path for the socket connection.
     * @param {string} [setup.hostURL='http://localhost'] - The host URL for the socket connection.
     * @param {number} [setup.port=5000] - The port for the socket connection.
+    * @param {Object} [setup.socketOptions={}] - Options passed to the Socket.IO client.
     * @param {Function} [setup.onConnect=()=>{}] - The callback function for when the socket connects.
     * @param {Function} [setup.onDisconnect=()=>{}] - The callback function for when the socket disconnects.
     * @param {Function} [setup.onData=()=>{}] - The callback function for when the socket receives data.
@@ -23,6 +24,7 @@ class SocketIO {
          routePath = '/',
          hostURL = 'http://localhost',
          port = 5000,
+         socketOptions = {},
          onConnect = () => {},
          onDisconnect = () => {},
          onData = () => {},
@@ -35,7 +37,7 @@ class SocketIO {
       this.routePath = routePath;
 
       this._instance = () => instance;
-      this._socket = io(this.url);
+      this._socket = io(this.url, socketOptions);
       this._onConnect = onConnect.bind(this);
       this._onDisconnect = onDisconnect.bind(this);
       this._onData = onData.bind(this);
@@ -43,13 +45,13 @@ class SocketIO {
 
       this._socket.on('connect', () => {
          this._onConnect();
-
-         this._socket.on('message', this._onData);
-         this._socket.on('error', this._onError);
-         this._socket.on('disconnect', () => {
-            this._onDisconnect();
-            this.parent.closeSocket(this.routePath);
-         });
+      });
+      this._socket.on('message', this._onData);
+      this._socket.on('error', this._onError);
+      this._socket.on('connect_error', this._onError);
+      this._socket.on('disconnect', () => {
+         this._onDisconnect();
+         this.parent.closeSocket(this.routePath);
       });
    }
 
