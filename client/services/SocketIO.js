@@ -51,7 +51,6 @@ class SocketIO {
       this._socket.on('connect_error', this._onError);
       this._socket.on('disconnect', () => {
          this._onDisconnect();
-         this.parent.closeSocket(this.routePath);
       });
    }
 
@@ -71,6 +70,17 @@ class SocketIO {
       return this._instance();
    }
 
+   get connected() {
+      return this._socket.connected;
+   }
+
+   disconnect() {
+      this._socket.disconnect();
+      if (this.parent.getSocket(this.id || this.routePath) === this) {
+         this.parent.closeSocket(this.id || this.routePath);
+      }
+   }
+
    /**
     * Send data to a specified event.
     * @param {string} name - The name of the event.
@@ -88,6 +98,7 @@ class SocketIO {
     */
    listenTo(name, callback) {
       this._socket.on(name, callback);
+      return () => this._socket.off(name, callback);
    }
 }
 
