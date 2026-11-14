@@ -10,19 +10,16 @@ class AJAX {
     * Create an AJAX instance.
     * @param {Object} setup - The setup object.
     * @param {string} setup.rootURL - The root URL for the API.
-    * @param {string} [setup.cookiesTokenPropName='token'] - The name of the token property in cookies.
     * @param {boolean} [setup.rejectUnauthorized=false] - Whether to reject unauthorized SSL certificates.
     * @param {Object} mainInstance - The main instance object.
     */
    constructor(setup, mainInstance) {
       const {
          rootURL,
-         cookiesTokenPropName = 'token',
          rejectUnauthorized = false
       } = Object(setup);
 
       this._mainInstance = () => mainInstance;
-      this._cookiesTokenPropName = cookiesTokenPropName;
       this._rejectUnauthorized = rejectUnauthorized || (NODE_ENV === 'production') ? true : false;
 
       if (!this._rejectUnauthorized) {
@@ -58,17 +55,6 @@ class AJAX {
       }
    }
 
-   /**
-    * Get the token from cookies.
-    * @returns {Promise<string>} The token.
-    */
-   async getToken() {
-      if (typeof window !== 'undefined') {
-         const token = await cookieStore.get(this._cookiesTokenPropName);
-         return token?.value;
-      }
-   }
-
    async getCookie(name) {
       if (typeof window !== 'undefined') {
          const cookie = await cookieStore.get(name);
@@ -89,10 +75,6 @@ class AJAX {
 
       try {
          if (isAuth) {
-            const legacy_session = await this.getCookie('legacy_session');
-            toHeaders = await this.addToken(toHeaders);
-
-            toHeaders.legacy_session = legacy_session;
             options.withCredentials = true;
          }
 
@@ -123,7 +105,6 @@ class AJAX {
 
       try {
          if (isAuth) {
-            toHeaders = await this.addToken(toHeaders);
             options.withCredentials = true;
          }
 
@@ -153,7 +134,6 @@ class AJAX {
 
       try {
          if (isAuth) {
-            toHeaders = await this.addToken(toHeaders);
             options.withCredentials = true;
          }
 
@@ -183,7 +163,6 @@ class AJAX {
 
       try {
          if (isAuth) {
-            toHeaders = await this.addToken(toHeaders);
             options.withCredentials = true;
          }
 
@@ -213,7 +192,6 @@ class AJAX {
 
       try {
          if (isAuth) {
-            toHeaders = await this.addToken(toHeaders);
             options.withCredentials = true;
          }
 
@@ -312,26 +290,6 @@ class AJAX {
    }
 
    /**
-    * Add token to the headers.
-    * @param {Object} headers - The request headers.
-    * @returns {Promise<Object>} The headers with the token.
-    */
-   async addToken(headers) {
-      const token = await this.getToken();
-
-      if (!token) {
-         // If the token is not stored in the browser's cookies, it will throw an error.
-         return this.toError({
-            name: 'TOKEN_REQUIRED',
-            message: 'To send an authenticated HTTP request, the user token is required!'
-         });
-      }
-
-      headers.token = token;
-      return headers;
-   }
-
-   /**
     * Perform a file upload POST request using multipart/form-data.
     * @param {string} endpoint - The API endpoint.
     * @param {File|Blob} file - The file to upload.
@@ -345,7 +303,7 @@ class AJAX {
 
       try {
          if (isAuth) {
-            toHeaders = await this.addToken(toHeaders);
+            options.withCredentials = true;
          }
 
          const formData = new FormData();
